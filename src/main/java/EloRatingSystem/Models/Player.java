@@ -31,5 +31,4 @@ public class Player {
         this.active = active;
     }
 
-
 }

@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 @Service
 public class PlayerService {
 
@@ -22,12 +24,19 @@ public class PlayerService {
             playerRepository.save(player);
             return Mono.just(new PlayerResponseDto(player));
         }
-        return Mono.error(new ApiException("Name tag already in use", HttpStatus.INTERNAL_SERVER_ERROR));
+        return Mono.error(new ApiException(String.format("NameTag %s is already in use",requestDto.getNameTag()), HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     private boolean checkIfPlayerExists(String nameTag) {
         return playerRepository.findByNameTag(nameTag).isPresent();
     }
 
-
+    public Mono<PlayerResponseDto> getByNameTag(String nameTag) {
+        Optional<Player> player = playerRepository.findByNameTag(nameTag);
+        if (player.isPresent()){
+            PlayerResponseDto responseDto = new PlayerResponseDto(player.get());
+            return Mono.just(responseDto);
+        }
+        return Mono.error(new ApiException(String.format("%s Doesn't exist",nameTag), HttpStatus.BAD_REQUEST));
+    }
 }
