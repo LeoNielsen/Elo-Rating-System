@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Entity
 @Data
@@ -16,13 +17,13 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "nameTag")
+    @Column(name = "nameTag", nullable = false, unique = true)
     private String nameTag;
 
-    @Column(name = "rating")
+    @Column(name = "rating", nullable = false)
     private Integer rating;
 
-    @Column(name = "active")
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
     public Player(String nameTag, Integer rating, Boolean active) {
