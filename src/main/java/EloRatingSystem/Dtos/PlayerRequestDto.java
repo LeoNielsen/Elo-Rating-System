@@ -8,7 +8,4 @@ import lombok.NoArgsConstructor;
 public class PlayerRequestDto {
 
     String nameTag;
-    public PlayerRequestDto(String nameTag){
-        this.nameTag = nameTag;
-    }
 }
