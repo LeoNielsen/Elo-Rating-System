@@ -1,11 +1,11 @@
 package EloRatingSystem.Dtos;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @NoArgsConstructor
 public class PlayerRequestDto {
 
-    String nameTag;
+    private String nameTag;
 }

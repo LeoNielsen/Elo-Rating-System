@@ -23,4 +23,17 @@ public class Team {
     @ManyToOne
     private Player defender;
 
+    @Column(name = "won")
+    private Integer won;
+
+    @Column(name = "lost")
+    private Integer lost;
+
+    public Team(Player attacker, Player defender){
+        this.attacker = attacker;
+        this.defender = defender;
+        this.won = 0;
+        this.lost = 0;
+    }
+
 }

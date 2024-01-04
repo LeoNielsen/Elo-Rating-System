@@ -27,7 +27,7 @@ public class PlayerService {
         return Mono.error(new ApiException(String.format("NameTag %s is already in use",requestDto.getNameTag()), HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
-    private boolean checkIfPlayerExists(String nameTag) {
+    public boolean checkIfPlayerExists(String nameTag) {
         return playerRepository.findByNameTag(nameTag).isPresent();
     }
 
