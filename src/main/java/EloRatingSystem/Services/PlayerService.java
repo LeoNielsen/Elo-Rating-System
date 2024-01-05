@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -38,5 +40,15 @@ public class PlayerService {
             return Mono.just(responseDto);
         }
         return Mono.error(new ApiException(String.format("%s Doesn't exist",nameTag), HttpStatus.BAD_REQUEST));
+    }
+
+    public Mono<List<PlayerResponseDto>> getAllPlayers() {
+        List<Player> players = playerRepository.findAll();
+        List<PlayerResponseDto> playerResponseDtoList = new ArrayList<>();
+        for (Player player : players) {
+            playerResponseDtoList.add(new PlayerResponseDto(player));
+        }
+
+        return Mono.just(playerResponseDtoList);
     }
 }

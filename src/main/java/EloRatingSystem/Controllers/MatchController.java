@@ -2,6 +2,7 @@ package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Models.Match;
 import EloRatingSystem.Reporitories.MatchRepository;
+import EloRatingSystem.Services.MatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,8 @@ public class MatchController {
 
     @Autowired
     MatchRepository matchRepository;
+    @Autowired
+    MatchService matchService;
 
     @GetMapping("/{id}")
     public Mono<Match> getMatchById(@PathVariable Long id) {
@@ -21,7 +24,7 @@ public class MatchController {
     }
     @PutMapping
     public Mono<Match> newMatch(@RequestBody Match match) {
-        return Mono.just(matchRepository.save(match));
+        return matchService.newMatch(match);
     }
 
 }

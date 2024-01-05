@@ -36,9 +36,8 @@ public class PlayerController {
     }
 
     @GetMapping("/all")
-    // TODO: fix Dto PLayer list
-    public Mono<List<Player>> getAll() {
-        return Mono.just(playerRepository.findAll());
+    public Mono<List<PlayerResponseDto>> getAll() {
+        return playerService.getAllPlayers();
     }
 
     @PutMapping
