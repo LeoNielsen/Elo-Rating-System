@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class TeamRequestDto {
 
-    private String attacker;
-
-    private String defender;
+    private Long attackerId;
+    private Long defenderId;
 }

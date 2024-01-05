@@ -29,4 +29,11 @@ public class Match {
     @Column(name = "blueTeamScore")
     private Integer blueTeamScore;
 
+    public Match(Team redTeam, Team blueTeam, Integer redTeamScore, Integer blueTeamScore){
+        this.redTeam = redTeam;
+        this.blueTeam = blueTeam;
+        this.redTeamScore = redTeamScore;
+        this.blueTeamScore = blueTeamScore;
+    }
+
 }

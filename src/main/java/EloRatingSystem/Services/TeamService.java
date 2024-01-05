@@ -27,8 +27,8 @@ public class TeamService {
     PlayerRepository playerRepository;
 
     public Mono<TeamResponseDto> newTeam(TeamRequestDto requestDto) {
-        Optional<Player> attackerOptional = playerRepository.findByNameTag(requestDto.getAttacker());
-        Optional<Player> defenderOptional = playerRepository.findByNameTag(requestDto.getDefender());
+        Optional<Player> attackerOptional = playerRepository.findById(requestDto.getAttackerId());
+        Optional<Player> defenderOptional = playerRepository.findById(requestDto.getDefenderId());
         if (attackerOptional.isPresent() && defenderOptional.isPresent()) {
             Player attacker = attackerOptional.get();
             Player defender = defenderOptional.get();
@@ -43,7 +43,7 @@ public class TeamService {
         }
 
         return Mono.error(new ApiException(String.format("Either %s or %s does not exit"
-                , requestDto.getAttacker(), requestDto.getDefender())
+                , requestDto.getAttackerId(), requestDto.getDefenderId())
                 , HttpStatus.BAD_REQUEST));
     }
 

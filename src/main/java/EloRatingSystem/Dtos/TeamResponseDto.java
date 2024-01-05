@@ -6,17 +6,16 @@ import lombok.Data;
 @Data
 public class TeamResponseDto {
 
-    private String attacker;
-
-    private String defender;
-
+    private Long id;
+    private Long attackerId;
+    private Long defenderId;
     private Integer won;
-
     private Integer lost;
 
     public TeamResponseDto(Team team){
-        this.attacker = team.getAttacker().getNameTag();
-        this.defender = team.getDefender().getNameTag();
+        this.id = team.getId();
+        this.attackerId = team.getAttacker().getId();
+        this.defenderId = team.getDefender().getId();
         this.won = team.getWon();
         this.lost = team.getLost();
     }

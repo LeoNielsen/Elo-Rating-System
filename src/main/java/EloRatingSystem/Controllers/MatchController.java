@@ -1,5 +1,7 @@
 package EloRatingSystem.Controllers;
 
+import EloRatingSystem.Dtos.MatchRequestDto;
+import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Models.Match;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Services.MatchService;
@@ -19,12 +21,12 @@ public class MatchController {
     MatchService matchService;
 
     @GetMapping("/{id}")
-    public Mono<Match> getMatchById(@PathVariable Long id) {
-        return Mono.just(matchRepository.findById(id).orElseThrow());
+    public Mono<MatchResponseDto> getMatchById(@PathVariable Long id) {
+        return matchService.getMatchById(id);
     }
     @PutMapping
-    public Mono<Match> newMatch(@RequestBody Match match) {
-        return matchService.newMatch(match);
+    public Mono<MatchResponseDto> newMatch(@RequestBody MatchRequestDto requestDto) {
+        return matchService.newMatch(requestDto);
     }
 
 }
