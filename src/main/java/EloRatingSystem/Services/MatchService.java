@@ -44,8 +44,10 @@ public class MatchService {
             Team redTeam = redTeamOptional.get();
             Team blueTeam = blueTeamOptional.get();
 
-            Match match = ratingService.newRating(new Match(redTeam, blueTeam,
+            Match match = matchRepository.save(new Match(redTeam, blueTeam,
                     requestDto.getRedTeamScore(), requestDto.getBlueTeamScore()));
+
+            match = ratingService.newRating(match);
 
             match = matchRepository.save(match);
 

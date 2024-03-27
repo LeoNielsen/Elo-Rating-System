@@ -28,7 +28,8 @@ public class PlayerRating {
     @Column(name = "newRating")
     private Integer newRating;
 
-    public PlayerRating(Player player, Integer oldRating, Integer newRating){
+    public PlayerRating(Match match, Player player, Integer oldRating, Integer newRating){
+        this.match = match;
         this.player = player;
         this.oldRating = oldRating;
         this.newRating = newRating;
