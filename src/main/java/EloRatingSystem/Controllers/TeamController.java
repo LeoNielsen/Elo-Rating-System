@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("team")
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class TeamController {
 
     @Autowired
@@ -23,17 +24,16 @@ public class TeamController {
 
     @GetMapping("/{id}")
     public Mono<TeamResponseDto> getTeamById(@PathVariable Long id) {
+        // TODO: make service method
         return Mono.just(new TeamResponseDto(teamRepository.findById(id).orElseThrow()));
     }
 
     @GetMapping("/all")
     public  Mono<List<TeamResponseDto>> getAllTeams(){
        return teamService.getAllTeams();
-
-
-
     }
-    @PutMapping
+
+    @PostMapping
     public Mono<TeamResponseDto> newTeam(@RequestBody TeamRequestDto requestDto) {
         return teamService.newTeam(requestDto);
     }

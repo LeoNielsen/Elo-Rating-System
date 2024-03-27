@@ -7,15 +7,15 @@ import lombok.Data;
 public class TeamResponseDto {
 
     private Long id;
-    private Long attackerId;
-    private Long defenderId;
+    private PlayerResponseDto attacker;
+    private PlayerResponseDto defender;
     private Integer won;
     private Integer lost;
 
     public TeamResponseDto(Team team){
         this.id = team.getId();
-        this.attackerId = team.getAttacker().getId();
-        this.defenderId = team.getDefender().getId();
+        this.attacker = new PlayerResponseDto(team.getAttacker());
+        this.defender = new PlayerResponseDto(team.getDefender());
         this.won = team.getWon();
         this.lost = team.getLost();
     }

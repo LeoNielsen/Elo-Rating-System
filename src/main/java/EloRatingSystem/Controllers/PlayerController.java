@@ -18,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("player")
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class PlayerController {
 
     @Autowired
@@ -27,6 +28,7 @@ public class PlayerController {
 
     @GetMapping("/id/{id}")
     public Mono<PlayerResponseDto> getById(@PathVariable Long id) {
+        // TODO: make service method
         return Mono.just(new PlayerResponseDto(playerRepository.findById(id).orElseThrow()));
     }
 
@@ -40,7 +42,7 @@ public class PlayerController {
         return playerService.getAllPlayers();
     }
 
-    @PutMapping
+    @PostMapping
     public Mono<PlayerResponseDto> newPlayer(@RequestBody PlayerRequestDto requestDto) {
         return playerService.newPlayer(requestDto);
     }

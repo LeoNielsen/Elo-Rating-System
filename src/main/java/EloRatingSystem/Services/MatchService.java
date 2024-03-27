@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,6 +23,18 @@ public class MatchService {
     MatchRepository matchRepository;
     @Autowired
     TeamRepository teamRepository;
+    @Autowired
+    RatingService ratingService;
+
+    public Mono<List<MatchResponseDto>> getAllMatches() {
+        List<Match> matches = matchRepository.findAll();
+        List<MatchResponseDto> matchResponseDtoList = new ArrayList<>();
+        for (Match match : matches) {
+            matchResponseDtoList.add(new MatchResponseDto(match));
+        }
+
+        return Mono.just(matchResponseDtoList);
+    }
 
     public Mono<MatchResponseDto> newMatch(MatchRequestDto requestDto) {
         Optional<Team> redTeamOptional = teamRepository.findById(requestDto.getRedTeamId());
@@ -30,8 +44,10 @@ public class MatchService {
             Team redTeam = redTeamOptional.get();
             Team blueTeam = blueTeamOptional.get();
 
-            Match match = matchRepository.save(new Match(redTeam, blueTeam,
+            Match match = ratingService.newRating(new Match(redTeam, blueTeam,
                     requestDto.getRedTeamScore(), requestDto.getBlueTeamScore()));
+
+            match = matchRepository.save(match);
 
             return Mono.just(new MatchResponseDto(match));
         }

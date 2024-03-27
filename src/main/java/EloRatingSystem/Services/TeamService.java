@@ -33,7 +33,7 @@ public class TeamService {
             Player attacker = attackerOptional.get();
             Player defender = defenderOptional.get();
 
-            Optional<Team> teamOptional = teamRepository.findByAttacker_IdAndDefender_Id(attacker.getId(), defender.getId());
+            Optional<Team> teamOptional = teamRepository.findByAttackerIdAndDefenderId(attacker.getId(), defender.getId());
             if (teamOptional.isPresent()) {
                 return Mono.just(new TeamResponseDto(teamOptional.get()));
             }
@@ -48,7 +48,7 @@ public class TeamService {
     }
 
     private boolean checkIfTeamExists(Long attackerId, Long defenderId) {
-        return teamRepository.findByAttacker_IdAndDefender_Id(attackerId, defenderId).isPresent();
+        return teamRepository.findByAttackerIdAndDefenderId(attackerId, defenderId).isPresent();
     }
 
     public Mono<List<TeamResponseDto>> getAllTeams() {

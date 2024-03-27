@@ -17,10 +17,10 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne (cascade = CascadeType.PERSIST)
     private Team redTeam;
 
-    @ManyToOne
+    @ManyToOne (cascade = CascadeType.PERSIST)
     private Team blueTeam;
 
     @Column(name = "redTeamScore")

@@ -8,15 +8,15 @@ import lombok.Data;
 public class MatchResponseDto {
 
     private Long id;
-    private Long redTeamId;
-    private Long blueTeamId;
+    private TeamResponseDto redTeam;
+    private TeamResponseDto blueTeam;
     private Integer redTeamScore;
     private Integer blueTeamScore;
 
     public MatchResponseDto(Match match) {
         this.id = match.getId();
-        this.redTeamId = match.getRedTeam().getId();
-        this.blueTeamId = match.getBlueTeam().getId();
+        this.redTeam = new TeamResponseDto(match.getRedTeam());
+        this.blueTeam = new TeamResponseDto(match.getBlueTeam());
         this.redTeamScore = match.getRedTeamScore();
         this.blueTeamScore = match.getBlueTeamScore();
     }
