@@ -2,6 +2,7 @@ package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
+import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Reporitories.PlayerRepository;
@@ -30,6 +31,11 @@ public class PlayerController {
     public Mono<PlayerResponseDto> getById(@PathVariable Long id) {
         // TODO: make service method
         return Mono.just(new PlayerResponseDto(playerRepository.findById(id).orElseThrow()));
+    }
+
+    @GetMapping("/statistics/{id}")
+    public Mono<PlayerStatisticsResponseDto> getStatisticsById(@PathVariable Long id) {
+        return playerService.getStatistics(id);
     }
 
     @GetMapping("/{nameTag}")
