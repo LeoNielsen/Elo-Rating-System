@@ -7,7 +7,6 @@ import EloRatingSystem.Models.Match;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.PlayerRating;
 import EloRatingSystem.Models.Team;
-import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.RatingRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +65,10 @@ public class RatingService {
     }
 
     private void rankingCalculator(Team winner, Team loser, double pointMultiplier, Match match) {
-        double winnerOddsAttacker = playerOdds(winner.getAttacker(), loser);
-        double winnerOddsDefender = playerOdds(winner.getDefender(), loser);
-        double loserOddsAttacker = playerOdds(loser.getAttacker(), winner);
-        double loserOddsDefender = playerOdds(loser.getDefender(), winner);
+        double winnerOddsAttacker = playerOddsTeam(winner.getAttacker(), loser);
+        double winnerOddsDefender = playerOddsTeam(winner.getDefender(), loser);
+        double loserOddsAttacker = playerOddsTeam(loser.getAttacker(), winner);
+        double loserOddsDefender = playerOddsTeam(loser.getDefender(), winner);
 
         double winnerTeamOdds = (winnerOddsAttacker + winnerOddsDefender) / 2;
         double loserTeamOdds = (loserOddsAttacker + loserOddsDefender) / 2;
@@ -90,14 +89,14 @@ public class RatingService {
         return player;
     }
 
-    public double playerOdds(Player player, Team opponentTeam) {
-        double oddsAgainstAttacker = playerOdds(player, opponentTeam.getAttacker());
-        double oddsAgainstDefender = playerOdds(player, opponentTeam.getDefender());
+    public double playerOddsTeam(Player player, Team opponentTeam) {
+        double oddsAgainstAttacker = playerOddsSolo(player, opponentTeam.getAttacker());
+        double oddsAgainstDefender = playerOddsSolo(player, opponentTeam.getDefender());
 
         return (oddsAgainstAttacker + oddsAgainstDefender) / 2;
     }
 
-    private double playerOdds(Player player, Player opponent) {
+    private double playerOddsSolo(Player player, Player opponent) {
         return 1 / (1 + (Math.pow(10, (double) (opponent.getRating() - player.getRating()) / 500)));
     }
 
