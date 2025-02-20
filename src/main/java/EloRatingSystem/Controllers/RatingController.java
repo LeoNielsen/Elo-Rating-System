@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("rating")
 @Slf4j
-@CrossOrigin(origins = "http://localhost")
+@CrossOrigin(origins = "http://localhost:80")
 public class RatingController {
 
     @Autowired

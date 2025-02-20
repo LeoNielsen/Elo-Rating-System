@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("player")
 @Slf4j
-@CrossOrigin(origins = "http://localhost")
+@CrossOrigin(origins = "http://localhost:80")
 public class PlayerController {
 
     @Autowired
