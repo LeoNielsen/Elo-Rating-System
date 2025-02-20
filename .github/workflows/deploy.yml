@@ -1,0 +1,26 @@
+name: Deploy Backend to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v3
+
+      - name: SSH og deploy til Raspberry Pi
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd ~/app/backend
+            git pull origin master
+            mvn clean package -DskipTests
+            docker-compose -f ~/app/docker-compose.yml up --build -d backend
