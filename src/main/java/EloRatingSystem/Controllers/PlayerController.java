@@ -19,7 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("player")
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
 public class PlayerController {
 
     @Autowired
