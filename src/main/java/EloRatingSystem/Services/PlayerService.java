@@ -65,31 +65,50 @@ public class PlayerService {
         Optional<Player> playerOptional = playerRepository.findById(id);
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-
-            //List<Match> matches = matchRepository.findAllByAttackerId(id);
-            List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(id, id);
-
-            int wins = 0;
-            int lost = 0;
-            int goals = 0;
-            for (Team team : teams) {
-                lost += team.getLost();
-                wins += team.getWon();
-
-                List<Match> matches = matchRepository.findAllByRedTeamIdOrBlueTeamId(team.getId(), team.getId());
-                for (Match match : matches) {
-                    if (match.getRedTeam().getAttacker().getId().equals(id) || match.getRedTeam().getDefender().getId().equals(id)) {
-                        goals += match.getRedTeamScore();
-                    } else {
-                        goals += match.getBlueTeamScore();
-                    }
-                }
-
-            }
-
-            return Mono.just(new PlayerStatisticsResponseDto(player.getNameTag(), player.getRating(), wins, lost, goals));
+            return Mono.just(playerStatistics(player));
         } else {
             return Mono.error(new ApiException(String.format("%s Doesn't exist", id), HttpStatus.BAD_REQUEST));
         }
+    }
+
+    public Mono<List<PlayerStatisticsResponseDto>> getAllStatistics() {
+        List<PlayerStatisticsResponseDto> playerStatistics = new ArrayList<>();
+
+        List<Player> players = playerRepository.findAll();
+        for (Player player : players) {
+            playerStatistics.add(playerStatistics(player));
+        }
+
+        return Mono.just(playerStatistics);
+    }
+
+    public PlayerStatisticsResponseDto playerStatistics(Player player) {
+        List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(player.getId(),player.getId());
+
+        int attackerWins = 0;
+        int defenderWins = 0;
+        int attackerLost = 0;
+        int defenderLost = 0;
+        int goals = 0;
+        for (Team team : teams) {
+            if(team.getAttacker().getId().equals(player.getId())){
+                attackerWins += team.getWon();
+                attackerLost += team.getLost();
+            } else {
+                defenderWins += team.getWon();
+                defenderLost += team.getLost();
+            }
+
+            List<Match> matches = matchRepository.findAllByRedTeamIdOrBlueTeamId(team.getId(), team.getId());
+            for (Match match : matches) {
+                if (match.getRedTeam().getAttacker().getId().equals(player.getId()) || match.getRedTeam().getDefender().getId().equals(player.getId())) {
+                    goals += match.getRedTeamScore();
+                } else {
+                    goals += match.getBlueTeamScore();
+                }
+            }
+        }
+
+        return new PlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getRating(), attackerWins,defenderWins,attackerLost, defenderLost, goals);
     }
 }

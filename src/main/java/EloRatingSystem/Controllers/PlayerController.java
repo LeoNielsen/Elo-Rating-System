@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("player")
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class PlayerController {
 
     @Autowired
@@ -36,6 +36,11 @@ public class PlayerController {
     @GetMapping("/statistics/{id}")
     public Mono<PlayerStatisticsResponseDto> getStatisticsById(@PathVariable Long id) {
         return playerService.getStatistics(id);
+    }
+
+    @GetMapping("/statistics/all")
+    public Mono<List<PlayerStatisticsResponseDto>> getAllStatistics() {
+        return playerService.getAllStatistics();
     }
 
     @GetMapping("/{nameTag}")
