@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("team")
 @Slf4j
+@CrossOrigin
 public class TeamController {
 
     @Autowired
