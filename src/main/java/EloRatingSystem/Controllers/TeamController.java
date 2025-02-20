@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("team")
 @Slf4j
-@CrossOrigin(origins = "http://localhost:80")
+@CrossOrigin(origins = "http://localhost:3000")
 public class TeamController {
 
     @Autowired
