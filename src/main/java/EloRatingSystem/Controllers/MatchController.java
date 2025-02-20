@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("match")
 @Slf4j
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost")
 public class MatchController {
 
     @Autowired
