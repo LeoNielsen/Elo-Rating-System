@@ -15,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("rating")
 @Slf4j
-@CrossOrigin
 public class RatingController {
 
     @Autowired

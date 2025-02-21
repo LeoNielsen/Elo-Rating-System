@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("match")
 @Slf4j
-@CrossOrigin
 public class MatchController {
 
     @Autowired

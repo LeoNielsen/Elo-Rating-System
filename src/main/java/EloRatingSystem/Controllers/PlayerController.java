@@ -19,7 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("player")
 @Slf4j
-@CrossOrigin
 public class PlayerController {
 
     @Autowired
