@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,6 +18,9 @@ public class Match {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(name = "date")
+    private Date date;
 
     @ManyToOne (cascade = CascadeType.PERSIST)
     private Team redTeam;
@@ -29,7 +34,8 @@ public class Match {
     @Column(name = "blueTeamScore")
     private Integer blueTeamScore;
 
-    public Match(Team redTeam, Team blueTeam, Integer redTeamScore, Integer blueTeamScore){
+    public Match(Date date, Team redTeam, Team blueTeam, Integer redTeamScore, Integer blueTeamScore){
+        this.date = date;
         this.redTeam = redTeam;
         this.blueTeam = blueTeam;
         this.redTeamScore = redTeamScore;

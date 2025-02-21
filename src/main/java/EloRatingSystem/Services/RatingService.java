@@ -83,7 +83,7 @@ public class RatingService {
     }
 
     private Player newPlayerRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
-        int newPlayerRating = (int) (player.getRating() + ((24 * pointMultiplier) * ((isWinner ? 1.0 : 0.0) - ((teamRating + playerOdds) / 2))));
+        int newPlayerRating = (int) Math.round(player.getRating() + ((32 * pointMultiplier) * ((isWinner ? 1.0 : 0.0) - ((teamRating + playerOdds) / 2))));
         ratingRepository.save(new PlayerRating(match,player,player.getRating(),newPlayerRating));
         player.setRating(newPlayerRating);
         return player;

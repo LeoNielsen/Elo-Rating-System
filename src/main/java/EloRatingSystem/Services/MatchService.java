@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class MatchService {
             Team redTeam = redTeamOptional.get();
             Team blueTeam = blueTeamOptional.get();
 
-            Match match = matchRepository.save(new Match(redTeam, blueTeam,
+            Match match = matchRepository.save(new Match(new Date(System.currentTimeMillis()),redTeam, blueTeam,
                     requestDto.getRedTeamScore(), requestDto.getBlueTeamScore()));
 
             match = ratingService.newRating(match);
