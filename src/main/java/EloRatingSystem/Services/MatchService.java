@@ -8,10 +8,12 @@ import EloRatingSystem.Models.Team;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.awt.print.Pageable;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +47,7 @@ public class MatchService {
             Team redTeam = redTeamOptional.get();
             Team blueTeam = blueTeamOptional.get();
 
-            Match match = matchRepository.save(new Match(new Date(System.currentTimeMillis()),redTeam, blueTeam,
+            Match match = matchRepository.save(new Match(new Date(System.currentTimeMillis()), redTeam, blueTeam,
                     requestDto.getRedTeamScore(), requestDto.getBlueTeamScore()));
 
             match = ratingService.newRating(match);
@@ -64,5 +66,21 @@ public class MatchService {
         Optional<Match> match = matchRepository.findById(id);
         return match.map(value -> Mono.just(new MatchResponseDto(value)))
                 .orElseGet(() -> Mono.error(new ApiException(String.format("match %s doesn't exist", id), HttpStatus.BAD_REQUEST)));
+    }
+
+    public void deleteLatestMatch() {
+        Match match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
+        ratingService.deleteRatingsByMatch(match.getId());
+
+        Team winner = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getRedTeam() : match.getBlueTeam();
+        Team loser = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getBlueTeam() : match.getRedTeam();
+
+        winner.setWon(winner.getWon() - 1);
+        loser.setLost(loser.getLost() - 1);
+
+        teamRepository.save(winner);
+        teamRepository.save(loser);
+
+        matchRepository.deleteById(match.getId());
     }
 }

@@ -61,6 +61,8 @@ public class PlayerController {
     public void deletePlayers() {
         playerRepository.deleteAll();
     }
+
+    // Only works on players that havent played any games
     @DeleteMapping("/{id}")
     public void deletePlayerById(@PathVariable Long id) {
         playerRepository.deleteById(id);

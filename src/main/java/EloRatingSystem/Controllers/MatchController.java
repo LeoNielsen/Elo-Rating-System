@@ -34,4 +34,9 @@ public class MatchController {
         return matchService.newMatch(requestDto);
     }
 
+    @DeleteMapping("/latest")
+    public void deleteLatestMatch() {
+        matchService.deleteLatestMatch();
+    }
+
 }

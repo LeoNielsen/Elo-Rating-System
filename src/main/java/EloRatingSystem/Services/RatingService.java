@@ -7,7 +7,9 @@ import EloRatingSystem.Models.Match;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.PlayerRating;
 import EloRatingSystem.Models.Team;
+import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.RatingRepository;
+import jakarta.persistence.Id;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,12 +25,15 @@ public class RatingService {
     @Autowired
     RatingRepository ratingRepository;
 
+    @Autowired
+    PlayerRepository playerRepository;
+
     public Mono<List<RatingResponseDto>> getRatingByMatchId(Long id) {
         List<PlayerRating> ratings = ratingRepository.findAllByMatchId(id);
 
         List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
         for (PlayerRating rating : ratings) {
-            ratingResponseDtoList.add(new RatingResponseDto(rating.getMatch().getId(),new PlayerResponseDto(rating.getPlayer()),rating.getOldRating(),rating.getNewRating()));
+            ratingResponseDtoList.add(new RatingResponseDto(rating.getMatch().getId(), new PlayerResponseDto(rating.getPlayer()), rating.getOldRating(), rating.getNewRating()));
         }
 
         return Mono.just(ratingResponseDtoList);
@@ -84,7 +89,7 @@ public class RatingService {
 
     private Player newPlayerRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
         int newPlayerRating = (int) Math.round(player.getRating() + ((32 * pointMultiplier) * ((isWinner ? 1.0 : 0.0) - ((teamRating + playerOdds) / 2))));
-        ratingRepository.save(new PlayerRating(match,player,player.getRating(),newPlayerRating));
+        ratingRepository.save(new PlayerRating(match, player, player.getRating(), newPlayerRating));
         player.setRating(newPlayerRating);
         return player;
     }
@@ -102,5 +107,15 @@ public class RatingService {
 
     private double pointMultiplier(int redTeamScore, int blueTeamScore) {
         return 1 + (Math.pow(Math.log10((Math.abs(redTeamScore - blueTeamScore))), 3));
+    }
+
+    public void deleteRatingsByMatch(Long Id) {
+        List<PlayerRating> playerRatingList = ratingRepository.findAllByMatchId(Id);
+        for (PlayerRating rating : playerRatingList) {
+            Player player = rating.getPlayer();
+            player.setRating(rating.getOldRating());
+            playerRepository.save(player);
+            ratingRepository.deleteById(rating.getId());
+        }
     }
 }
