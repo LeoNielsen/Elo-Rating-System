@@ -25,4 +25,9 @@ public class RatingController {
         return ratingService.getRatingByMatchId(id);
     }
 
+    @GetMapping("/all")
+    public Mono<List<RatingResponseDto>> getAll() {
+        return ratingService.getAllRatings();
+    }
+
 }

@@ -1,5 +1,6 @@
 package EloRatingSystem.Services;
 
+import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Exception.ApiException;
@@ -18,6 +19,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.antlr.v4.runtime.tree.xpath.XPath.findAll;
 
 @Service
 @Slf4j
@@ -117,5 +120,15 @@ public class RatingService {
             playerRepository.save(player);
             ratingRepository.deleteById(rating.getId());
         }
+    }
+
+    public Mono<List<RatingResponseDto>> getAllRatings() {
+        List<PlayerRating> ratingList = ratingRepository.findAll();
+        List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
+        for (PlayerRating rating : ratingList) {
+            ratingResponseDtoList.add(new RatingResponseDto(rating.getMatch().getId(),new PlayerResponseDto(rating.getPlayer()),rating.getOldRating(),rating.getNewRating()));
+        }
+
+        return Mono.just(ratingResponseDtoList);
     }
 }
