@@ -1,6 +1,5 @@
 package EloRatingSystem.Reporitories;
 
-import EloRatingSystem.Models.PlayerRating;
 import EloRatingSystem.Models.SoloPlayerRating;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

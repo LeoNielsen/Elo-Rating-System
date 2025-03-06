@@ -47,10 +47,6 @@ public class TeamService {
                 , HttpStatus.BAD_REQUEST));
     }
 
-    private boolean checkIfTeamExists(Long attackerId, Long defenderId) {
-        return teamRepository.findByAttackerIdAndDefenderId(attackerId, defenderId).isPresent();
-    }
-
     public Mono<List<TeamResponseDto>> getAllTeams() {
         List<Team> teams = teamRepository.findAll();
 

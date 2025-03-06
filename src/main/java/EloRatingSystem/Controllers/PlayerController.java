@@ -4,13 +4,10 @@ import EloRatingSystem.Dtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
 import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
-import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Models.Player;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Services.PlayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -74,7 +71,7 @@ public class PlayerController {
         playerRepository.deleteAll();
     }
 
-    // Only works on players that havent played any games
+    // Only works on players that haven't played any games
     @DeleteMapping("/{id}")
     public void deletePlayerById(@PathVariable Long id) {
         playerRepository.deleteById(id);

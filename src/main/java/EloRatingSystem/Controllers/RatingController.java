@@ -1,10 +1,7 @@
 package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.ChartDataDto;
-import EloRatingSystem.Dtos.MatchRequestDto;
-import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
-import EloRatingSystem.Services.MatchService;
 import EloRatingSystem.Services.RatingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,22 +1,17 @@
 package EloRatingSystem.Services;
 
 import EloRatingSystem.Dtos.ChartDataDto;
-import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
-import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.*;
 import EloRatingSystem.Reporitories.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -47,32 +42,16 @@ public class RatingService {
     }
 
     public Match newRating(Match match) {
-        Team winner;
-        Team loser;
+        Team winner = match.getRedTeamScore() > match.getBlueTeamScore() ? match.getRedTeam() : match.getBlueTeam();
+        Team loser = match.getRedTeamScore() > match.getBlueTeamScore() ? match.getBlueTeam() : match.getRedTeam();
 
         double pointMultiplier = pointMultiplier(match.getRedTeamScore(), match.getBlueTeamScore());
 
-        if (match.getRedTeamScore() > match.getBlueTeamScore()) {
-            winner = match.getRedTeam();
-            loser = match.getBlueTeam();
+        rankingCalculator(winner, loser, pointMultiplier, match);
 
-            rankingCalculator(winner, loser, pointMultiplier, match);
+        match.setRedTeam(winner.getId().equals(match.getRedTeam().getId()) ? winner : loser);
+        match.setBlueTeam(winner.getId().equals(match.getBlueTeam().getId()) ? winner : loser);
 
-            match.setRedTeam(winner);
-            match.setBlueTeam(loser);
-
-        } else if (match.getBlueTeamScore() > match.getRedTeamScore()) {
-            winner = match.getBlueTeam();
-            loser = match.getRedTeam();
-
-            rankingCalculator(winner, loser, pointMultiplier, match);
-
-            match.setBlueTeam(winner);
-            match.setRedTeam(loser);
-
-        } else {
-            Mono.error(new ApiException("Match cannot be a draw", HttpStatus.BAD_REQUEST));
-        }
         return match;
     }
 
@@ -153,8 +132,6 @@ public class RatingService {
 
         newPlayerSoloRating(winner, pointMultiplier, winnerOdds, true, match);
         newPlayerSoloRating(loser, pointMultiplier, loserOdds, false, match);
-
-        // TODO add wins and lost
     }
 
     private double playerOddsSolo(Player player, Player opponent) {
@@ -199,22 +176,22 @@ public class RatingService {
 
     public Mono<List<ChartDataDto>> getChartData() {
         List<PlayerRating> ratings  = ratingRepository.findAll();
-        List<ChartDataDto> chartDataDtos = new ArrayList<>();
+        List<ChartDataDto> chartDataDtoList = new ArrayList<>();
         for (PlayerRating rating : ratings) {
             Match match = matchRepository.findById(rating.getMatch().getId()).orElseThrow();
-            chartDataDtos.add(new ChartDataDto(match.getId(),new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(),match.getDate() ));
+            chartDataDtoList.add(new ChartDataDto(match.getId(),new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(),match.getDate() ));
         }
-        return Mono.just(chartDataDtos);
+        return Mono.just(chartDataDtoList);
     }
 
     public Mono<List<ChartDataDto>> getSoloChartData() {
         List<SoloPlayerRating> ratings  = soloRatingRepository.findAll();
-        List<ChartDataDto> chartDataDtos = new ArrayList<>();
+        List<ChartDataDto> chartDataDtoList = new ArrayList<>();
         for (SoloPlayerRating rating : ratings) {
             SoloMatch match = soloMatchRepository.findById(rating.getSoloMatch().getId()).orElseThrow();
-            chartDataDtos.add(new ChartDataDto(match.getId(),new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(),match.getDate() ));
+            chartDataDtoList.add(new ChartDataDto(match.getId(),new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(),match.getDate() ));
         }
-        return Mono.just(chartDataDtos);
+        return Mono.just(chartDataDtoList);
     }
 
 }
