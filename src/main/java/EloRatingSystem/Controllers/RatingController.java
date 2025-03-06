@@ -1,5 +1,6 @@
 package EloRatingSystem.Controllers;
 
+import EloRatingSystem.Dtos.ChartDataDto;
 import EloRatingSystem.Dtos.MatchRequestDto;
 import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
@@ -38,6 +39,15 @@ public class RatingController {
     @GetMapping("/solo/all")
     public Mono<List<RatingResponseDto>> getAllSoloRatings() {
         return ratingService.getAllSoloRatings();
+    }
+
+    @GetMapping("/chart")
+    public Mono<List<ChartDataDto>> getChartData() {
+        return ratingService.getChartData();
+    }
+    @GetMapping("/solo/chart")
+    public Mono<List<ChartDataDto>> getSoloChartData() {
+        return ratingService.getSoloChartData();
     }
 
 }

@@ -1,14 +1,12 @@
 package EloRatingSystem.Services;
 
+import EloRatingSystem.Dtos.ChartDataDto;
 import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.*;
-import EloRatingSystem.Reporitories.MatchRepository;
-import EloRatingSystem.Reporitories.PlayerRepository;
-import EloRatingSystem.Reporitories.RatingRepository;
-import EloRatingSystem.Reporitories.SoloRatingRepository;
+import EloRatingSystem.Reporitories.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +16,7 @@ import reactor.core.publisher.Mono;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -29,6 +28,12 @@ public class RatingService {
 
     @Autowired
     PlayerRepository playerRepository;
+
+    @Autowired
+    MatchRepository matchRepository;
+
+    @Autowired
+    SoloMatchRepository soloMatchRepository;
 
     public Mono<List<RatingResponseDto>> getRatingByMatchId(Long id) {
         List<PlayerRating> ratings = ratingRepository.findAllByMatchId(id);
@@ -191,4 +196,25 @@ public class RatingService {
             soloRatingRepository.deleteById(rating.getId());
         }
     }
+
+    public Mono<List<ChartDataDto>> getChartData() {
+        List<PlayerRating> ratings  = ratingRepository.findAll();
+        List<ChartDataDto> chartDataDtos = new ArrayList<>();
+        for (PlayerRating rating : ratings) {
+            Match match = matchRepository.findById(rating.getMatch().getId()).orElseThrow();
+            chartDataDtos.add(new ChartDataDto(match.getId(),new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(),match.getDate() ));
+        }
+        return Mono.just(chartDataDtos);
+    }
+
+    public Mono<List<ChartDataDto>> getSoloChartData() {
+        List<SoloPlayerRating> ratings  = soloRatingRepository.findAll();
+        List<ChartDataDto> chartDataDtos = new ArrayList<>();
+        for (SoloPlayerRating rating : ratings) {
+            SoloMatch match = soloMatchRepository.findById(rating.getSoloMatch().getId()).orElseThrow();
+            chartDataDtos.add(new ChartDataDto(match.getId(),new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(),match.getDate() ));
+        }
+        return Mono.just(chartDataDtos);
+    }
+
 }
