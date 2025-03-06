@@ -10,13 +10,15 @@ public class SoloPlayerStatisticsResponseDto {
     private Integer wins;
     private Integer lost;
     private Integer totalGoals;
-    public SoloPlayerStatisticsResponseDto(Long id, String nameTag, Integer rating, int wins, int lost, int goals) {
+    private Integer todayRatingChance;
+
+    public SoloPlayerStatisticsResponseDto(Long id, String nameTag, Integer rating, Integer wins, Integer lost, Integer goals,Integer todayRatingChance) {
         this.id = id;
         this.nameTag = nameTag;
         this.rating = rating;
         this.wins = wins;
         this.lost = lost;
         this.totalGoals = goals;
-
+        this.todayRatingChance = todayRatingChance;
     }
 }

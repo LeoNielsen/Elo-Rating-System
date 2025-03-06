@@ -27,6 +27,8 @@ public class PlayerService {
     TeamRepository teamRepository;
     @Autowired
     RatingRepository ratingRepository;
+    @Autowired
+    SoloRatingRepository soloRatingRepository;
 
     public Mono<PlayerResponseDto> newPlayer(PlayerRequestDto requestDto) {
         if (!checkIfPlayerExists(requestDto.getNameTag())) {
@@ -136,7 +138,9 @@ public class PlayerService {
         int wins = 0;
         int lost = 0;
         int goals = 0;
+        int todayRatingChance = 0;
 
+        Date date = new Date(System.currentTimeMillis());
         List<SoloMatch> matches = soloMatchRepository.findAllByRedPlayerIdOrBluePlayerId(player.getId(), player.getId());
         for (SoloMatch match : matches) {
             if (match.getRedPlayer().getId().equals(player.getId())) {
@@ -154,8 +158,16 @@ public class PlayerService {
                     lost += 1;
                 }
             }
+            if (match.getDate().toString().equals(date.toString())) {
+                List<SoloPlayerRating> ratings = soloRatingRepository.findAllBySoloMatchId(match.getId());
+                for (SoloPlayerRating rating : ratings) {
+                    if (rating.getPlayer().getId().equals(player.getId())) {
+                        todayRatingChance += rating.getNewRating() - rating.getOldRating();
+                    }
+                }
+            }
         }
-        return new SoloPlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getSoloRating(), wins, lost, goals);
+        return new SoloPlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getSoloRating(), wins, lost, goals,todayRatingChance);
 
     }
 
