@@ -178,4 +178,14 @@ public class RatingService {
 
         return Mono.just(ratingResponseDtoList);
     }
+
+    public void deleteRatingsBySoloMatch(Long id) {
+        List<SoloPlayerRating> playerRatingList = soloRatingRepository.findAllBySoloMatchId(id);
+        for (SoloPlayerRating rating : playerRatingList) {
+            Player player = rating.getPlayer();
+            player.setSoloRating(rating.getOldRating());
+            playerRepository.save(player);
+            soloRatingRepository.deleteById(rating.getId());
+        }
+    }
 }

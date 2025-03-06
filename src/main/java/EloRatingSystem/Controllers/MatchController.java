@@ -55,4 +55,9 @@ public class MatchController {
         matchService.deleteLatestMatch();
     }
 
+    @DeleteMapping("/solo/latest")
+    public void deleteLatestSoloMatch() {
+        matchService.deleteLatestSoloMatch();
+    }
+
 }

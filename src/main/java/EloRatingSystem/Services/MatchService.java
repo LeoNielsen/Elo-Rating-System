@@ -131,4 +131,11 @@ public class MatchService {
                 String.format("Either player %s or %s does not exits", requestDto.getRedPlayerId(), requestDto.getBluePlayerId())
                 , HttpStatus.BAD_REQUEST));
     }
+
+    public void deleteLatestSoloMatch() {
+        SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
+        ratingService.deleteRatingsBySoloMatch(match.getId());
+
+        soloMatchRepository.deleteById(match.getId());
+    }
 }
