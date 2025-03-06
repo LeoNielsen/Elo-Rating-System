@@ -3,6 +3,7 @@ package EloRatingSystem.Controllers;
 import EloRatingSystem.Dtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Reporitories.PlayerRepository;
@@ -41,6 +42,17 @@ public class PlayerController {
     public Mono<List<PlayerStatisticsResponseDto>> getAllStatistics() {
         return playerService.getAllStatistics();
     }
+
+    @GetMapping("/statistics/solo/{id}")
+    public Mono<SoloPlayerStatisticsResponseDto> getSoloStatisticsById(@PathVariable Long id) {
+        return playerService.getSoloStatistics(id);
+    }
+
+    @GetMapping("/statistics/solo/all")
+    public Mono<List<SoloPlayerStatisticsResponseDto>> getAllSoloStatistics() {
+        return playerService.getAllSoloStatistics();
+    }
+
 
     @GetMapping("/{nameTag}")
     public Mono<PlayerResponseDto> getByNameTag(@PathVariable String nameTag) {

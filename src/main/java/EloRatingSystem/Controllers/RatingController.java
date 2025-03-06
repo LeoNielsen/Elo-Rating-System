@@ -30,4 +30,14 @@ public class RatingController {
         return ratingService.getAllRatings();
     }
 
+    @GetMapping("/solo/match/{id}")
+    public Mono<List<RatingResponseDto>> getSoloRatingByMatchId(@PathVariable Long id) {
+        return ratingService.getSoloRatingBySoloMatchId(id);
+    }
+
+    @GetMapping("/solo/all")
+    public Mono<List<RatingResponseDto>> getAllSoloRatings() {
+        return ratingService.getAllSoloRatings();
+    }
+
 }

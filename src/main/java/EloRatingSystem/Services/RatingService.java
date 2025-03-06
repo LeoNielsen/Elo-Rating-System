@@ -158,4 +158,24 @@ public class RatingService {
         soloRatingRepository.save(new SoloPlayerRating(match, player, player.getSoloRating(), newPlayerRating));
         player.setSoloRating(newPlayerRating);
     }
+
+    public Mono<List<RatingResponseDto>> getSoloRatingBySoloMatchId(Long id) {
+        List<SoloPlayerRating> ratings = soloRatingRepository.findAllBySoloMatchId(id);
+
+        List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
+        for (SoloPlayerRating rating : ratings) {
+            ratingResponseDtoList.add(new RatingResponseDto(rating.getSoloMatch().getId(), new PlayerResponseDto(rating.getPlayer()), rating.getOldRating(), rating.getNewRating()));
+        }
+        return Mono.just(ratingResponseDtoList);
+    }
+
+    public Mono<List<RatingResponseDto>> getAllSoloRatings() {
+        List<SoloPlayerRating> ratingList = soloRatingRepository.findAll();
+        List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
+        for (SoloPlayerRating rating : ratingList) {
+            ratingResponseDtoList.add(new RatingResponseDto(rating.getSoloMatch().getId(),new PlayerResponseDto(rating.getPlayer()),rating.getOldRating(),rating.getNewRating()));
+        }
+
+        return Mono.just(ratingResponseDtoList);
+    }
 }

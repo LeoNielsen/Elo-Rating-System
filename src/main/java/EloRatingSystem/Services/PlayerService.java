@@ -3,12 +3,15 @@ package EloRatingSystem.Services;
 import EloRatingSystem.Dtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Match;
 import EloRatingSystem.Models.Player;
+import EloRatingSystem.Models.SoloMatch;
 import EloRatingSystem.Models.Team;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
+import EloRatingSystem.Reporitories.SoloMatchRepository;
 import EloRatingSystem.Reporitories.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,11 +30,13 @@ public class PlayerService {
     @Autowired
     MatchRepository matchRepository;
     @Autowired
+    SoloMatchRepository soloMatchRepository;
+    @Autowired
     TeamRepository teamRepository;
 
     public Mono<PlayerResponseDto> newPlayer(PlayerRequestDto requestDto) {
         if (!checkIfPlayerExists(requestDto.getNameTag())) {
-            Player player = new Player(requestDto.getNameTag(),1200, 1200, true);
+            Player player = new Player(requestDto.getNameTag(), 1200, 1200, true);
             playerRepository.save(player);
             return Mono.just(new PlayerResponseDto(player));
         }
@@ -83,7 +88,7 @@ public class PlayerService {
     }
 
     public PlayerStatisticsResponseDto playerStatistics(Player player) {
-        List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(player.getId(),player.getId());
+        List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(player.getId(), player.getId());
 
         int attackerWins = 0;
         int defenderWins = 0;
@@ -91,7 +96,7 @@ public class PlayerService {
         int defenderLost = 0;
         int goals = 0;
         for (Team team : teams) {
-            if(team.getAttacker().getId().equals(player.getId())){
+            if (team.getAttacker().getId().equals(player.getId())) {
                 attackerWins += team.getWon();
                 attackerLost += team.getLost();
             } else {
@@ -109,6 +114,54 @@ public class PlayerService {
             }
         }
 
-        return new PlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getRating(), attackerWins,defenderWins,attackerLost, defenderLost, goals);
+        return new PlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getRating(), attackerWins, defenderWins, attackerLost, defenderLost, goals);
+    }
+
+    public Mono<SoloPlayerStatisticsResponseDto> getSoloStatistics(Long id) {
+        Optional<Player> playerOptional = playerRepository.findById(id);
+        if (playerOptional.isPresent()) {
+            Player player = playerOptional.get();
+            return Mono.just(soloPlayerStatistics(player));
+        } else {
+            return Mono.error(new ApiException(String.format("%s Doesn't exist", id), HttpStatus.BAD_REQUEST));
+        }
+    }
+
+    private SoloPlayerStatisticsResponseDto soloPlayerStatistics(Player player) {
+        int wins = 0;
+        int lost = 0;
+        int goals = 0;
+
+        List<SoloMatch> matches = soloMatchRepository.findAllByRedPlayerIdOrBluePlayerId(player.getId(), player.getId());
+        for (SoloMatch match : matches) {
+            if (match.getRedPlayer().getId().equals(player.getId())) {
+                goals += match.getRedScore();
+                if (match.getRedScore() == 10) {
+                    wins += 1;
+                } else {
+                    lost += 1;
+                }
+            } else {
+                goals += match.getBlueScore();
+                if (match.getBlueScore() == 10) {
+                    wins += 1;
+                } else {
+                    lost += 1;
+                }
+            }
+        }
+        return new SoloPlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getSoloRating(), wins, lost, goals);
+
+    }
+
+    public Mono<List<SoloPlayerStatisticsResponseDto>> getAllSoloStatistics() {
+        List<SoloPlayerStatisticsResponseDto> playerStatistics = new ArrayList<>();
+
+        List<Player> players = playerRepository.findAll();
+        for (Player player : players) {
+            playerStatistics.add(soloPlayerStatistics(player));
+        }
+
+        return Mono.just(playerStatistics);
     }
 }
