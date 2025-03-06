@@ -22,12 +22,16 @@ public class Player {
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
+    @Column(name = "soloRating", nullable = false)
+    private Integer soloRating;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
 
-    public Player(String nameTag, Integer rating, Boolean active) {
+    public Player(String nameTag, Integer rating, Integer soloRating, Boolean active) {
         this.nameTag = nameTag;
         this.rating = rating;
+        this.soloRating = soloRating;
         this.active = active;
     }
 

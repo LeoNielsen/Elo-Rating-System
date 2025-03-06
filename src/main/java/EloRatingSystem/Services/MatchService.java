@@ -2,18 +2,22 @@ package EloRatingSystem.Services;
 
 import EloRatingSystem.Dtos.MatchRequestDto;
 import EloRatingSystem.Dtos.MatchResponseDto;
+import EloRatingSystem.Dtos.SoloMatchRequestDto;
+import EloRatingSystem.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Match;
+import EloRatingSystem.Models.Player;
+import EloRatingSystem.Models.SoloMatch;
 import EloRatingSystem.Models.Team;
 import EloRatingSystem.Reporitories.MatchRepository;
+import EloRatingSystem.Reporitories.PlayerRepository;
+import EloRatingSystem.Reporitories.SoloMatchRepository;
 import EloRatingSystem.Reporitories.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.awt.print.Pageable;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +29,11 @@ public class MatchService {
     @Autowired
     MatchRepository matchRepository;
     @Autowired
+    SoloMatchRepository soloMatchRepository;
+    @Autowired
     TeamRepository teamRepository;
+    @Autowired
+    PlayerRepository playerRepository;
     @Autowired
     RatingService ratingService;
 
@@ -82,5 +90,45 @@ public class MatchService {
         teamRepository.save(loser);
 
         matchRepository.deleteById(match.getId());
+    }
+
+    public Mono<SoloMatchResponseDto> getSoloMatchById(Long id) {
+        Optional<SoloMatch> match = soloMatchRepository.findById(id);
+        return match.map(value -> Mono.just(new SoloMatchResponseDto(value)))
+                .orElseGet(() -> Mono.error(new ApiException(String.format("match %s doesn't exist", id), HttpStatus.BAD_REQUEST)));
+
+    }
+
+    public Mono<List<SoloMatchResponseDto>> getAllSoloMatches() {
+        List<SoloMatch> matches = soloMatchRepository.findAll();
+        List<SoloMatchResponseDto> matchResponseDtoList = new ArrayList<>();
+        for (SoloMatch match : matches) {
+            matchResponseDtoList.add(new SoloMatchResponseDto(match));
+        }
+
+        return Mono.just(matchResponseDtoList);
+    }
+
+    public Mono<SoloMatchResponseDto> newSoloMatch(SoloMatchRequestDto requestDto) {
+        Optional<Player> redPlayerOptional = playerRepository.findById(requestDto.getRedPlayerId());
+        Optional<Player> bluePlayerOptional = playerRepository.findById(requestDto.getBluePlayerId());
+
+        if (bluePlayerOptional.isPresent() && redPlayerOptional.isPresent()) {
+            Player redPlayer = redPlayerOptional.get();
+            Player bluePlayer = bluePlayerOptional.get();
+
+            SoloMatch match = soloMatchRepository.save(new SoloMatch(new Date(System.currentTimeMillis()), redPlayer, bluePlayer,
+                    requestDto.getRedScore(), requestDto.getBlueScore()));
+
+            match = ratingService.newSoloRating(match);
+
+            match = soloMatchRepository.save(match);
+
+            return Mono.just(new SoloMatchResponseDto(match));
+        }
+
+        return Mono.error(new ApiException(
+                String.format("Either player %s or %s does not exits", requestDto.getRedPlayerId(), requestDto.getBluePlayerId())
+                , HttpStatus.BAD_REQUEST));
     }
 }

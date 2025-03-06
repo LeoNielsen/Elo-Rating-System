@@ -9,15 +9,15 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Rating")
-public class PlayerRating {
+@Table(name = "SoloRating")
+public class SoloPlayerRating {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
-    private Match match;
+    private SoloMatch soloMatch;
 
     @ManyToOne
     private Player player;
@@ -28,8 +28,8 @@ public class PlayerRating {
     @Column(name = "newRating")
     private Integer newRating;
 
-    public PlayerRating(Match match, Player player, Integer oldRating, Integer newRating){
-        this.match = match;
+    public SoloPlayerRating(SoloMatch soloMatch, Player player, Integer oldRating, Integer newRating){
+        this.soloMatch = soloMatch;
         this.player = player;
         this.oldRating = oldRating;
         this.newRating = newRating;

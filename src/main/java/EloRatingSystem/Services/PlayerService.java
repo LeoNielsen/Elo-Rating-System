@@ -31,7 +31,7 @@ public class PlayerService {
 
     public Mono<PlayerResponseDto> newPlayer(PlayerRequestDto requestDto) {
         if (!checkIfPlayerExists(requestDto.getNameTag())) {
-            Player player = new Player(requestDto.getNameTag(), 1200, true);
+            Player player = new Player(requestDto.getNameTag(),1200, 1200, true);
             playerRepository.save(player);
             return Mono.just(new PlayerResponseDto(player));
         }

@@ -1,16 +1,12 @@
 package EloRatingSystem.Services;
 
-import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Models.Match;
-import EloRatingSystem.Models.Player;
-import EloRatingSystem.Models.PlayerRating;
-import EloRatingSystem.Models.Team;
+import EloRatingSystem.Models.*;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.RatingRepository;
-import jakarta.persistence.Id;
+import EloRatingSystem.Reporitories.SoloRatingRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,13 +16,13 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.antlr.v4.runtime.tree.xpath.XPath.findAll;
-
 @Service
 @Slf4j
 public class RatingService {
     @Autowired
     RatingRepository ratingRepository;
+    @Autowired
+    SoloRatingRepository soloRatingRepository;
 
     @Autowired
     PlayerRepository playerRepository;
@@ -98,13 +94,13 @@ public class RatingService {
     }
 
     public double playerOddsTeam(Player player, Team opponentTeam) {
-        double oddsAgainstAttacker = playerOddsSolo(player, opponentTeam.getAttacker());
-        double oddsAgainstDefender = playerOddsSolo(player, opponentTeam.getDefender());
+        double oddsAgainstAttacker = playerOdds(player, opponentTeam.getAttacker());
+        double oddsAgainstDefender = playerOdds(player, opponentTeam.getDefender());
 
         return (oddsAgainstAttacker + oddsAgainstDefender) / 2;
     }
 
-    private double playerOddsSolo(Player player, Player opponent) {
+    private double playerOdds(Player player, Player opponent) {
         return 1 / (1 + (Math.pow(10, (double) (opponent.getRating() - player.getRating()) / 500)));
     }
 
@@ -130,5 +126,36 @@ public class RatingService {
         }
 
         return Mono.just(ratingResponseDtoList);
+    }
+
+    public SoloMatch newSoloRating(SoloMatch match) {
+        Player winner = match.getBlueScore() < match.getRedScore() ? match.getRedPlayer() : match.getBluePlayer();
+        Player loser = match.getBlueScore() < match.getRedScore() ? match.getBluePlayer() : match.getRedPlayer();
+
+        double pointMultiplier = pointMultiplier(match.getRedScore(), match.getBlueScore());
+
+        soloRankingCalculator(winner, loser, pointMultiplier, match);
+
+        return match;
+    }
+
+    private void soloRankingCalculator(Player winner, Player loser, double pointMultiplier, SoloMatch match) {
+        double winnerOdds = playerOddsSolo(winner, loser);
+        double loserOdds = playerOddsSolo(loser, winner);
+
+        newPlayerSoloRating(winner, pointMultiplier, winnerOdds, true, match);
+        newPlayerSoloRating(loser, pointMultiplier, loserOdds, false, match);
+
+        // TODO add wins and lost
+    }
+
+    private double playerOddsSolo(Player player, Player opponent) {
+        return 1 / (1 + (Math.pow(10, (double) (opponent.getSoloRating() - player.getSoloRating()) / 400)));
+    }
+
+    private void newPlayerSoloRating(Player player, double pointMultiplier, double playerOdds, boolean isWinner, SoloMatch match) {
+        int newPlayerRating = (int) Math.round(player.getSoloRating() + ((32 * pointMultiplier) * ((isWinner ? 1.0 : 0.0) - (playerOdds))));
+        soloRatingRepository.save(new SoloPlayerRating(match, player, player.getSoloRating(), newPlayerRating));
+        player.setSoloRating(newPlayerRating);
     }
 }
