@@ -1,23 +1,15 @@
 package EloRatingSystem.Services;
 
-import EloRatingSystem.Dtos.PlayerRequestDto;
-import EloRatingSystem.Dtos.PlayerResponseDto;
-import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
-import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.*;
 import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Models.Match;
-import EloRatingSystem.Models.Player;
-import EloRatingSystem.Models.SoloMatch;
-import EloRatingSystem.Models.Team;
-import EloRatingSystem.Reporitories.MatchRepository;
-import EloRatingSystem.Reporitories.PlayerRepository;
-import EloRatingSystem.Reporitories.SoloMatchRepository;
-import EloRatingSystem.Reporitories.TeamRepository;
+import EloRatingSystem.Models.*;
+import EloRatingSystem.Reporitories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +25,8 @@ public class PlayerService {
     SoloMatchRepository soloMatchRepository;
     @Autowired
     TeamRepository teamRepository;
+    @Autowired
+    RatingRepository ratingRepository;
 
     public Mono<PlayerResponseDto> newPlayer(PlayerRequestDto requestDto) {
         if (!checkIfPlayerExists(requestDto.getNameTag())) {
@@ -90,11 +84,13 @@ public class PlayerService {
     public PlayerStatisticsResponseDto playerStatistics(Player player) {
         List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(player.getId(), player.getId());
 
+        int todayRatingChance = 0;
         int attackerWins = 0;
         int defenderWins = 0;
         int attackerLost = 0;
         int defenderLost = 0;
         int goals = 0;
+        Date date = new Date(System.currentTimeMillis());
         for (Team team : teams) {
             if (team.getAttacker().getId().equals(player.getId())) {
                 attackerWins += team.getWon();
@@ -111,11 +107,20 @@ public class PlayerService {
                 } else {
                     goals += match.getBlueTeamScore();
                 }
+                if (match.getDate().toString().equals(date.toString())) {
+                    List<PlayerRating> ratings = ratingRepository.findAllByMatchId(match.getId());
+                    for (PlayerRating rating : ratings) {
+                        if (rating.getPlayer().getId().equals(player.getId())) {
+                            todayRatingChance += rating.getNewRating() - rating.getOldRating();
+                        }
+                    }
+                }
             }
         }
 
-        return new PlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getRating(), attackerWins, defenderWins, attackerLost, defenderLost, goals);
+        return new PlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getRating(), attackerWins, defenderWins, attackerLost, defenderLost, goals, todayRatingChance);
     }
+
 
     public Mono<SoloPlayerStatisticsResponseDto> getSoloStatistics(Long id) {
         Optional<Player> playerOptional = playerRepository.findById(id);

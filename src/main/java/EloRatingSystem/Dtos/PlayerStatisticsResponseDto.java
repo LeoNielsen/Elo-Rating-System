@@ -13,8 +13,9 @@ public class PlayerStatisticsResponseDto {
     private Integer attackerLost;
     private Integer defenderLost;
     private Integer totalGoals;
+    private Integer todayRatingChance;
 
-    public PlayerStatisticsResponseDto(Long id, String nameTag, Integer rating, Integer attackerWins, Integer defenderWins, Integer attackerLost, Integer defenderLost, Integer totalGoals) {
+    public PlayerStatisticsResponseDto(Long id, String nameTag, Integer rating, Integer attackerWins, Integer defenderWins, Integer attackerLost, Integer defenderLost, Integer totalGoals, Integer todayRatingChance) {
         this.id = id;
         this.nameTag = nameTag;
         this.rating = rating;
@@ -23,5 +24,6 @@ public class PlayerStatisticsResponseDto {
         this.attackerLost = attackerLost;
         this.defenderLost = defenderLost;
         this.totalGoals = totalGoals;
+        this.todayRatingChance = todayRatingChance;
     }
 }

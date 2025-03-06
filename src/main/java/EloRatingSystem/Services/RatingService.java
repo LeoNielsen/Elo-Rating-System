@@ -1,9 +1,11 @@
 package EloRatingSystem.Services;
 
+import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.*;
+import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.RatingRepository;
 import EloRatingSystem.Reporitories.SoloRatingRepository;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +35,7 @@ public class RatingService {
 
         List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
         for (PlayerRating rating : ratings) {
-            ratingResponseDtoList.add(new RatingResponseDto(rating.getMatch().getId(), new PlayerResponseDto(rating.getPlayer()), rating.getOldRating(), rating.getNewRating()));
+            ratingResponseDtoList.add(new RatingResponseDto(rating));
         }
 
         return Mono.just(ratingResponseDtoList);
@@ -122,7 +125,7 @@ public class RatingService {
         List<PlayerRating> ratingList = ratingRepository.findAll();
         List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
         for (PlayerRating rating : ratingList) {
-            ratingResponseDtoList.add(new RatingResponseDto(rating.getMatch().getId(),new PlayerResponseDto(rating.getPlayer()),rating.getOldRating(),rating.getNewRating()));
+            ratingResponseDtoList.add(new RatingResponseDto(rating));
         }
 
         return Mono.just(ratingResponseDtoList);
@@ -173,7 +176,7 @@ public class RatingService {
         List<SoloPlayerRating> ratingList = soloRatingRepository.findAll();
         List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
         for (SoloPlayerRating rating : ratingList) {
-            ratingResponseDtoList.add(new RatingResponseDto(rating.getSoloMatch().getId(),new PlayerResponseDto(rating.getPlayer()),rating.getOldRating(),rating.getNewRating()));
+            ratingResponseDtoList.add(new RatingResponseDto(rating.getSoloMatch().getId(), new PlayerResponseDto(rating.getPlayer()), rating.getOldRating(), rating.getNewRating()));
         }
 
         return Mono.just(ratingResponseDtoList);
