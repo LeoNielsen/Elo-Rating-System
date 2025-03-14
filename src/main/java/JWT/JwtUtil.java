@@ -1,13 +1,12 @@
 package JWT;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
+import EloRatingSystem.Dtos.UserDto;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.InitializingBean;
-import EloRatingSystem.Models.User;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,7 +26,7 @@ public class JwtUtil implements InitializingBean {
         System.out.println("Secret key rotated: " + new Date());
     }
 
-    public String createJWT(User user) {
+    public String createJWT(UserDto user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim("role", user.getRole().name())

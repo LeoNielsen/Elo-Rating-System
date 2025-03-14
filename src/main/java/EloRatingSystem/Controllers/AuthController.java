@@ -1,69 +1,62 @@
 package EloRatingSystem.Controllers;
 
+import EloRatingSystem.Dtos.UserDto;
+import EloRatingSystem.Dtos.UserRequestDto;
+import EloRatingSystem.Dtos.UserResponseDto;
 import EloRatingSystem.Models.User;
-import EloRatingSystem.Reporitories.UserRepository;
 import EloRatingSystem.Services.UserService;
 import EloRatingSystem.UserRoles.Role;
 import JWT.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
-    private UserService userService;
+    public UserService userService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    public JwtUtil jwtUtil;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    public AuthenticationManager authenticationManager;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    // Register endpoint
+    // Register a user
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) throws Exception {
-        // Register the user with 'ROLE_USER'
-        User savedUser = userService.registerUser(user, Role.ROLE_USER);
-        return ResponseEntity.ok(savedUser);
+    public Mono<ResponseEntity<UserResponseDto>> register(@RequestBody User user) {
+        return userService.registerUser(user, Role.ROLE_USER)
+                .map(registeredUser -> {
+                    // Generate JWT token after registration
+                    String token = jwtUtil.createJWT(registeredUser);
+                    UserDto userDto = new UserDto(registeredUser.getUsername(), registeredUser.getRole());
+                    UserResponseDto responseDto = new UserResponseDto(token, userDto);
+                    return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+                });
     }
 
-    // Login endpoint
+    // Login a user
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        // Authenticate user using Spring Security's AuthenticationManager
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.get("username"), request.get("password"))
-            );
-
-            // Set the authentication in the security context
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Find the user from the repository
-            User user = userRepository.findByUsername(request.get("username"))
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            // Generate the JWT token
-            String token = jwtUtil.createJWT(user);
-
-            // Return the token and role
-            return ResponseEntity.ok(Map.of("token", token, "role", user.getRole()));
-
-        } catch (Exception e) {
-            // Handle authentication error (incorrect username/password)
-            return ResponseEntity.status(401).body("Invalid username or password");
-        }
+    public Mono<ResponseEntity<UserResponseDto>> login(@RequestBody UserRequestDto request) {
+        return Mono.fromCallable(() -> authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())))
+                .doOnNext(authentication -> SecurityContextHolder.getContext().setAuthentication(authentication))
+                .flatMap(authentication -> Mono.fromCallable(() -> userService.findByUsername(request.getUsername())))
+                .map(userOptional -> userOptional.map(user -> {
+                    String token = jwtUtil.createJWT(new UserDto(user));
+                    UserDto userDto = new UserDto(user.getUsername(), user.getRole());
+                    UserResponseDto responseDto = new UserResponseDto(token, userDto);
+                    return ResponseEntity.ok(responseDto);
+                }).orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null)));
     }
 }
