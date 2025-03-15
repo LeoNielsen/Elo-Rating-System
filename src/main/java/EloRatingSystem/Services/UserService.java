@@ -1,52 +1,50 @@
 package EloRatingSystem.Services;
 
-import EloRatingSystem.Models.User;
 import EloRatingSystem.Dtos.UserDto;
+import EloRatingSystem.Dtos.UserRequestDto;
+import EloRatingSystem.Dtos.UserResponseDto;
+import EloRatingSystem.Models.User;
 import EloRatingSystem.Reporitories.UserRepository;
 import EloRatingSystem.UserRoles.Role;
-import JWT.JwtUtil;
+import EloRatingSystem.Util.JwtUtil;
+import EloRatingSystem.Util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import java.util.Optional;
 
 @Service
 @Slf4j
 public class UserService {
     @Autowired
-    public UserRepository userRepository;
-
+    UserRepository userRepository;
     @Autowired
-    public JwtUtil jwtUtil;
+    JwtUtil jwtUtil;
+    @Autowired
+    PasswordUtil passwordUtil;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public Mono<UserResponseDto> registerUser(UserRequestDto requestDto) {
+        if (requestDto.getUsername() == null || requestDto.getPassword() == null) {
+            return Mono.error(new IllegalArgumentException("Username and password cannot be null."));
+        }
 
-    public Mono<UserDto> registerUser(User user, Role role) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(role);
-
-        return Mono.fromCallable(() -> userRepository.save(user))
-                .doOnSuccess(savedUser -> log.info("Generated JWT for user {}: {}", savedUser.getUsername(), jwtUtil.createJWT(new UserDto(savedUser))))
-                .map(savedUser -> new UserDto(savedUser.getUsername(), savedUser.getRole()));
+        String encodedPassword = passwordUtil.encodePassword(requestDto.getPassword());
+        User newUser = new User();
+        newUser.setUsername(requestDto.getUsername());
+        newUser.setPassword(encodedPassword);
+        newUser.setRole(Role.USER);
+        return Mono.just(new UserResponseDto(jwtUtil.generateToken(new UserDto(newUser)), new UserDto(userRepository.save(newUser))));
     }
 
-    public Mono<Void> createAdminIfNotExists() {
-        return Mono.fromCallable(() -> userRepository.findByUsername("admin"))
-                .filter(Optional::isEmpty)
-                .flatMap(empty -> Mono.fromRunnable(() -> {
-                    User admin = new User();
-                    admin.setUsername("admin");
-                    admin.setPassword(passwordEncoder.encode("admin123"));
-                    admin.setRole(Role.ROLE_ADMIN);
-                    userRepository.save(admin);
-                    log.info("Generated JWT for admin: {}", jwtUtil.createJWT(new UserDto(admin)));
-                }))
-                .then();
+    public Mono<UserResponseDto> loginUser(UserRequestDto requestDto) {
+        if (requestDto.getUsername() == null || requestDto.getPassword() == null) {
+            return Mono.error(new IllegalArgumentException("Username and password cannot be null."));
+        }
+
+        return Mono.just(userRepository.findByUsername(requestDto.getUsername())
+                .filter(user -> passwordUtil.matches(requestDto.getPassword(), user.getPassword()))
+                .map(user -> new UserResponseDto(jwtUtil.generateToken(new UserDto(user)), new UserDto(user)))
+                .orElseThrow());
     }
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
 }

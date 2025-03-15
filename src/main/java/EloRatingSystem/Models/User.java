@@ -3,7 +3,6 @@ package EloRatingSystem.Models;
 import EloRatingSystem.UserRoles.Role;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
 @Data
@@ -13,7 +12,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "userName", nullable = false, unique = true)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", nullable = false)
@@ -22,8 +21,5 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public void setPassword(String rawPassword) {
-        this.password = new BCryptPasswordEncoder().encode(rawPassword);
-    }
 }
 
