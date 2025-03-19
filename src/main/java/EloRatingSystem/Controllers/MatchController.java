@@ -7,6 +7,7 @@ import EloRatingSystem.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Services.MatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -26,6 +27,7 @@ public class MatchController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<List<MatchResponseDto>> getAll() {
         return matchService.getAllMatches();
     }

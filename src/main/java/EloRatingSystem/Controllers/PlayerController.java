@@ -8,6 +8,7 @@ import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Services.PlayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -57,11 +58,13 @@ public class PlayerController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('USER')")
     public Mono<List<PlayerResponseDto>> getAll() {
         return playerService.getAllPlayers();
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     public Mono<PlayerResponseDto> newPlayer(@RequestBody PlayerRequestDto requestDto) {
         return playerService.newPlayer(requestDto);
     }

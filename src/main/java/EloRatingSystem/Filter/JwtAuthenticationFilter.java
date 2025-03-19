@@ -1,6 +1,5 @@
 package EloRatingSystem.Filter;
 
-import EloRatingSystem.UserRoles.Role;
 import EloRatingSystem.Util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,37 +28,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        System.out.println("JwtAuthenticationFilter is running for " + request.getRequestURI());
         String token = extractToken(request);
-        System.out.println("Extracted Token: " + token);
-
         if (token != null) {
             String username = jwtUtil.extractUsername(token);
-            System.out.println("Extracted Username: " + username);
-
-            String role = jwtUtil.extractRole(token);  // Extract the single role from the token
-            System.out.println("Role from Token: " + role);
+            String role = jwtUtil.extractRole(token);
 
             if (username != null && jwtUtil.validateToken(token, username)) {
-                // Convert the role to a GrantedAuthority
-                List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
-                // Ensure role is correctly set
-
-                // Create the authentication object with the username and authority
+                List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_"+role));
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
-
-                // Set the details for the authentication object
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Set the authentication in the SecurityContext
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                System.out.println("Authentication successful for user: " + username);
-                System.out.println("Authorities: " + authentication.getAuthorities());
-
-                System.out.println("Expected Authority: " + Role.USER.name());
-                System.out.println("Actual Authorities: " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
-
             } else {
                 System.out.println("Token validation failed.");
             }
@@ -69,10 +47,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Continue with the next filter in the chain
         filterChain.doFilter(request, response);
-
-// Check if authentication is still set after the filter chain
-        System.out.println("After filter chain - Auth: " + SecurityContextHolder.getContext().getAuthentication());
-
     }
 
 
@@ -81,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         System.out.println(authHeader);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);  // Skip "Bearer " (7 characters)
+            return authHeader.substring(7);
         }
         return null;
     }
