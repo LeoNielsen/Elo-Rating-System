@@ -17,15 +17,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    public static final String ADMIN = "admin";
-    public static final String USER = "user";
     private final JwtConverter jwtConverter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((auth) ->
                 auth
-                        .requestMatchers("/admin/**").hasRole(ADMIN)
-                        .requestMatchers("/csv/**").hasRole(ADMIN)
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated());
         http

@@ -4,11 +4,13 @@ import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Services.MatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin")
 @Slf4j
+@PreAuthorize("hasRole('admin')")
 public class AdminController {
     @Autowired
     MatchService matchService;
@@ -27,7 +29,7 @@ public class AdminController {
 
     @GetMapping("/test")
     public String secured(){
-        return "Hello ! this is a private page !";
+        return "Hello! From Admin";
     }
 
     // Only works on players that haven't played any games

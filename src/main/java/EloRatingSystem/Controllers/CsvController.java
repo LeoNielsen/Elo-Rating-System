@@ -8,6 +8,7 @@ import EloRatingSystem.Services.PlayerService;
 import EloRatingSystem.Services.TeamService;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/csv")
+@PreAuthorize("hasRole('admin')")
 public class CsvController {
 
     @Autowired
