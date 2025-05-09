@@ -66,15 +66,4 @@ public class PlayerController {
         return playerService.newPlayer(requestDto);
     }
 
-    @DeleteMapping("/all")
-    public void deletePlayers() {
-        playerRepository.deleteAll();
-    }
-
-    // Only works on players that haven't played any games
-    @DeleteMapping("/{id}")
-    public void deletePlayerById(@PathVariable Long id) {
-        playerRepository.deleteById(id);
-    }
-
 }

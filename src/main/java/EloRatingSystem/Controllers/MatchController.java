@@ -50,14 +50,6 @@ public class MatchController {
         return matchService.newSoloMatch(requestDto);
     }
 
-    @DeleteMapping("/latest")
-    public void deleteLatestMatch() {
-        matchService.deleteLatestMatch();
-    }
 
-    @DeleteMapping("/solo/latest")
-    public void deleteLatestSoloMatch() {
-        matchService.deleteLatestSoloMatch();
-    }
 
 }
