@@ -1,5 +1,6 @@
 package EloRatingSystem.Reporitories;
 
+import EloRatingSystem.Models.PlayerRating;
 import EloRatingSystem.Models.SoloPlayerRating;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,4 +11,6 @@ import java.util.List;
 public interface SoloRatingRepository extends JpaRepository<SoloPlayerRating,Long> {
 
     List<SoloPlayerRating> findAllBySoloMatchId(Long id);
+    PlayerRating findTopMaxNewRatingByPlayerId(Long id);
+    PlayerRating findTopMinNewRatingByPlayerId(Long id);
 }

@@ -10,4 +10,6 @@ import java.util.List;
 public interface RatingRepository extends JpaRepository<PlayerRating,Long> {
 
     List<PlayerRating> findAllByMatchId(Long id);
+    PlayerRating findTopMaxNewRatingByPlayerId(Long id);
+    PlayerRating findTopMinNewRatingByPlayerId(Long id);
 }

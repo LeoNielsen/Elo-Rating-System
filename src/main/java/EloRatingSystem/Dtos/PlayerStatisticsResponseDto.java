@@ -1,8 +1,10 @@
 package EloRatingSystem.Dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class PlayerStatisticsResponseDto {
 
     private Long id;
@@ -14,16 +16,8 @@ public class PlayerStatisticsResponseDto {
     private Integer defenderLost;
     private Integer totalGoals;
     private Integer todayRatingChance;
-
-    public PlayerStatisticsResponseDto(Long id, String nameTag, Integer rating, Integer attackerWins, Integer defenderWins, Integer attackerLost, Integer defenderLost, Integer totalGoals, Integer todayRatingChance) {
-        this.id = id;
-        this.nameTag = nameTag;
-        this.rating = rating;
-        this.attackerWins = attackerWins;
-        this.defenderWins = defenderWins;
-        this.attackerLost = attackerLost;
-        this.defenderLost = defenderLost;
-        this.totalGoals = totalGoals;
-        this.todayRatingChance = todayRatingChance;
-    }
+    private Integer highestELO;
+    private Integer lowestELO;
+    private Integer longestWinStreak;
+    private Integer currentWinStreak;
 }

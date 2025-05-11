@@ -92,6 +92,10 @@ public class PlayerService {
         int attackerLost = 0;
         int defenderLost = 0;
         int goals = 0;
+        int highestELO = 1200;
+        int lowestELO = 1200;
+        int longestWinStreak = 0;
+        int currentWinStreak = 0;
         Date date = new Date(System.currentTimeMillis());
         for (Team team : teams) {
             if (team.getAttacker().getId().equals(player.getId())) {
@@ -102,7 +106,14 @@ public class PlayerService {
                 defenderLost += team.getLost();
             }
 
+
             List<Match> matches = matchRepository.findAllByRedTeamIdOrBlueTeamId(team.getId(), team.getId());
+
+            if(!matches.isEmpty()){
+                highestELO = ratingRepository.findTopMaxNewRatingByPlayerId(player.getId()).getNewRating();
+                lowestELO = ratingRepository.findTopMinNewRatingByPlayerId(player.getId()).getNewRating();
+            }
+
             for (Match match : matches) {
                 if (match.getRedTeam().getAttacker().getId().equals(player.getId()) || match.getRedTeam().getDefender().getId().equals(player.getId())) {
                     goals += match.getRedTeamScore();
@@ -120,7 +131,7 @@ public class PlayerService {
             }
         }
 
-        return new PlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getRating(), attackerWins, defenderWins, attackerLost, defenderLost, goals, todayRatingChance);
+        return new PlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getRating(), attackerWins, defenderWins, attackerLost, defenderLost, goals, todayRatingChance,highestELO,lowestELO,longestWinStreak,currentWinStreak);
     }
 
 
@@ -139,9 +150,17 @@ public class PlayerService {
         int lost = 0;
         int goals = 0;
         int todayRatingChance = 0;
+        int highestELO = 0;
+        int lowestELO = 0;
+        int longestWinStreak = 1200;
+        int currentWinStreak = 1200;
 
         Date date = new Date(System.currentTimeMillis());
         List<SoloMatch> matches = soloMatchRepository.findAllByRedPlayerIdOrBluePlayerId(player.getId(), player.getId());
+        if(!matches.isEmpty()){
+            highestELO = ratingRepository.findTopMaxNewRatingByPlayerId(player.getId()).getNewRating();
+            lowestELO = ratingRepository.findTopMinNewRatingByPlayerId(player.getId()).getNewRating();
+        }
         for (SoloMatch match : matches) {
             if (match.getRedPlayer().getId().equals(player.getId())) {
                 goals += match.getRedScore();
@@ -167,7 +186,7 @@ public class PlayerService {
                 }
             }
         }
-        return new SoloPlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getSoloRating(), wins, lost, goals,todayRatingChance);
+        return new SoloPlayerStatisticsResponseDto(player.getId(), player.getNameTag(), player.getSoloRating(), wins, lost, goals,todayRatingChance,highestELO,lowestELO,longestWinStreak,currentWinStreak);
 
     }
 
@@ -181,4 +200,6 @@ public class PlayerService {
 
         return Mono.just(playerStatistics);
     }
+
+
 }
