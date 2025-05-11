@@ -110,8 +110,8 @@ public class PlayerService {
             List<Match> matches = matchRepository.findAllByRedTeamIdOrBlueTeamId(team.getId(), team.getId());
 
             if(!matches.isEmpty()){
-                highestELO = ratingRepository.findTopMaxNewRatingByPlayerId(player.getId()).getNewRating();
-                lowestELO = ratingRepository.findTopMinNewRatingByPlayerId(player.getId()).getNewRating();
+                highestELO = ratingRepository.findTopMaxNewRatingByPlayerId(player.getId()).orElseThrow().getNewRating();
+                lowestELO = ratingRepository.findTopMinNewRatingByPlayerId(player.getId()).orElseThrow().getNewRating();
             }
 
             for (Match match : matches) {
@@ -158,8 +158,8 @@ public class PlayerService {
         Date date = new Date(System.currentTimeMillis());
         List<SoloMatch> matches = soloMatchRepository.findAllByRedPlayerIdOrBluePlayerId(player.getId(), player.getId());
         if(!matches.isEmpty()){
-            highestELO = ratingRepository.findTopMaxNewRatingByPlayerId(player.getId()).getNewRating();
-            lowestELO = ratingRepository.findTopMinNewRatingByPlayerId(player.getId()).getNewRating();
+            highestELO = soloRatingRepository.findTopMaxNewRatingByPlayerId(player.getId()).orElseThrow().getNewRating();
+            lowestELO = soloRatingRepository.findTopMinNewRatingByPlayerId(player.getId()).orElseThrow().getNewRating();
         }
         for (SoloMatch match : matches) {
             if (match.getRedPlayer().getId().equals(player.getId())) {
