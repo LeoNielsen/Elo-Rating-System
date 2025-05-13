@@ -87,9 +87,5 @@ public class MatchService {
         playerService.regeneratePlayerStatistics(loser.getDefender());
         playerService.regeneratePlayerStatistics(winner.getAttacker());
         playerService.regeneratePlayerStatistics(loser.getAttacker());
-
-
     }
-
-
 }
