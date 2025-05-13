@@ -26,6 +26,8 @@ public class MatchService {
     TeamRepository teamRepository;
     @Autowired
     RatingService ratingService;
+    @Autowired
+    PlayerService playerService;
 
     public Mono<List<MatchResponseDto>> getAllMatches() {
         List<Match> matches = matchRepository.findAll();
@@ -80,6 +82,13 @@ public class MatchService {
         teamRepository.save(loser);
 
         matchRepository.deleteById(match.getId());
+
+        playerService.regeneratePlayerStatistics(winner.getDefender());
+        playerService.regeneratePlayerStatistics(loser.getDefender());
+        playerService.regeneratePlayerStatistics(winner.getAttacker());
+        playerService.regeneratePlayerStatistics(loser.getAttacker());
+
+
     }
 
 

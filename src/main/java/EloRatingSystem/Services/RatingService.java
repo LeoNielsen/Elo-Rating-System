@@ -28,8 +28,7 @@ public class RatingService {
     PlayerStatsRepository playerStatsRepository;
     @Autowired
     MatchRepository matchRepository;
-    @Autowired
-    PlayerService playerService;
+
 
     public Mono<List<RatingResponseDto>> getAllRatings() {
         List<PlayerRating> ratingList = ratingRepository.findAll();
@@ -43,16 +42,6 @@ public class RatingService {
 
 
 
-    public Mono<List<ChartDataDto>> getChartData() {
-        List<PlayerRating> ratings = ratingRepository.findAll();
-        List<ChartDataDto> chartDataDtoList = new ArrayList<>();
-        for (PlayerRating rating : ratings) {
-            Match match = matchRepository.findById(rating.getMatch().getId()).orElseThrow();
-            chartDataDtoList.add(new ChartDataDto(match.getId(), new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(), match.getDate()));
-        }
-        return Mono.just(chartDataDtoList);
-    }
-
     public Mono<List<RatingResponseDto>> getRatingByMatchId(Long id) {
         List<PlayerRating> ratings = ratingRepository.findAllByMatchId(id);
 
@@ -62,6 +51,16 @@ public class RatingService {
         }
 
         return Mono.just(ratingResponseDtoList);
+    }
+
+    public Mono<List<ChartDataDto>> getChartData() {
+        List<PlayerRating> ratings = ratingRepository.findAll();
+        List<ChartDataDto> chartDataDtoList = new ArrayList<>();
+        for (PlayerRating rating : ratings) {
+            Match match = matchRepository.findById(rating.getMatch().getId()).orElseThrow();
+            chartDataDtoList.add(new ChartDataDto(match.getId(), new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(), match.getDate()));
+        }
+        return Mono.just(chartDataDtoList);
     }
 
     public Match newRating(Match match) {
@@ -196,7 +195,6 @@ public class RatingService {
             updatePlayerDailyStats(rating.getOldRating() - rating.getNewRating(), player);
             playerRepository.save(player);
             ratingRepository.deleteById(rating.getId());
-            playerService.regeneratePlayerStatistics(player);
         }
     }
 

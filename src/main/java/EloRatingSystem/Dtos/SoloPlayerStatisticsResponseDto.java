@@ -1,5 +1,7 @@
 package EloRatingSystem.Dtos;
 
+import EloRatingSystem.Models.Player;
+import EloRatingSystem.Models.SoloPlayerStats;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -12,11 +14,39 @@ public class SoloPlayerStatisticsResponseDto {
     private Integer wins;
     private Integer lost;
     private Integer totalGoals;
-    private Integer todayRatingChance;
     private Integer highestELO;
     private Integer lowestELO;
     private Integer longestWinStreak;
     private Integer currentWinStreak;
+    private Integer todayRatingChance;
 
+
+    public SoloPlayerStatisticsResponseDto(Player player, SoloPlayerStats playerStats, int todayRatingChance) {
+        this.id = player.getId();
+        this.nameTag = player.getNameTag();
+        this.rating = player.getSoloRating();
+        this.wins = playerStats.getWins();
+        this.lost = playerStats.getLost();
+        this.totalGoals = playerStats.getGoals();
+        this.highestELO = playerStats.getHighestELO();
+        this.lowestELO = playerStats.getLowestELO();
+        this.longestWinStreak = playerStats.getLongestWinStreak();
+        this.currentWinStreak = playerStats.getCurrentWinStreak();
+        this.todayRatingChance = todayRatingChance;
+    }
+
+    public SoloPlayerStatisticsResponseDto(Player player, int todayRatingChance) {
+        this.id = player.getId();
+        this.nameTag = player.getNameTag();
+        this.rating = player.getSoloRating();
+        this.wins = 0;
+        this.lost = 0;
+        this.totalGoals = 0;
+        this.highestELO = 1200;
+        this.lowestELO = 1200;
+        this.longestWinStreak = 0;
+        this.currentWinStreak = 0;
+        this.todayRatingChance = todayRatingChance;
+    }
 
 }

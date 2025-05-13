@@ -25,6 +25,8 @@ public class SoloMatchService {
     PlayerRepository playerRepository;
     @Autowired
     SoloRatingService soloRatingService;
+    @Autowired
+    PlayerService playerService;
 
     public Mono<List<SoloMatchResponseDto>> getAllSoloMatches() {
         List<SoloMatch> matches = soloMatchRepository.findAll();
@@ -70,6 +72,12 @@ public class SoloMatchService {
         SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
         soloRatingService.deleteRatingsBySoloMatch(match.getId());
 
+        Player redPlayer = match.getRedPlayer();
+        Player bluePlayer = match.getBluePlayer();
+
         soloMatchRepository.deleteById(match.getId());
+
+        playerService.regenerateSoloPlayerStatistics(redPlayer);
+        playerService.regenerateSoloPlayerStatistics(bluePlayer);
     }
 }

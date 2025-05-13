@@ -38,4 +38,20 @@ public class PlayerStatisticsResponseDto {
         this.currentWinStreak = playerStats.getCurrentWinStreak();
         this.todayRatingChance = todayRatingChance;
     }
+
+    public PlayerStatisticsResponseDto(Player player, int todayRatingChance) {
+        this.id = player.getId();
+        this.nameTag = player.getNameTag();
+        this.rating = player.getRating();
+        this.attackerWins = 0;
+        this.defenderWins = 0;
+        this.attackerLost = 0;
+        this.defenderLost = 0;
+        this.totalGoals = 0;
+        this.highestELO = 1200;
+        this.lowestELO = 1200;
+        this.longestWinStreak = 0;
+        this.currentWinStreak = 0;
+        this.todayRatingChance = todayRatingChance;
+    }
 }

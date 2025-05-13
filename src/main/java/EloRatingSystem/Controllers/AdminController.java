@@ -1,6 +1,7 @@
 package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.MatchRequestDto;
+import EloRatingSystem.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Dtos.TeamRequestDto;
 import EloRatingSystem.Dtos.TeamResponseDto;
 import EloRatingSystem.Models.Player;
@@ -65,6 +66,11 @@ public class AdminController {
         playerService.playerStatisticsGenAll();
     }
 
+    @GetMapping("/solo/player/statgen")
+    public void soloPlayerStatGen() {
+        playerService.regenerateSoloPlayerStatisticsAll();
+    }
+
     @GetMapping("/match/gen")
     public void matchGen() {
         List<Player> players = playerRepository.findAll();
@@ -77,6 +83,17 @@ public class AdminController {
             TeamResponseDto team2 = teamService.newTeam(new TeamRequestDto(players.get(3).getId(), players.get(4).getId())).block();
             matchService.newMatch(new MatchRequestDto(team1.getId(), team2.getId(), 10, rand.nextInt(0, 10)));
         }
+    }
 
+    @GetMapping("/solo/match/gen")
+    public void matchSoloGen() {
+        List<Player> players = playerRepository.findAll();
+        Random rand = new Random();
+
+        int x = 10;
+        for (int i = 0; i < x; i++) {
+            Collections.shuffle(players);
+            soloMatchService.newSoloMatch(new SoloMatchRequestDto(players.get(0).getId(), players.get(1).getId(), 10, rand.nextInt(0, 10)));
+        }
     }
 }
