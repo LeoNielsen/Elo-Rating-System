@@ -24,10 +24,25 @@ public class PlayerController {
     @Autowired
     PlayerService playerService;
 
+    @GetMapping("/all")
+    public Mono<List<PlayerResponseDto>> getAll() {
+        return playerService.getAllPlayers();
+    }
+
     @GetMapping("/id/{id}")
     public Mono<PlayerResponseDto> getById(@PathVariable Long id) {
         // TODO: make service method
         return Mono.just(new PlayerResponseDto(playerRepository.findById(id).orElseThrow()));
+    }
+
+    @GetMapping("/{nameTag}")
+    public Mono<PlayerResponseDto> getByNameTag(@PathVariable String nameTag) {
+        return playerService.getByNameTag(nameTag);
+    }
+
+    @PostMapping
+    public Mono<PlayerResponseDto> newPlayer(@RequestBody PlayerRequestDto requestDto) {
+        return playerService.newPlayer(requestDto);
     }
 
     @GetMapping("/statistics/{id}")
@@ -50,20 +65,5 @@ public class PlayerController {
         return playerService.getAllSoloStatistics();
     }
 
-
-    @GetMapping("/{nameTag}")
-    public Mono<PlayerResponseDto> getByNameTag(@PathVariable String nameTag) {
-            return playerService.getByNameTag(nameTag);
-    }
-
-    @GetMapping("/all")
-    public Mono<List<PlayerResponseDto>> getAll() {
-        return playerService.getAllPlayers();
-    }
-
-    @PostMapping
-    public Mono<PlayerResponseDto> newPlayer(@RequestBody PlayerRequestDto requestDto) {
-        return playerService.newPlayer(requestDto);
-    }
 
 }
