@@ -30,7 +30,7 @@ public class MatchService {
     PlayerService playerService;
 
     public Mono<List<MatchResponseDto>> getAllMatches() {
-        List<Match> matches = matchRepository.findAll();
+        List<Match> matches = matchRepository.findTop100ByOrderByIdDesc();
         List<MatchResponseDto> matchResponseDtoList = new ArrayList<>();
         for (Match match : matches) {
             matchResponseDtoList.add(new MatchResponseDto(match));
