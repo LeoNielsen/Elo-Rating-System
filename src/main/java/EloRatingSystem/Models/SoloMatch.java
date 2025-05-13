@@ -19,7 +19,7 @@ public class SoloMatch {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     private Date date;
 
     @ManyToOne (cascade = CascadeType.PERSIST)
@@ -28,10 +28,10 @@ public class SoloMatch {
     @ManyToOne (cascade = CascadeType.PERSIST)
     private Player bluePlayer;
 
-    @Column(name = "redScore")
+    @Column(name = "redScore", nullable = false)
     private Integer redScore;
 
-    @Column(name = "blueScore")
+    @Column(name = "blueScore", nullable = false)
     private Integer blueScore;
 
     public SoloMatch(Date date, Player redPlayer, Player bluePlayer, Integer redTeamScore, Integer blueTeamScore) {

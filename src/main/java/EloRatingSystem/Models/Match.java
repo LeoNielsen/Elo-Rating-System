@@ -15,26 +15,25 @@ import java.sql.Date;
 public class Match {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     private Date date;
 
-    @ManyToOne (cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private Team redTeam;
 
-    @ManyToOne (cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private Team blueTeam;
 
-    @Column(name = "redTeamScore")
+    @Column(name = "redTeamScore", nullable = false)
     private Integer redTeamScore;
 
-    @Column(name = "blueTeamScore")
+    @Column(name = "blueTeamScore", nullable = false)
     private Integer blueTeamScore;
 
-    public Match(Date date, Team redTeam, Team blueTeam, Integer redTeamScore, Integer blueTeamScore){
+    public Match(Date date, Team redTeam, Team blueTeam, Integer redTeamScore, Integer blueTeamScore) {
         this.date = date;
         this.redTeam = redTeam;
         this.blueTeam = blueTeam;

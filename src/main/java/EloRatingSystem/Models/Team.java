@@ -23,10 +23,10 @@ public class Team {
     @ManyToOne
     private Player defender;
 
-    @Column(name = "won")
+    @Column(name = "won", nullable = false)
     private Integer won;
 
-    @Column(name = "lost")
+    @Column(name = "lost", nullable = false)
     private Integer lost;
 
     public Team(Player attacker, Player defender){

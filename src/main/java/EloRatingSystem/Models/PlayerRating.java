@@ -22,10 +22,10 @@ public class PlayerRating {
     @ManyToOne
     private Player player;
 
-    @Column(name = "oldRating")
+    @Column(name = "oldRating", nullable = false)
     private Integer oldRating;
 
-    @Column(name = "newRating")
+    @Column(name = "newRating", nullable = false)
     private Integer newRating;
 
     public PlayerRating(Match match, Player player, Integer oldRating, Integer newRating){
