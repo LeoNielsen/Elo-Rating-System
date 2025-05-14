@@ -1,6 +1,6 @@
-package EloRatingSystem.Reporitories;
+package EloRatingSystem.Reporitories.DailyStats;
 
-import EloRatingSystem.Models.SoloPlayerDailyStats;
+import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

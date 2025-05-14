@@ -7,6 +7,7 @@ import EloRatingSystem.Models.Match;
 import EloRatingSystem.Models.Team;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.TeamRepository;
+import EloRatingSystem.Services.RatingServices.RatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

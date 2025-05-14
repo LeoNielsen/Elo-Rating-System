@@ -2,8 +2,8 @@ package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
-import EloRatingSystem.Services.RatingService;
-import EloRatingSystem.Services.SoloRatingService;
+import EloRatingSystem.Services.RatingServices.RatingService;
+import EloRatingSystem.Services.RatingServices.SoloRatingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

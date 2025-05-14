@@ -7,6 +7,7 @@ import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.SoloMatch;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.SoloMatchRepository;
+import EloRatingSystem.Services.RatingServices.SoloRatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

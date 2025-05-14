@@ -1,5 +1,6 @@
-package EloRatingSystem.Models;
+package EloRatingSystem.Models.DailyStats;
 
+import EloRatingSystem.Models.Player;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,8 +12,7 @@ import java.sql.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "PlayerDailyStats")
-public class PlayerDailyStats {
+public abstract class DailyStatsAbstract {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -23,7 +23,7 @@ public class PlayerDailyStats {
     @Column(name = "ratingChange", nullable = false)
     private int ratingChange;
 
-    public PlayerDailyStats(Player player, Date date, int ratingChange) {
+    public DailyStatsAbstract(Player player, Date date, int ratingChange) {
         this.player = player;
         this.date = date;
         this.ratingChange = ratingChange;

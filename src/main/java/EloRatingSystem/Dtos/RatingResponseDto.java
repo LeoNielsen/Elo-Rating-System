@@ -1,6 +1,8 @@
 package EloRatingSystem.Dtos;
 
+import EloRatingSystem.Models.MonthlyRating;
 import EloRatingSystem.Models.PlayerRating;
+import EloRatingSystem.Models.SoloPlayerRating;
 import lombok.Data;
 @Data
 public class RatingResponseDto {
@@ -23,5 +25,18 @@ public class RatingResponseDto {
         this.oldRating = rating.getOldRating();
         this.newRating = rating.getNewRating();
     }
+    public RatingResponseDto(MonthlyRating rating) {
+        this.matchId = rating.getMatch().getId();
+        this.player = new PlayerResponseDto(rating.getPlayer());
+        this.oldRating = rating.getOldRating();
+        this.newRating = rating.getNewRating();
+    }
+    public RatingResponseDto(SoloPlayerRating rating) {
+        this.matchId = rating.getSoloMatch().getId();
+        this.player = new PlayerResponseDto(rating.getPlayer());
+        this.oldRating = rating.getOldRating();
+        this.newRating = rating.getNewRating();
+    }
+
 
 }

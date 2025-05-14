@@ -1,16 +1,23 @@
-package EloRatingSystem.Services;
+package EloRatingSystem.Services.RatingServices;
 
 import EloRatingSystem.Dtos.ChartDataDto;
 import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
-import EloRatingSystem.Models.*;
-import EloRatingSystem.Reporitories.*;
+import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
+import EloRatingSystem.Models.Player;
+import EloRatingSystem.Models.SoloMatch;
+import EloRatingSystem.Models.SoloPlayerRating;
+import EloRatingSystem.Models.SoloPlayerStats;
+import EloRatingSystem.Reporitories.DailyStats.SoloPlayerDailyStatsRepository;
+import EloRatingSystem.Reporitories.PlayerRepository;
+import EloRatingSystem.Reporitories.SoloMatchRepository;
+import EloRatingSystem.Reporitories.SoloPlayerStatsRepository;
+import EloRatingSystem.Reporitories.SoloRatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,67 +35,90 @@ public class SoloRatingService {
     SoloPlayerDailyStatsRepository soloPlayerDailyStatsRepository;
     @Autowired
     SoloPlayerStatsRepository soloPlayerStatsRepository;
+    @Autowired
+    RatingUtils ratingUtils;
 
     public Mono<List<RatingResponseDto>> getSoloRatingBySoloMatchId(Long id) {
         List<SoloPlayerRating> ratings = soloRatingRepository.findAllBySoloMatchId(id);
-
-        List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
-        for (SoloPlayerRating rating : ratings) {
-            ratingResponseDtoList.add(new RatingResponseDto(rating.getSoloMatch().getId(), new PlayerResponseDto(rating.getPlayer()), rating.getOldRating(), rating.getNewRating()));
-        }
-        return Mono.just(ratingResponseDtoList);
+        List<RatingResponseDto> dtoList = ratings.stream()
+                .map(RatingResponseDto::new)
+                .toList();
+        return Mono.just(dtoList);
     }
 
     public Mono<List<ChartDataDto>> getSoloChartData() {
         List<SoloPlayerRating> ratings = soloRatingRepository.findAll();
-        List<ChartDataDto> chartDataDtoList = new ArrayList<>();
-        for (SoloPlayerRating rating : ratings) {
-            SoloMatch match = soloMatchRepository.findById(rating.getSoloMatch().getId()).orElseThrow();
-            chartDataDtoList.add(new ChartDataDto(match.getId(), new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(), match.getDate()));
-        }
+        List<ChartDataDto> chartDataDtoList = ratings.stream()
+                .map(rating -> {
+                    SoloMatch match = soloMatchRepository.findById(rating.getSoloMatch().getId()).orElseThrow();
+                    return new ChartDataDto(match.getId(), new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(), match.getDate());
+                })
+                .toList();
         return Mono.just(chartDataDtoList);
     }
 
     public SoloMatch newSoloRating(SoloMatch match) {
-        Player winner = match.getBlueScore() < match.getRedScore() ? match.getRedPlayer() : match.getBluePlayer();
-        Player loser = match.getBlueScore() < match.getRedScore() ? match.getBluePlayer() : match.getRedPlayer();
+        boolean redWon = ratingUtils.isWinner(match.getRedScore(), match.getBlueScore());
+        Player winner = redWon ? match.getRedPlayer() : match.getBluePlayer();
+        Player loser = redWon ? match.getBluePlayer() : match.getRedPlayer();
 
-        double pointMultiplier = ratingService.pointMultiplier(match.getRedScore(), match.getBlueScore());
-
-        soloRankingCalculator(winner, loser, pointMultiplier, match);
+        soloRankingCalculator(winner, loser, match);
 
         return match;
     }
 
-    private void soloRankingCalculator(Player winner, Player loser, double pointMultiplier, SoloMatch match) {
-        double winnerOdds = playerOddsSolo(winner, loser);
-        double loserOdds = playerOddsSolo(loser, winner);
+    private void soloRankingCalculator(Player winner, Player loser, SoloMatch match) {
+        double pointMultiplier = ratingUtils.calculatePointMultiplier(match.getRedScore(), match.getBlueScore());
+
+        double winnerOdds = ratingUtils.calculateOdds(winner.getSoloRating(), loser.getSoloRating(), 400);
+        double loserOdds = ratingUtils.calculateOdds(loser.getSoloRating(), winner.getSoloRating(), 400);
 
         newPlayerSoloRating(winner, pointMultiplier, winnerOdds, true, match);
         newPlayerSoloRating(loser, pointMultiplier, loserOdds, false, match);
     }
 
-    private double playerOddsSolo(Player player, Player opponent) {
-        return 1 / (1 + (Math.pow(10, (double) (opponent.getSoloRating() - player.getSoloRating()) / 400)));
-    }
-
     private void newPlayerSoloRating(Player player, double pointMultiplier, double playerOdds, boolean isWinner, SoloMatch match) {
-        int newPlayerRating = (int) Math.round(player.getSoloRating() + ((32 * pointMultiplier) * ((isWinner ? 1.0 : 0.0) - (playerOdds))));
+        int newPlayerRating = ratingUtils.calculateNewRating(player.getSoloRating(), pointMultiplier, playerOdds, isWinner);
         SoloPlayerRating soloPlayerRating = new SoloPlayerRating(match, player, player.getSoloRating(), newPlayerRating);
         soloRatingRepository.save(soloPlayerRating);
-        updatePlayerStats(player,soloPlayerRating);
+        updatePlayerStats(player, soloPlayerRating);
         updatePlayerDailyStats(newPlayerRating - player.getSoloRating(), player);
         player.setSoloRating(newPlayerRating);
+    }
+
+    private void updatePlayerDailyStats(int ratingChange, Player player) {
+        Date today = new Date(System.currentTimeMillis());
+        soloPlayerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today).
+                ifPresentOrElse(
+                        stats -> {
+                            stats.setRatingChange(stats.getRatingChange() + ratingChange);
+                            soloPlayerDailyStatsRepository.save(stats);
+
+                        },
+                        () -> soloPlayerDailyStatsRepository.save(new SoloPlayerDailyStats(player, today, ratingChange))
+                );
     }
 
     private void updatePlayerStats(Player player, SoloPlayerRating playerRating) {
         SoloMatch match = playerRating.getSoloMatch();
         boolean isBlue = match.getBluePlayer() == player;
         boolean won = isBlue && match.getBlueScore() > match.getRedScore() || !isBlue && match.getRedScore() > match.getBlueScore();
-        SoloPlayerStats stats;
+
         Optional<SoloPlayerStats> playerStatsOptional = soloPlayerStatsRepository.findByPlayerId(player.getId());
+        SoloPlayerStats stats = playerStatsOptional.orElseGet(() ->
+                new SoloPlayerStats(
+                        player,
+                        won ? 1 : 0,
+                        !won ? 1 : 0,
+                        isBlue ? match.getBlueScore() : match.getRedScore(),
+                        playerRating.getNewRating(),
+                        playerRating.getOldRating(),
+                        won ? 1 : 0,
+                        won ? 1 : 0
+                )
+        );
+
         if (playerStatsOptional.isPresent()) {
-            stats = playerStatsOptional.get();
             if (won) {
                 stats.setWins(stats.getWins() + 1);
                 stats.setCurrentWinStreak(stats.getCurrentWinStreak() + 1);
@@ -109,31 +139,9 @@ public class SoloRatingService {
             }
 
             stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueScore() : match.getRedScore()));
-        } else {
-            stats = new SoloPlayerStats(
-                    player,
-                    won ? 1 : 0,
-                    !won ? 1 : 0,
-                    isBlue ? match.getBlueScore() : match.getRedScore(),
-                    playerRating.getNewRating(),
-                    playerRating.getOldRating(),
-                    won ? 1 : 0,
-                    won ? 1 : 0
-            );
         }
-        soloPlayerStatsRepository.save(stats);
-    }
 
-    private void updatePlayerDailyStats(int change, Player player) {
-        Date date = new Date(System.currentTimeMillis());
-        Optional<SoloPlayerDailyStats> playerDailyStatsOptional = soloPlayerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), date);
-        if (playerDailyStatsOptional.isPresent()) {
-            SoloPlayerDailyStats playerDailyStats = playerDailyStatsOptional.get();
-            playerDailyStats.setRatingChange(playerDailyStats.getRatingChange() + change);
-            soloPlayerDailyStatsRepository.save(playerDailyStats);
-        } else {
-            soloPlayerDailyStatsRepository.save(new SoloPlayerDailyStats(player, date, change));
-        }
+        soloPlayerStatsRepository.save(stats);
     }
 
     public void deleteRatingsBySoloMatch(Long id) {
