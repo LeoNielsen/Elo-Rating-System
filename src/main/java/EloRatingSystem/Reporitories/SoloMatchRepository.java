@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface SoloMatchRepository extends JpaRepository<SoloMatch,Long> {
     Optional<SoloMatch> findTop1ByOrderByIdDesc();
-
     List<SoloMatch> findAllByRedPlayerIdOrBluePlayerId(Long redId,Long blueId);
+    List<SoloMatch> findTop100ByOrderByIdDesc();
 }

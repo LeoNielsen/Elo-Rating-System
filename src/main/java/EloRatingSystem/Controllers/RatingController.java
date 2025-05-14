@@ -29,19 +29,9 @@ public class RatingController {
         return ratingService.getRatingByMatchId(id);
     }
 
-    @GetMapping("/all")
-    public Mono<List<RatingResponseDto>> getAll() {
-        return ratingService.getAllRatings();
-    }
-
     @GetMapping("/solo/match/{id}")
     public Mono<List<RatingResponseDto>> getSoloRatingByMatchId(@PathVariable Long id) {
         return soloRatingService.getSoloRatingBySoloMatchId(id);
-    }
-
-    @GetMapping("/solo/all")
-    public Mono<List<RatingResponseDto>> getAllSoloRatings() {
-        return soloRatingService.getAllSoloRatings();
     }
 
     @GetMapping("/chart")

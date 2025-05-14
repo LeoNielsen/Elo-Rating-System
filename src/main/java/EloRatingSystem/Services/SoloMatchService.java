@@ -28,8 +28,8 @@ public class SoloMatchService {
     @Autowired
     PlayerService playerService;
 
-    public Mono<List<SoloMatchResponseDto>> getAllSoloMatches() {
-        List<SoloMatch> matches = soloMatchRepository.findAll();
+    public Mono<List<SoloMatchResponseDto>> getRecentMatches() {
+        List<SoloMatch> matches = soloMatchRepository.findTop100ByOrderByIdDesc();
         List<SoloMatchResponseDto> matchResponseDtoList = new ArrayList<>();
         for (SoloMatch match : matches) {
             matchResponseDtoList.add(new SoloMatchResponseDto(match));

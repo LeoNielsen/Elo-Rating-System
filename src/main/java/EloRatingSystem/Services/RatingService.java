@@ -29,19 +29,6 @@ public class RatingService {
     @Autowired
     MatchRepository matchRepository;
 
-
-    public Mono<List<RatingResponseDto>> getAllRatings() {
-        List<PlayerRating> ratingList = ratingRepository.findAll();
-        List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
-        for (PlayerRating rating : ratingList) {
-            ratingResponseDtoList.add(new RatingResponseDto(rating));
-        }
-
-        return Mono.just(ratingResponseDtoList);
-    }
-
-
-
     public Mono<List<RatingResponseDto>> getRatingByMatchId(Long id) {
         List<PlayerRating> ratings = ratingRepository.findAllByMatchId(id);
 

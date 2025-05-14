@@ -28,9 +28,9 @@ public class MatchController {
         return matchService.getMatchById(id);
     }
 
-    @GetMapping("/all")
-    public Mono<List<MatchResponseDto>> getAll() {
-        return matchService.getAllMatches();
+    @GetMapping()
+    public Mono<List<MatchResponseDto>> getRecentMatches() {
+        return matchService.getRecentMatches();
     }
 
     @PostMapping
@@ -43,9 +43,9 @@ public class MatchController {
         return soloMatchService.getSoloMatchById(id);
     }
 
-    @GetMapping("/solo/all")
-    public Mono<List<SoloMatchResponseDto>> getAllSoloMatches() {
-        return soloMatchService.getAllSoloMatches();
+    @GetMapping("/solo")
+    public Mono<List<SoloMatchResponseDto>> getRecentSoloMatches() {
+        return soloMatchService.getRecentMatches();
     }
 
     @PostMapping("/solo/new")

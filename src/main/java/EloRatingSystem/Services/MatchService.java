@@ -29,7 +29,7 @@ public class MatchService {
     @Autowired
     PlayerService playerService;
 
-    public Mono<List<MatchResponseDto>> getAllMatches() {
+    public Mono<List<MatchResponseDto>> getRecentMatches() {
         List<Match> matches = matchRepository.findTop100ByOrderByIdDesc();
         List<MatchResponseDto> matchResponseDtoList = new ArrayList<>();
         for (Match match : matches) {
