@@ -19,8 +19,15 @@ public class MonthlyStats {
     @OneToOne
     private Player player;
 
-    @Column(name = "MonthlyRating", nullable = false)
-    private Integer MonthlyRating;
+    @Column(name = "year", nullable = false)
+    private Integer year;
+
+    @Column(name = "month", nullable = false)
+    private Integer month;
+
+    @Column(name = "monthlyRating", nullable = false)
+    private Integer monthlyRating;
+
     @Column(name = "attackerWins", nullable = false)
     private Integer attackerWins;
     @Column(name = "defenderWins", nullable = false)
@@ -40,8 +47,11 @@ public class MonthlyStats {
     @Column(name = "currentWinStreak", nullable = false)
     private Integer currentWinStreak;
 
-    public MonthlyStats(Player player, Integer attackerWins, Integer defenderWins, Integer attackerLost, Integer defenderLost, Integer goals, Integer highestELO, Integer lowestELO, Integer longestWinStreak, Integer currentWinStreak) {
+    public MonthlyStats(Player player, Integer year, Integer month, Integer monthlyRating, Integer attackerWins, Integer defenderWins, Integer attackerLost, Integer defenderLost, Integer goals, Integer highestELO, Integer lowestELO, Integer longestWinStreak, Integer currentWinStreak) {
         this.player = player;
+        this.year = year;
+        this.month = month;
+        this.monthlyRating = monthlyRating;
         this.attackerWins = attackerWins;
         this.defenderWins = defenderWins;
         this.attackerLost = attackerLost;
@@ -53,4 +63,7 @@ public class MonthlyStats {
         this.currentWinStreak = currentWinStreak;
     }
 
+    public MonthlyStats(Integer monthlyRating) {
+        this.monthlyRating = monthlyRating;
+    }
 }

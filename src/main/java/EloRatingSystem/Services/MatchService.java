@@ -7,6 +7,7 @@ import EloRatingSystem.Models.Match;
 import EloRatingSystem.Models.Team;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.TeamRepository;
+import EloRatingSystem.Services.RatingServices.MonthlyRatingService;
 import EloRatingSystem.Services.RatingServices.RatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,8 @@ public class MatchService {
     TeamRepository teamRepository;
     @Autowired
     RatingService ratingService;
+    @Autowired
+    MonthlyRatingService monthlyRatingService;
     @Autowired
     PlayerService playerService;
 
@@ -58,7 +61,7 @@ public class MatchService {
                     requestDto.getRedTeamScore(), requestDto.getBlueTeamScore()));
 
             match = ratingService.newRating(match);
-
+            monthlyRatingService.newRating(match);
             match = matchRepository.save(match);
 
             return Mono.just(new MatchResponseDto(match));
@@ -81,7 +84,7 @@ public class MatchService {
 
         teamRepository.save(winner);
         teamRepository.save(loser);
-
+        monthlyRatingService.deleteRatingsByMatch(match.getId());
         matchRepository.deleteById(match.getId());
 
         playerService.regeneratePlayerStatistics(winner.getDefender());
