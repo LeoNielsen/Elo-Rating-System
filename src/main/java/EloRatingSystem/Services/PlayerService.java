@@ -5,19 +5,25 @@ import EloRatingSystem.Dtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
 import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Models.*;
+import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
-import EloRatingSystem.Reporitories.*;
+import EloRatingSystem.Models.*;
+import EloRatingSystem.Reporitories.DailyStats.MonthlyDailyStatsRepository;
 import EloRatingSystem.Reporitories.DailyStats.PlayerDailyStatsRepository;
 import EloRatingSystem.Reporitories.DailyStats.SoloPlayerDailyStatsRepository;
+import EloRatingSystem.Reporitories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.sql.Date;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PlayerService {
@@ -27,7 +33,11 @@ public class PlayerService {
     @Autowired
     PlayerStatsRepository playerStatsRepository;
     @Autowired
+    MonthlyStatsRepository monthlyStatsRepository;
+    @Autowired
     PlayerDailyStatsRepository playerDailyStatsRepository;
+    @Autowired
+    MonthlyDailyStatsRepository monthlyDailyStatsRepository;
     @Autowired
     SoloPlayerStatsRepository soloPlayerStatsRepository;
     @Autowired
@@ -40,6 +50,8 @@ public class PlayerService {
     TeamRepository teamRepository;
     @Autowired
     RatingRepository ratingRepository;
+    @Autowired
+    MonthlyRatingRepository monthlyRatingRepository;
     @Autowired
     SoloRatingRepository soloRatingRepository;
 
@@ -179,7 +191,7 @@ public class PlayerService {
         Optional<Player> playerOptional = playerRepository.findById(id);
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-                return Mono.just(soloPlayerStatistics(player));
+            return Mono.just(soloPlayerStatistics(player));
         } else {
             return Mono.error(new ApiException(String.format("%s Doesn't exist", id), HttpStatus.BAD_REQUEST));
         }
@@ -196,7 +208,7 @@ public class PlayerService {
         if (playerStatsOptional.isPresent()) {
             return new SoloPlayerStatisticsResponseDto(player, playerStatsOptional.get(), todayRatingChance);
         } else {
-            return new SoloPlayerStatisticsResponseDto(player,todayRatingChance);
+            return new SoloPlayerStatisticsResponseDto(player, todayRatingChance);
         }
     }
 
@@ -205,7 +217,7 @@ public class PlayerService {
 
         List<Player> players = playerRepository.findAll();
         for (Player player : players) {
-                playerStatistics.add(soloPlayerStatistics(player));
+            playerStatistics.add(soloPlayerStatistics(player));
         }
 
         return Mono.just(playerStatistics);
@@ -279,4 +291,126 @@ public class PlayerService {
             soloPlayerStatsRepository.save(new SoloPlayerStats(player, wins, lost, goals, highestELO, lowestELO, longestWinStreak, currentWinStreak));
         }
     }
+
+    public Mono<List<PlayerStatisticsResponseDto>> getAllMonthlyStatistics() {
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int year = today.getYear();
+
+        List<PlayerStatisticsResponseDto> playerStatistics = new ArrayList<>();
+
+        List<Player> players = playerRepository.findAll();
+        for (Player player : players) {
+            playerStatistics.add(monthlyStatistics(player, month, year));
+        }
+
+        return Mono.just(playerStatistics);
+    }
+
+    public Mono<PlayerStatisticsResponseDto> getMonthlyStatistics(Long id) {
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int year = today.getYear();
+        Optional<Player> playerOptional = playerRepository.findById(id);
+        if (playerOptional.isPresent()) {
+            Player player = playerOptional.get();
+            return Mono.just(monthlyStatistics(player,month,year));
+        } else {
+            return Mono.error(new ApiException(String.format("%s Doesn't exist", id), HttpStatus.BAD_REQUEST));
+        }
+    }
+
+    public PlayerStatisticsResponseDto monthlyStatistics(Player player, int month, int year) {
+        int todayRatingChance = 0;
+        Date date = new Date(System.currentTimeMillis());
+        Optional<MonthlyDailyStats> playerDailyStats = monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), date);
+        if (playerDailyStats.isPresent()) {
+            todayRatingChance = playerDailyStats.get().getRatingChange();
+        }
+        Optional<MonthlyStats> playerStatsOptional = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
+        if (playerStatsOptional.isPresent()) {
+            return new PlayerStatisticsResponseDto(player, playerStatsOptional.get(), todayRatingChance);
+        } else {
+            return new PlayerStatisticsResponseDto(player, todayRatingChance);
+        }
+    }
+
+    public void monthlyStatisticsGenAll() {
+        List<Player> players = playerRepository.findAll();
+        for (Player player : players) {
+            regenerateMonthlyStatistics(player);
+        }
+    }
+
+    public void regenerateMonthlyStatistics(Player player) {
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int year = today.getYear();
+
+        List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(player.getId(), player.getId());
+
+        int attackerWins = 0;
+        int defenderWins = 0;
+        int attackerLost = 0;
+        int defenderLost = 0;
+        int goals = 0;
+        int highestELO = 1200;
+        int lowestELO = 1200;
+        int longestWinStreak = 0;
+        int currentWinStreak = 0;
+
+        List<Match> matches = new ArrayList<>();
+
+        for (Team team : teams) {
+            if (team.getAttacker().getId().equals(player.getId())) {
+                attackerWins += team.getWon();
+                attackerLost += team.getLost();
+            } else {
+                defenderWins += team.getWon();
+                defenderLost += team.getLost();
+            }
+            matches.addAll(matchRepository.findAllByRedTeamIdOrBlueTeamId(team.getId(), team.getId()));
+        }
+
+        if (!matches.isEmpty()) {
+            highestELO = monthlyRatingRepository.findTopByPlayerIdOrderByNewRatingDesc(player.getId()).orElseThrow().getNewRating();
+            lowestELO = monthlyRatingRepository.findTopByPlayerIdOrderByNewRatingAsc(player.getId()).orElseThrow().getNewRating();
+        }
+
+        matches.sort(Comparator.comparingLong(Match::getId));
+
+        for (Match match : matches) {
+            LocalDate localDate = match.getDate().toLocalDate();
+            if (localDate.getYear() == year && localDate.getMonthValue() == month) {
+                if (match.getRedTeam().getAttacker().getId().equals(player.getId()) || match.getRedTeam().getDefender().getId().equals(player.getId())) {
+                    if (match.getRedTeamScore() == 10) {
+                        currentWinStreak++;
+                        if (currentWinStreak > longestWinStreak) {
+                            longestWinStreak = currentWinStreak;
+                        }
+                    } else {
+                        currentWinStreak = 0;
+                    }
+                    goals += match.getRedTeamScore();
+                } else {
+                    if (match.getBlueTeamScore() == 10) {
+                        currentWinStreak++;
+                        if (currentWinStreak > longestWinStreak) {
+                            longestWinStreak = currentWinStreak;
+                        }
+                    } else {
+                        currentWinStreak = 0;
+                    }
+                    goals += match.getBlueTeamScore();
+                }
+            }
+        }
+        Optional<PlayerStats> playerStats = playerStatsRepository.findByPlayerId(player.getId());
+        if (playerStats.isPresent()) {
+            playerStatsRepository.save(new PlayerStats(playerStats.get().getId(), player, attackerWins, defenderWins, attackerLost, defenderLost, goals, highestELO, lowestELO, longestWinStreak, currentWinStreak));
+        } else {
+            playerStatsRepository.save(new PlayerStats(player, attackerWins, defenderWins, attackerLost, defenderLost, goals, highestELO, lowestELO, longestWinStreak, currentWinStreak));
+        }
+    }
+
 }

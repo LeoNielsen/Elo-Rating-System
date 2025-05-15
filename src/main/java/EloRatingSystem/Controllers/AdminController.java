@@ -6,10 +6,7 @@ import EloRatingSystem.Dtos.TeamRequestDto;
 import EloRatingSystem.Dtos.TeamResponseDto;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Reporitories.PlayerRepository;
-import EloRatingSystem.Services.MatchService;
-import EloRatingSystem.Services.PlayerService;
-import EloRatingSystem.Services.SoloMatchService;
-import EloRatingSystem.Services.TeamService;
+import EloRatingSystem.Services.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +23,8 @@ import java.util.Random;
 public class AdminController {
     @Autowired
     MatchService matchService;
+    @Autowired
+    MonthlyService monthlyService;
     @Autowired
     SoloMatchService soloMatchService;
     @Autowired
@@ -64,6 +63,7 @@ public class AdminController {
     @GetMapping("/player/statgen")
     public void playerStatGen() {
         playerService.playerStatisticsGenAll();
+        playerService.monthlyStatisticsGenAll();
     }
 
     @GetMapping("/solo/player/statgen")
@@ -95,5 +95,10 @@ public class AdminController {
             Collections.shuffle(players);
             soloMatchService.newSoloMatch(new SoloMatchRequestDto(players.get(0).getId(), players.get(1).getId(), 10, rand.nextInt(0, 10)));
         }
+    }
+
+    @GetMapping("/winner")
+    public void getMonthlyWinner() {
+        monthlyService.setMonthlyWinner();
     }
 }

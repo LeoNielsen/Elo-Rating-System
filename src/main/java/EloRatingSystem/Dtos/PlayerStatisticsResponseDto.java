@@ -1,5 +1,6 @@
 package EloRatingSystem.Dtos;
 
+import EloRatingSystem.Models.MonthlyStats;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.PlayerStats;
 import lombok.AllArgsConstructor;
@@ -52,6 +53,22 @@ public class PlayerStatisticsResponseDto {
         this.lowestELO = 1200;
         this.longestWinStreak = 0;
         this.currentWinStreak = 0;
+        this.todayRatingChance = todayRatingChance;
+    }
+
+    public PlayerStatisticsResponseDto(Player player, MonthlyStats playerStats, int todayRatingChance) {
+        this.id = player.getId();
+        this.nameTag = player.getNameTag();
+        this.rating = playerStats.getMonthlyRating();
+        this.attackerWins = playerStats.getAttackerWins();
+        this.defenderWins = playerStats.getDefenderWins();
+        this.attackerLost = playerStats.getAttackerLost();
+        this.defenderLost = playerStats.getDefenderLost();
+        this.totalGoals = playerStats.getGoals();
+        this.highestELO = playerStats.getHighestELO();
+        this.lowestELO = playerStats.getLowestELO();
+        this.longestWinStreak = playerStats.getLongestWinStreak();
+        this.currentWinStreak = playerStats.getCurrentWinStreak();
         this.todayRatingChance = todayRatingChance;
     }
 }

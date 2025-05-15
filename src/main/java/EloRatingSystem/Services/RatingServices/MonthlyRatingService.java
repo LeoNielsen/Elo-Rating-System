@@ -63,23 +63,23 @@ public class MonthlyRatingService {
 
     protected double calculatePlayerOdds(Player player, Team opponentTeam) {
         LocalDate today = LocalDate.now();
-        int year = today.getYear();
         int month = today.getMonthValue();
-        Optional<MonthlyStats> optionalStats = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
-        Optional<MonthlyStats> optDefender = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(opponentTeam.getDefender().getId(), month, year);
-        Optional<MonthlyStats> optAttacker = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(opponentTeam.getAttacker().getId(), month, year);
-        MonthlyStats stats = optionalStats.orElseGet(() ->
-                new MonthlyStats(1200)
-        );
-        MonthlyStats attacker = optionalStats.orElseGet(() ->
-                new MonthlyStats(1200)
-        );
-        MonthlyStats defender = optionalStats.orElseGet(() ->
-                new MonthlyStats(1200)
-        );
-        double oddsAgainstAttacker = ratingUtils.calculateOdds(stats.getMonthlyRating(), defender.getMonthlyRating(), 500);
-        double oddsAgainstDefender = ratingUtils.calculateOdds(stats.getMonthlyRating(), attacker.getMonthlyRating(), 500);
-        return (oddsAgainstAttacker + oddsAgainstDefender) / 2;
+        int year = today.getYear();
+
+        MonthlyStats playerStats = getStatsOrDefault(player.getId(), month, year);
+        MonthlyStats defenderStats = getStatsOrDefault(opponentTeam.getDefender().getId(), month, year);
+        MonthlyStats attackerStats = getStatsOrDefault(opponentTeam.getAttacker().getId(), month, year);
+
+        double oddsAgainstDefender = ratingUtils.calculateOdds(playerStats.getMonthlyRating(), defenderStats.getMonthlyRating(), 500);
+        double oddsAgainstAttacker = ratingUtils.calculateOdds(playerStats.getMonthlyRating(), attackerStats.getMonthlyRating(), 500);
+
+        return (oddsAgainstDefender + oddsAgainstAttacker) / 2;
+    }
+
+    private MonthlyStats getStatsOrDefault(Long playerId, int month, int year) {
+        return monthlyStatsRepository
+                .findByPlayerIdAndMonthAndYear(playerId, month, year)
+                .orElse(new MonthlyStats(1200));
     }
 
     private void newMonthlyRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
@@ -157,11 +157,11 @@ public class MonthlyRatingService {
                 );
     }
 
-    public void deleteRatingsByMatch(Long Id) {
+    public void deleteRatingsByMatch(Long id) {
         LocalDate today = LocalDate.now();
         int year = today.getYear();
         int month = today.getMonthValue();
-        List<MonthlyRating> playerRatingList = monthlyRatingRepository.findAllByMatchId(Id);
+        List<MonthlyRating> playerRatingList = monthlyRatingRepository.findAllByMatchId(id);
         for (MonthlyRating rating : playerRatingList) {
             Player player = rating.getPlayer();
             MonthlyStats stats = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year).orElseThrow();
@@ -170,4 +170,5 @@ public class MonthlyRatingService {
             monthlyRatingRepository.deleteById(rating.getId());
         }
     }
+
 }

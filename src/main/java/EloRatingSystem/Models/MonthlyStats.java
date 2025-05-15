@@ -16,7 +16,7 @@ public class MonthlyStats {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     private Player player;
 
     @Column(name = "year", nullable = false)

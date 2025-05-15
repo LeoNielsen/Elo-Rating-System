@@ -55,6 +55,15 @@ public class PlayerController {
         return playerService.getAllStatistics();
     }
 
+    @GetMapping("statistics/monthly/all")
+    public Mono<List<PlayerStatisticsResponseDto>> getAllMonthlyStatistics() {
+        return playerService.getAllMonthlyStatistics();
+    }
+    @GetMapping("/statistics/monthly/{id}")
+    public Mono<PlayerStatisticsResponseDto> getStatisticsMonthlyById(@PathVariable Long id) {
+        return playerService.getMonthlyStatistics(id);
+    }
+
     @GetMapping("/statistics/solo/{id}")
     public Mono<SoloPlayerStatisticsResponseDto> getSoloStatisticsById(@PathVariable Long id) {
         return playerService.getSoloStatistics(id);
