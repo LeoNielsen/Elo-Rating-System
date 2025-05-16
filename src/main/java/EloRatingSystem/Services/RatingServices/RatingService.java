@@ -98,7 +98,7 @@ public class RatingService {
     }
 
 
-    private void updatePlayerDailyStats(int ratingChange, Player player) {
+    public void updatePlayerDailyStats(int ratingChange, Player player) {
         Date today = new Date(System.currentTimeMillis());
         dailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today)
                 .ifPresentOrElse(
@@ -113,7 +113,7 @@ public class RatingService {
     private void updatePlayerStats(Player player, PlayerRating rating) {
         Match match = rating.getMatch();
         boolean isBlue = (player == match.getBlueTeam().getAttacker() || player == match.getBlueTeam().getDefender());
-        boolean won = isBlue && match.getBlueTeamScore() > match.getRedTeamScore() || isBlue && match.getRedTeamScore() > match.getBlueTeamScore();
+        boolean won = isBlue && match.getBlueTeamScore() > match.getRedTeamScore() || !isBlue && match.getRedTeamScore() > match.getBlueTeamScore();
         boolean isAttacker = (player == match.getBlueTeam().getAttacker() || player == match.getRedTeam().getAttacker());
 
         Optional<PlayerStats> playerStatsOptional = statsRepository.findByPlayerId(player.getId());

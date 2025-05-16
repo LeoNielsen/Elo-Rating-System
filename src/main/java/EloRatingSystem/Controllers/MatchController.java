@@ -33,6 +33,11 @@ public class MatchController {
         return matchService.getRecentMatches();
     }
 
+    @GetMapping("/all")
+    public Mono<List<MatchResponseDto>> getAllMatches() {
+        return matchService.getAllMatches();
+    }
+
     @PostMapping
     public Mono<MatchResponseDto> newMatch(@RequestBody MatchRequestDto requestDto) {
         return matchService.newMatch(requestDto);

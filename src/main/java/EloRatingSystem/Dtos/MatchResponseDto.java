@@ -3,10 +3,12 @@ package EloRatingSystem.Dtos;
 import EloRatingSystem.Models.Match;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
 @Data
+@NoArgsConstructor
 public class MatchResponseDto {
 
     private Long id;

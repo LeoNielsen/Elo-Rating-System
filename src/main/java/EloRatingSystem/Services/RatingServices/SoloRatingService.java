@@ -86,14 +86,13 @@ public class SoloRatingService {
         player.setSoloRating(newPlayerRating);
     }
 
-    private void updatePlayerDailyStats(int ratingChange, Player player) {
+    public void updatePlayerDailyStats(int ratingChange, Player player) {
         Date today = new Date(System.currentTimeMillis());
         soloPlayerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today).
                 ifPresentOrElse(
                         stats -> {
                             stats.setRatingChange(stats.getRatingChange() + ratingChange);
                             soloPlayerDailyStatsRepository.save(stats);
-
                         },
                         () -> soloPlayerDailyStatsRepository.save(new SoloPlayerDailyStats(player, today, ratingChange))
                 );

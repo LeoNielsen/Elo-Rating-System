@@ -33,6 +33,16 @@ public class MatchService {
     @Autowired
     PlayerService playerService;
 
+    public Mono<List<MatchResponseDto>> getAllMatches() {
+        List<Match> matches = matchRepository.findAll();
+        List<MatchResponseDto> matchResponseDtoList = new ArrayList<>();
+        for (Match match : matches) {
+            matchResponseDtoList.add(new MatchResponseDto(match));
+        }
+
+        return Mono.just(matchResponseDtoList);
+    }
+
     public Mono<List<MatchResponseDto>> getRecentMatches() {
         List<Match> matches = matchRepository.findTop100ByOrderByIdDesc();
         List<MatchResponseDto> matchResponseDtoList = new ArrayList<>();
@@ -91,9 +101,6 @@ public class MatchService {
         playerService.regeneratePlayerStatistics(loser.getDefender());
         playerService.regeneratePlayerStatistics(winner.getAttacker());
         playerService.regeneratePlayerStatistics(loser.getAttacker());
-        playerService.regenerateMonthlyStatistics(winner.getDefender());
-        playerService.regenerateMonthlyStatistics(loser.getDefender());
-        playerService.regenerateMonthlyStatistics(winner.getAttacker());
-        playerService.regenerateMonthlyStatistics(loser.getAttacker());
+        playerService.monthlyStatisticsGenAll();
     }
 }

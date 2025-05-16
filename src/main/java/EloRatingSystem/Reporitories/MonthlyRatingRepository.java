@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface MonthlyRatingRepository extends JpaRepository<MonthlyRating,Long> {
     List<MonthlyRating> findAllByMatchId(Long matchId);
+    Optional<MonthlyRating> findByMatchIdAndPlayerId(Long matchId,Long playerId);
+
 
     Optional<MonthlyRating> findTopByPlayerIdOrderByNewRatingAsc(Long id);
 

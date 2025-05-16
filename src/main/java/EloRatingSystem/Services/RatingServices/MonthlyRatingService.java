@@ -88,7 +88,7 @@ public class MonthlyRatingService {
         int month = today.getMonthValue();
 
         boolean isBlue = (player == match.getBlueTeam().getAttacker() || player == match.getBlueTeam().getDefender());
-        boolean won = isBlue && match.getBlueTeamScore() > match.getRedTeamScore() || isBlue && match.getRedTeamScore() > match.getBlueTeamScore();
+        boolean won = isBlue && match.getBlueTeamScore() > match.getRedTeamScore() || !isBlue && match.getRedTeamScore() > match.getBlueTeamScore();
         boolean isAttacker = (player == match.getBlueTeam().getAttacker() || player == match.getRedTeam().getAttacker());
 
         int newRating;
@@ -145,7 +145,7 @@ public class MonthlyRatingService {
         monthlyStatsRepository.save(stats);
     }
 
-    private void updateMonthlyDailyStats(int ratingChange, Player player) {
+    public void updateMonthlyDailyStats(int ratingChange, Player player) {
         Date today = new Date(System.currentTimeMillis());
         monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today)
                 .ifPresentOrElse(

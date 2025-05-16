@@ -13,4 +13,6 @@ public interface SoloRatingRepository extends JpaRepository<SoloPlayerRating,Lon
     List<SoloPlayerRating> findAllBySoloMatchId(Long id);
     Optional<SoloPlayerRating> findTopMaxNewRatingByPlayerId(Long id);
     Optional<SoloPlayerRating> findTopMinNewRatingByPlayerId(Long id);
+
+    Optional<SoloPlayerRating> findBySoloMatchIdAndPlayerId(Long id, Long id1);
 }

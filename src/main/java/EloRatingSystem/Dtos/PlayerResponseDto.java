@@ -2,8 +2,10 @@ package EloRatingSystem.Dtos;
 
 import EloRatingSystem.Models.Player;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class PlayerResponseDto {
 
     private Long id;

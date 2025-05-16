@@ -2,10 +2,12 @@ package EloRatingSystem.Dtos;
 
 import EloRatingSystem.Models.SoloMatch;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
 @Data
+@NoArgsConstructor
 public class SoloMatchResponseDto {
     private Long id;
     private Date date;
