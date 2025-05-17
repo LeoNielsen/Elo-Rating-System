@@ -32,6 +32,8 @@ public class AdminController {
     @Autowired
     PlayerService playerService;
     @Autowired
+    RegenerateService regenerateService;
+    @Autowired
     TeamService teamService;
 
     @DeleteMapping("/match/latest")
@@ -62,13 +64,19 @@ public class AdminController {
 
     @GetMapping("/player/statgen")
     public void playerStatGen() {
-        playerService.playerStatisticsGenAll();
-        playerService.monthlyStatisticsGenAll();
+        regenerateService.playerStatisticsGenAll();
+        regenerateService.monthlyStatisticsGenAll();
+    }
+
+    @GetMapping("/monthly/player/statgen")
+    public void monthlyStatGen() {
+        regenerateService.playerStatisticsGenAll();
+        regenerateService.monthlyStatisticsGenAll();
     }
 
     @GetMapping("/solo/player/statgen")
     public void soloPlayerStatGen() {
-        playerService.regenerateSoloPlayerStatisticsAll();
+        regenerateService.regenerateSoloPlayerStatisticsAll();
     }
 
     @GetMapping("/match/gen")

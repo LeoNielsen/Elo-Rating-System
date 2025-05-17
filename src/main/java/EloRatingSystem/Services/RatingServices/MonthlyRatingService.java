@@ -36,36 +36,43 @@ public class MonthlyRatingService {
     }
 
     public void newRating(Match match) {
-        boolean redWon = match.getRedTeamScore() > match.getBlueTeamScore();
-        Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
-        Team loser = redWon ? match.getBlueTeam() : match.getRedTeam();
-
-        rankingCalculator(winner, loser, match);
-    }
-
-    private void rankingCalculator(Team winner, Team loser, Match match) {
-        double pointMultiplier = ratingUtils.calculatePointMultiplier(match.getRedTeamScore(), match.getBlueTeamScore());
-
-        double winnerOddsAttacker = calculatePlayerOdds(winner.getAttacker(), loser);
-        double winnerOddsDefender = calculatePlayerOdds(winner.getDefender(), loser);
-        double loserOddsAttacker = calculatePlayerOdds(loser.getAttacker(), winner);
-        double loserOddsDefender = calculatePlayerOdds(loser.getDefender(), winner);
-
-        double winnerTeamOdds = (winnerOddsAttacker + winnerOddsDefender) / 2;
-        double loserTeamOdds = (loserOddsAttacker + loserOddsDefender) / 2;
-
-        newMonthlyRating(winner.getAttacker(), winnerTeamOdds, pointMultiplier, winnerOddsAttacker, true, match);
-        newMonthlyRating(winner.getDefender(), winnerTeamOdds, pointMultiplier, winnerOddsDefender, true, match);
-        newMonthlyRating(loser.getAttacker(), loserTeamOdds, pointMultiplier, loserOddsAttacker, false, match);
-        newMonthlyRating(loser.getDefender(), loserTeamOdds, pointMultiplier, loserOddsDefender, false, match);
-    }
-
-
-    protected double calculatePlayerOdds(Player player, Team opponentTeam) {
         LocalDate today = LocalDate.now();
         int month = today.getMonthValue();
         int year = today.getYear();
 
+        boolean redWon = match.getRedTeamScore() > match.getBlueTeamScore();
+        Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
+        Team loser = redWon ? match.getBlueTeam() : match.getRedTeam();
+
+        rankingCalculator(winner, loser, match, month, year);
+    }
+    public void newRating(Match match, int month, int year) {
+        boolean redWon = match.getRedTeamScore() > match.getBlueTeamScore();
+        Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
+        Team loser = redWon ? match.getBlueTeam() : match.getRedTeam();
+
+        rankingCalculator(winner, loser, match, month, year);
+    }
+
+    private void rankingCalculator(Team winner, Team loser, Match match, int month, int year) {
+        double pointMultiplier = ratingUtils.calculatePointMultiplier(match.getRedTeamScore(), match.getBlueTeamScore());
+
+        double winnerOddsAttacker = calculatePlayerOdds(winner.getAttacker(), loser, month, year);
+        double winnerOddsDefender = calculatePlayerOdds(winner.getDefender(), loser, month, year);
+        double loserOddsAttacker = calculatePlayerOdds(loser.getAttacker(), winner, month, year);
+        double loserOddsDefender = calculatePlayerOdds(loser.getDefender(), winner, month, year);
+
+        double winnerTeamOdds = (winnerOddsAttacker + winnerOddsDefender) / 2;
+        double loserTeamOdds = (loserOddsAttacker + loserOddsDefender) / 2;
+
+        newMonthlyRating(winner.getAttacker(), winnerTeamOdds, pointMultiplier, winnerOddsAttacker, true, match, month, year);
+        newMonthlyRating(winner.getDefender(), winnerTeamOdds, pointMultiplier, winnerOddsDefender, true, match, month, year);
+        newMonthlyRating(loser.getAttacker(), loserTeamOdds, pointMultiplier, loserOddsAttacker, false, match, month, year);
+        newMonthlyRating(loser.getDefender(), loserTeamOdds, pointMultiplier, loserOddsDefender, false, match, month, year);
+    }
+
+
+    protected double calculatePlayerOdds(Player player, Team opponentTeam, int month, int year) {
         MonthlyStats playerStats = getStatsOrDefault(player.getId(), month, year);
         MonthlyStats defenderStats = getStatsOrDefault(opponentTeam.getDefender().getId(), month, year);
         MonthlyStats attackerStats = getStatsOrDefault(opponentTeam.getAttacker().getId(), month, year);
@@ -82,21 +89,54 @@ public class MonthlyRatingService {
                 .orElse(new MonthlyStats(1200));
     }
 
-    private void newMonthlyRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
-        LocalDate today = LocalDate.now();
-        int year = today.getYear();
-        int month = today.getMonthValue();
+    private void newMonthlyRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, Match match, int month, int year) {
+        MonthlyStats monthlyStats = getStatsOrDefault(player.getId(), month, year);
+        int oldMonthlyRating = monthlyStats.getMonthlyRating();
+        int newMonthlyRating = ratingUtils.calculateNewRating(oldMonthlyRating, pointMultiplier, (teamRating + playerOdds) / 2, isWinner);
+        MonthlyRating monthlyRating = new MonthlyRating(match, player, oldMonthlyRating, newMonthlyRating);
+        monthlyRatingRepository.save(monthlyRating);
+        updateMonthlyStats(player, monthlyRating, month, year);
+        updateMonthlyDailyStats(newMonthlyRating - oldMonthlyRating, player);
+    }
 
-        boolean isBlue = (player == match.getBlueTeam().getAttacker() || player == match.getBlueTeam().getDefender());
+    public void updateMonthlyDailyStats(int ratingChange, Player player) {
+        Date today = new Date(System.currentTimeMillis());
+        monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today)
+                .ifPresentOrElse(
+                        stats -> {
+                            stats.setRatingChange(stats.getRatingChange() + ratingChange);
+                            monthlyDailyStatsRepository.save(stats);
+                        },
+                        () -> monthlyDailyStatsRepository.save(new MonthlyDailyStats(player, today, ratingChange))
+                );
+    }
+
+    public void updateMonthlyStats(Player player, MonthlyRating rating, int month, int year) {
+        Match match = rating.getMatch();
+        boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(),player);
         boolean won = isBlue && match.getBlueTeamScore() > match.getRedTeamScore() || !isBlue && match.getRedTeamScore() > match.getBlueTeamScore();
         boolean isAttacker = (player == match.getBlueTeam().getAttacker() || player == match.getRedTeam().getAttacker());
 
-        int newRating;
-        MonthlyStats stats;
-        MonthlyRating monthlyRating;
-        Optional<MonthlyStats> optionalStats = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
-        if (optionalStats.isPresent()) {
-            stats = optionalStats.get();
+        Optional<MonthlyStats> statsOpt = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
+        MonthlyStats stats = statsOpt.orElseGet(() ->
+                new MonthlyStats(
+                        player,
+                        year,
+                        month,
+                        rating.getNewRating(),
+                        isAttacker && won ? 1 : 0,
+                        !isAttacker && won ? 1 : 0,
+                        isAttacker && !won ? 1 : 0,
+                        !isAttacker && !won ? 1 : 0,
+                        isBlue ? match.getBlueTeamScore() : match.getRedTeamScore(),
+                        rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
+                        rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
+                        won ? 1 : 0,
+                        won ? 1 : 0
+                )
+        );
+
+        if (statsOpt.isPresent()) {
             if (won) {
                 if (isAttacker) {
                     stats.setAttackerWins(stats.getAttackerWins() + 1);
@@ -113,48 +153,14 @@ public class MonthlyRatingService {
                 }
                 stats.setCurrentWinStreak(0);
             }
-            newRating = ratingUtils.calculateNewRating(stats.getMonthlyRating(), pointMultiplier, (teamRating + playerOdds) / 2, isWinner);
-            monthlyRating = new MonthlyRating(match,player,stats.getMonthlyRating(),newRating);
-            stats.setMonthlyRating(newRating);
+
+            int newRating = rating.getNewRating();
+            stats.setMonthlyRating(rating.getNewRating());
             stats.setHighestELO(Math.max(stats.getHighestELO(), newRating));
             stats.setLowestELO(Math.min(stats.getLowestELO(), newRating));
             stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
-        } else {
-            int defaultRating = 1200;
-            newRating = ratingUtils.calculateNewRating(defaultRating, pointMultiplier, (teamRating + playerOdds) / 2, isWinner);
-            monthlyRating = new MonthlyRating(match, player, defaultRating, newRating);
-            stats = new MonthlyStats(
-                    player,
-                    year,
-                    month,
-                    newRating,
-                    isAttacker && won ? 1 : 0,
-                    !isAttacker && won ? 1 : 0,
-                    isAttacker && !won ? 1 : 0,
-                    !isAttacker && !won ? 1 : 0,
-                    isBlue ? match.getBlueTeamScore() : match.getRedTeamScore(),
-                    newRating,
-                    newRating,
-                    won ? 1 : 0,
-                    won ? 1 : 0
-            );
         }
-
-        updateMonthlyDailyStats(newRating - monthlyRating.getOldRating(), player);
-        monthlyRatingRepository.save(monthlyRating);
         monthlyStatsRepository.save(stats);
-    }
-
-    public void updateMonthlyDailyStats(int ratingChange, Player player) {
-        Date today = new Date(System.currentTimeMillis());
-        monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today)
-                .ifPresentOrElse(
-                        stats -> {
-                            stats.setRatingChange(stats.getRatingChange() + ratingChange);
-                            monthlyDailyStatsRepository.save(stats);
-                        },
-                        () -> monthlyDailyStatsRepository.save(new MonthlyDailyStats(player, today, ratingChange))
-                );
     }
 
     public void deleteRatingsByMatch(Long id) {
@@ -170,5 +176,4 @@ public class MonthlyRatingService {
             monthlyRatingRepository.deleteById(rating.getId());
         }
     }
-
 }

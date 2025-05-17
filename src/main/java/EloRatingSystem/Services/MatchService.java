@@ -31,7 +31,7 @@ public class MatchService {
     @Autowired
     MonthlyRatingService monthlyRatingService;
     @Autowired
-    PlayerService playerService;
+    RegenerateService regenerateService;
 
     public Mono<List<MatchResponseDto>> getAllMatches() {
         List<Match> matches = matchRepository.findAll();
@@ -97,10 +97,14 @@ public class MatchService {
         monthlyRatingService.deleteRatingsByMatch(match.getId());
         matchRepository.deleteById(match.getId());
 
-        playerService.regeneratePlayerStatistics(winner.getDefender());
-        playerService.regeneratePlayerStatistics(loser.getDefender());
-        playerService.regeneratePlayerStatistics(winner.getAttacker());
-        playerService.regeneratePlayerStatistics(loser.getAttacker());
-        playerService.monthlyStatisticsGenAll();
+        regenerateService.regeneratePlayerStatistics(winner.getDefender());
+        regenerateService.regeneratePlayerStatistics(loser.getDefender());
+        regenerateService.regeneratePlayerStatistics(winner.getAttacker());
+        regenerateService.regeneratePlayerStatistics(loser.getAttacker());
+        regenerateService.regenerateMonthlyStatistics(winner.getDefender());
+        regenerateService.regenerateMonthlyStatistics(loser.getDefender());
+        regenerateService.regenerateMonthlyStatistics(winner.getAttacker());
+        regenerateService.regenerateMonthlyStatistics(loser.getAttacker());
+
     }
 }

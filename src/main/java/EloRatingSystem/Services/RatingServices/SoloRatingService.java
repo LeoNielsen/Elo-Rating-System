@@ -24,8 +24,6 @@ import java.util.Optional;
 @Service
 public class SoloRatingService {
     @Autowired
-    RatingService ratingService;
-    @Autowired
     SoloRatingRepository soloRatingRepository;
     @Autowired
     PlayerRepository playerRepository;
@@ -98,8 +96,8 @@ public class SoloRatingService {
                 );
     }
 
-    private void updatePlayerStats(Player player, SoloPlayerRating playerRating) {
-        SoloMatch match = playerRating.getSoloMatch();
+    public void updatePlayerStats(Player player, SoloPlayerRating rating) {
+        SoloMatch match = rating.getSoloMatch();
         boolean isBlue = match.getBluePlayer() == player;
         boolean won = isBlue && match.getBlueScore() > match.getRedScore() || !isBlue && match.getRedScore() > match.getBlueScore();
 
@@ -110,8 +108,8 @@ public class SoloRatingService {
                         won ? 1 : 0,
                         !won ? 1 : 0,
                         isBlue ? match.getBlueScore() : match.getRedScore(),
-                        playerRating.getNewRating(),
-                        playerRating.getOldRating(),
+                        rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
+                        rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         won ? 1 : 0,
                         won ? 1 : 0
                 )

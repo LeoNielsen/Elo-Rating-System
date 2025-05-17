@@ -27,7 +27,7 @@ public class SoloMatchService {
     @Autowired
     SoloRatingService soloRatingService;
     @Autowired
-    PlayerService playerService;
+    RegenerateService regenerateService;
 
     public Mono<List<SoloMatchResponseDto>> getRecentMatches() {
         List<SoloMatch> matches = soloMatchRepository.findTop100ByOrderByIdDesc();
@@ -78,7 +78,7 @@ public class SoloMatchService {
 
         soloMatchRepository.deleteById(match.getId());
 
-        playerService.regenerateSoloPlayerStatistics(redPlayer);
-        playerService.regenerateSoloPlayerStatistics(bluePlayer);
+        regenerateService.regenerateSoloPlayerStatistics(redPlayer);
+        regenerateService.regenerateSoloPlayerStatistics(bluePlayer);
     }
 }

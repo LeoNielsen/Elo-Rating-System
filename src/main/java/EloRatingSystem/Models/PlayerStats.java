@@ -19,23 +19,23 @@ public class PlayerStats {
     private Player player;
 
     @Column(name = "attackerWins", nullable = false)
-    private Integer attackerWins;
+    private Integer attackerWins = 0;
     @Column(name = "defenderWins", nullable = false)
-    private Integer defenderWins;
+    private Integer defenderWins = 0;
     @Column(name = "attackerLost", nullable = false)
-    private Integer attackerLost;
+    private Integer attackerLost = 0;
     @Column(name = "defenderLost", nullable = false)
-    private Integer defenderLost;
+    private Integer defenderLost = 0;
     @Column(name = "goals", nullable = false)
-    private Integer goals;
+    private Integer goals = 0;
     @Column(name = "highestELO", nullable = false)
-    private Integer highestELO;
+    private Integer highestELO = 1200;
     @Column(name = "lowestELO", nullable = false)
-    private Integer lowestELO;
+    private Integer lowestELO = 1200;
     @Column(name = "longestWinStreak", nullable = false)
-    private Integer longestWinStreak;
+    private Integer longestWinStreak = 0;
     @Column(name = "currentWinStreak", nullable = false)
-    private Integer currentWinStreak;
+    private Integer currentWinStreak = 0;
 
     public PlayerStats(Player player, Integer attackerWins, Integer defenderWins, Integer attackerLost, Integer defenderLost, Integer goals, Integer highestELO, Integer lowestELO, Integer longestWinStreak, Integer currentWinStreak) {
         this.player = player;
@@ -49,4 +49,9 @@ public class PlayerStats {
         this.longestWinStreak = longestWinStreak;
         this.currentWinStreak = currentWinStreak;
     }
+
+    public PlayerStats(Player player) {
+        this.player = player;
+    }
+
 }

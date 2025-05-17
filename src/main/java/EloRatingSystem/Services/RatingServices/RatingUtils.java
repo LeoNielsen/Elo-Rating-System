@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RatingUtils {
-    public double calculatePointMultiplier(int score1, int score2) {
+    protected double calculatePointMultiplier(int score1, int score2) {
         return 1 + Math.pow(Math.log10(Math.abs(score1 - score2)), 3);
     }
 
@@ -16,16 +16,20 @@ public class RatingUtils {
         return (oddsAgainstAttacker + oddsAgainstDefender) / 2;
     }
 
-    public double calculateOdds(int playerRating, int opponentRating, int divisor) {
+    protected double calculateOdds(int playerRating, int opponentRating, int divisor) {
         return 1.0 / (1.0 + Math.pow(10, (double) (opponentRating - playerRating) / divisor));
     }
 
-    public int calculateNewRating(int currentRating, double multiplier, double odds, boolean isWinner) {
+    protected int calculateNewRating(int currentRating, double multiplier, double odds, boolean isWinner) {
         return (int) Math.round(currentRating + (32 * multiplier) * ((isWinner ? 1.0 : 0.0) - odds));
     }
 
-    public boolean isWinner(int playerScore, int opponentScore) {
+    protected boolean isWinner(int playerScore, int opponentScore) {
         return playerScore > opponentScore;
+    }
+
+    protected boolean isPlayerInTeam(Team team, Player player) {
+        return team.getAttacker().equals(player) || team.getDefender().equals(player);
     }
 
 }
