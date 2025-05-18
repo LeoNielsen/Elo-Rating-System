@@ -99,7 +99,8 @@ public class SoloRatingService {
     public void updatePlayerStats(Player player, SoloPlayerRating rating) {
         SoloMatch match = rating.getSoloMatch();
         boolean isBlue = match.getBluePlayer() == player;
-        boolean won = isBlue && match.getBlueScore() > match.getRedScore() || !isBlue && match.getRedScore() > match.getBlueScore();
+        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueScore(),match.getRedScore());
+        boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
 
         Optional<SoloPlayerStats> playerStatsOptional = soloPlayerStatsRepository.findByPlayerId(player.getId());
         SoloPlayerStats stats = playerStatsOptional.orElseGet(() ->

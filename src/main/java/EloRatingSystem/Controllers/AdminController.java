@@ -30,8 +30,6 @@ public class AdminController {
     @Autowired
     PlayerRepository playerRepository;
     @Autowired
-    PlayerService playerService;
-    @Autowired
     RegenerateService regenerateService;
     @Autowired
     TeamService teamService;

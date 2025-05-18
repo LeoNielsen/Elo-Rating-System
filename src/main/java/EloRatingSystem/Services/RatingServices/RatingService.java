@@ -112,8 +112,9 @@ public class RatingService {
     public void updatePlayerStats(Player player, PlayerRating rating) {
         Match match = rating.getMatch();
         boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(),player);
-        boolean won = isBlue && match.getBlueTeamScore() > match.getRedTeamScore() || !isBlue && match.getRedTeamScore() > match.getBlueTeamScore();
-        boolean isAttacker = (player == match.getBlueTeam().getAttacker() || player == match.getRedTeam().getAttacker());
+        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(),match.getRedTeamScore());
+        boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
+        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(),match.getRedTeam(),player);
 
         Optional<PlayerStats> playerStatsOptional = statsRepository.findByPlayerId(player.getId());
         PlayerStats stats = playerStatsOptional.orElseGet(() ->

@@ -114,8 +114,10 @@ public class MonthlyRatingService {
     public void updateMonthlyStats(Player player, MonthlyRating rating, int month, int year) {
         Match match = rating.getMatch();
         boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(),player);
-        boolean won = isBlue && match.getBlueTeamScore() > match.getRedTeamScore() || !isBlue && match.getRedTeamScore() > match.getBlueTeamScore();
-        boolean isAttacker = (player == match.getBlueTeam().getAttacker() || player == match.getRedTeam().getAttacker());
+        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(),match.getRedTeamScore());
+        boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
+        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(),match.getRedTeam(),player);
+
 
         Optional<MonthlyStats> statsOpt = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
         MonthlyStats stats = statsOpt.orElseGet(() ->

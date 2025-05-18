@@ -56,6 +56,7 @@ public class RegenerateService {
     SoloRatingRepository soloRatingRepository;
     @Autowired
     SoloMatchRepository soloMatchRepository;
+    private PlayerRating rating;
 
     public void playerStatisticsGenAll() {
         List<Player> players = playerRepository.findAll();
@@ -77,12 +78,12 @@ public class RegenerateService {
 
         for (Match match : matches) {
             List<PlayerRating> ratings = ratingRepository.findAllByMatchIdAndPlayerId(match.getId(), player.getId());
-            for (PlayerRating rating : ratings) {
-                ratingService.updatePlayerStats(player, rating);
-                if (match.getDate().toLocalDate().equals(today.toLocalDate())) {
-                    ratingService.updatePlayerDailyStats(rating.getNewRating() - rating.getOldRating(), player);
-                }
+            PlayerRating rating = ratings.get(0);
+            ratingService.updatePlayerStats(player, rating);
+            if (match.getDate().toLocalDate().equals(today.toLocalDate())) {
+                ratingService.updatePlayerDailyStats(rating.getNewRating() - rating.getOldRating(), player);
             }
+
         }
     }
 
@@ -124,7 +125,7 @@ public class RegenerateService {
             LocalDate date = match.getDate().toLocalDate();
             int month = date.getMonthValue();
             int year = date.getYear();
-            monthlyRatingService.newRating(match,month,year);
+            monthlyRatingService.newRating(match, month, year);
         }
 
         monthlyDailyStatsRepository.deleteAll();

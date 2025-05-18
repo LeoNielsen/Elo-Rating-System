@@ -32,4 +32,8 @@ public class RatingUtils {
         return team.getAttacker().equals(player) || team.getDefender().equals(player);
     }
 
+    protected boolean isAttacker(Team team, Team team2, Player player) {
+        return team.getAttacker().equals(player) || team2.getAttacker().equals(player);
+    }
+
 }

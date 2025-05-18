@@ -57,7 +57,7 @@ public class PlayerService {
     }
 
     public Mono<PlayerResponseDto> getByNameTag(String nameTag) {
-        Optional<Player> player = playerRepository.findByNameTag(nameTag);
+        Optional<Player> player = playerRepository.findByNameTagIgnoreCase(nameTag);
         if (player.isPresent()) {
             PlayerResponseDto responseDto = new PlayerResponseDto(player.get());
             return Mono.just(responseDto);
@@ -75,7 +75,7 @@ public class PlayerService {
     }
 
     public boolean checkIfPlayerExists(String nameTag) {
-        return playerRepository.findByNameTag(nameTag).isPresent();
+        return playerRepository.findByNameTagIgnoreCase(nameTag).isPresent();
     }
 
     public Mono<PlayerStatisticsResponseDto> getStatistics(Long id) {
