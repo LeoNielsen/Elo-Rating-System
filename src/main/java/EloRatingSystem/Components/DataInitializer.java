@@ -56,7 +56,7 @@ public class DataInitializer implements CommandLineRunner {
 
         addIfMissing("win_10_zero_as_defender", "Absolute Defense", "win a game 10 - 0 as a defender", GameType.TEAMS, AchievementType.WIN_10_ZERO_AS_DEFENDER, AchievementMetric.WINS, 1);
         addIfMissing("win_10_zero_as_attacker", "Offensive Overdrive", "win a game 10 - 0 as an attacker", GameType.TEAMS, AchievementType.WIN_10_ZERO_AS_ATTACKER, AchievementMetric.WINS, 1);
-        addIfMissing("win_10_zero_Solo", "Solo Slaughter", "win a game 10 - 0 in 1v1", GameType.TEAMS, AchievementType.WIN_10_ZERO_AS_ATTACKER, AchievementMetric.WINS, 1);
+        addIfMissing("win_10_zero_Solo", "Solo Slaughter", "win a game 10 - 0 in 1v1", GameType.SOLO, AchievementType.WIN_10_ZERO_SOLO, AchievementMetric.WINS, 1);
 
         addIfMissing("monthly_2v2_wins", "First Crown", "win monthly 2v2", GameType.MONTHLY, AchievementType.TOTAL_MONTHLY_2V2_WINS, AchievementMetric.WINS, 1);
         addIfMissing("monthly_2v2_wins_3", "Monthly Master", "win monthly 2v2 3 times", GameType.MONTHLY, AchievementType.TOTAL_MONTHLY_2V2_WINS, AchievementMetric.WINS, 3);
