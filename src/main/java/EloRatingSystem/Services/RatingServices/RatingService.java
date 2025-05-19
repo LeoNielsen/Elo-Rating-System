@@ -10,6 +10,7 @@ import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.PlayerStatsRepository;
 import EloRatingSystem.Reporitories.RatingRepository;
+import EloRatingSystem.Services.AchievementService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,8 @@ public class RatingService {
     MatchRepository matchRepository;
     @Autowired
     RatingUtils ratingUtils;
+    @Autowired
+    AchievementService achievementService;
 
     public Mono<List<RatingResponseDto>> getRatingByMatchId(Long id) {
         List<PlayerRating> ratings = ratingRepository.findAllByMatchId(id);
@@ -156,6 +159,7 @@ public class RatingService {
             stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
         }
         statsRepository.save(stats);
+        achievementService.checkAndUnlockAchievements(player,match);
     }
 
     public void deleteRatingsByMatch(Long Id) {

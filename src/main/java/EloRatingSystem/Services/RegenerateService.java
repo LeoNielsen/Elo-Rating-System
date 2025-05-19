@@ -56,7 +56,8 @@ public class RegenerateService {
     SoloRatingRepository soloRatingRepository;
     @Autowired
     SoloMatchRepository soloMatchRepository;
-    private PlayerRating rating;
+    @Autowired
+    AchievementService achievementService;
 
     public void playerStatisticsGenAll() {
         List<Player> players = playerRepository.findAll();
@@ -83,7 +84,7 @@ public class RegenerateService {
             if (match.getDate().toLocalDate().equals(today.toLocalDate())) {
                 ratingService.updatePlayerDailyStats(rating.getNewRating() - rating.getOldRating(), player);
             }
-
+            achievementService.checkAndUnlockAchievements(player,match);
         }
     }
 
@@ -112,6 +113,7 @@ public class RegenerateService {
             if (match.getDate().toLocalDate().equals(today.toLocalDate())) {
                 soloRatingService.updatePlayerDailyStats(rating.getNewRating() - rating.getOldRating(), player);
             }
+            achievementService.checkAndUnlockAchievementsSolo(player,match);
         }
     }
 

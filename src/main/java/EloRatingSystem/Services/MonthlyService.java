@@ -19,6 +19,8 @@ public class MonthlyService {
     MonthlyWinnerRepository monthlyWinnerRepository;
     @Autowired
     MonthlyStatsRepository monthlyStatsRepository;
+    @Autowired
+    AchievementService achievementService;
 
     @Scheduled(cron = "0 0 2 1 * *")
     public void setMonthlyWinner() {
@@ -45,6 +47,7 @@ public class MonthlyService {
                     month,
                     stats.getMonthlyRating()
             ));
+            achievementService.checkAndUnlockAchievementsMonthly(stats.getPlayer());
         }
     }
 }

@@ -13,6 +13,7 @@ import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.SoloMatchRepository;
 import EloRatingSystem.Reporitories.SoloPlayerStatsRepository;
 import EloRatingSystem.Reporitories.SoloRatingRepository;
+import EloRatingSystem.Services.AchievementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -35,6 +36,8 @@ public class SoloRatingService {
     SoloPlayerStatsRepository soloPlayerStatsRepository;
     @Autowired
     RatingUtils ratingUtils;
+    @Autowired
+    AchievementService achievementService;
 
     public Mono<List<RatingResponseDto>> getSoloRatingBySoloMatchId(Long id) {
         List<SoloPlayerRating> ratings = soloRatingRepository.findAllBySoloMatchId(id);
@@ -140,6 +143,7 @@ public class SoloRatingService {
         }
 
         soloPlayerStatsRepository.save(stats);
+        achievementService.checkAndUnlockAchievementsSolo(player,match);
     }
 
     public void deleteRatingsBySoloMatch(Long id) {
