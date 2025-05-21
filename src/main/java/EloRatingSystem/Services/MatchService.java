@@ -3,12 +3,15 @@ package EloRatingSystem.Services;
 import EloRatingSystem.Dtos.MatchRequestDto;
 import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Exception.ApiException;
+import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Match;
 import EloRatingSystem.Models.Team;
+import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.TeamRepository;
 import EloRatingSystem.Services.RatingServices.MonthlyRatingService;
 import EloRatingSystem.Services.RatingServices.RatingService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,8 @@ public class MatchService {
     MonthlyRatingService monthlyRatingService;
     @Autowired
     RegenerateService regenerateService;
+    @Autowired
+    PlayerAchievementRepository playerAchievementRepository;
 
     public Mono<List<MatchResponseDto>> getAllMatches() {
         List<Match> matches = matchRepository.findAll();
@@ -82,6 +87,7 @@ public class MatchService {
                 , HttpStatus.BAD_REQUEST));
     }
 
+    @Transactional
     public void deleteLatestMatch() {
         Match match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
         ratingService.deleteRatingsByMatch(match.getId());
@@ -97,10 +103,16 @@ public class MatchService {
         monthlyRatingService.deleteRatingsByMatch(match.getId());
         matchRepository.deleteById(match.getId());
 
+        playerAchievementRepository.deleteAllByPlayerIdAndGameType(winner.getDefender().getId(), GameType.TEAMS);
+        playerAchievementRepository.deleteAllByPlayerIdAndGameType(loser.getDefender().getId(), GameType.TEAMS);
+        playerAchievementRepository.deleteAllByPlayerIdAndGameType(winner.getAttacker().getId(), GameType.TEAMS);
+        playerAchievementRepository.deleteAllByPlayerIdAndGameType(loser.getAttacker().getId(), GameType.TEAMS);
+
         regenerateService.regeneratePlayerStatistics(winner.getDefender());
         regenerateService.regeneratePlayerStatistics(loser.getDefender());
         regenerateService.regeneratePlayerStatistics(winner.getAttacker());
         regenerateService.regeneratePlayerStatistics(loser.getAttacker());
+
         regenerateService.regenerateMonthlyStatistics(winner.getDefender());
         regenerateService.regenerateMonthlyStatistics(loser.getDefender());
         regenerateService.regenerateMonthlyStatistics(winner.getAttacker());

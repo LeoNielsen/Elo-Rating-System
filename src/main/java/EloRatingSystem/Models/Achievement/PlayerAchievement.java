@@ -23,9 +23,16 @@ public class PlayerAchievement {
 
     private boolean unlocked;
 
+    @Enumerated(EnumType.STRING)
+    private GameType gameType;
+
+
+
+
     public PlayerAchievement(Player player, Achievement achievement, boolean unlocked) {
         this.player = player;
         this.achievement = achievement;
         this.unlocked = unlocked;
+        this.gameType = achievement.getGameType();
     }
 }

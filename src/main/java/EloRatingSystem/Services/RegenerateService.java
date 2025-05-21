@@ -61,7 +61,6 @@ public class RegenerateService {
 
     public void playerStatisticsGenAll() {
         List<Player> players = playerRepository.findAll();
-
         for (Player player : players) {
             regeneratePlayerStatistics(player);
         }

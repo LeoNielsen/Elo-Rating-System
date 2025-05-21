@@ -3,11 +3,14 @@ package EloRatingSystem.Services;
 import EloRatingSystem.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Exception.ApiException;
+import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.SoloMatch;
+import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.SoloMatchRepository;
 import EloRatingSystem.Services.RatingServices.SoloRatingService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,8 @@ public class SoloMatchService {
     SoloRatingService soloRatingService;
     @Autowired
     RegenerateService regenerateService;
+    @Autowired
+    PlayerAchievementRepository playerAchievementRepository;
 
     public Mono<List<SoloMatchResponseDto>> getRecentMatches() {
         List<SoloMatch> matches = soloMatchRepository.findTop100ByOrderByIdDesc();
@@ -69,6 +74,7 @@ public class SoloMatchService {
                 , HttpStatus.BAD_REQUEST));
     }
 
+    @Transactional
     public void deleteLatestSoloMatch() {
         SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
         soloRatingService.deleteRatingsBySoloMatch(match.getId());
@@ -77,6 +83,9 @@ public class SoloMatchService {
         Player bluePlayer = match.getBluePlayer();
 
         soloMatchRepository.deleteById(match.getId());
+
+        playerAchievementRepository.deleteAllByPlayerIdAndGameType(redPlayer.getId(), GameType.SOLO);
+        playerAchievementRepository.deleteAllByPlayerIdAndGameType(bluePlayer.getId(), GameType.SOLO);
 
         regenerateService.regenerateSoloPlayerStatistics(redPlayer);
         regenerateService.regenerateSoloPlayerStatistics(bluePlayer);

@@ -2,6 +2,7 @@ package EloRatingSystem.Services;
 
 import EloRatingSystem.Models.*;
 import EloRatingSystem.Models.Achievement.Achievement;
+import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Achievement.PlayerAchievement;
 import EloRatingSystem.Reporitories.Achievements.AchievementRepository;
 import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
@@ -60,7 +61,7 @@ public class AchievementService {
             }
         }
 
-        List<Achievement> allAchievements = achievementRepository.findAll();
+        List<Achievement> allAchievements = achievementRepository.findAllByGameType(GameType.TEAMS);
         for (Achievement achievement : allAchievements) {
             boolean qualifies = switch (achievement.getType()) {
                 case RATING_REACHED -> rating >= achievement.getAmount();
@@ -99,7 +100,7 @@ public class AchievementService {
             }
         }
 
-        List<Achievement> allAchievements = achievementRepository.findAll();
+        List<Achievement> allAchievements = achievementRepository.findAllByGameType(GameType.SOLO);
         for (Achievement achievement : allAchievements) {
             boolean qualifies = switch (achievement.getType()) {
                 case RATING_REACHED_SOLO -> rating >= achievement.getAmount();
@@ -120,8 +121,8 @@ public class AchievementService {
 
     public void checkAndUnlockAchievementsMonthly(Player player) {
         List<MonthlyWinner> monthlyWins = monthlyWinnerRepository.findAllByPlayerId(player.getId());
-        List<Achievement> allAchievements = achievementRepository.findAll();
 
+        List<Achievement> allAchievements = achievementRepository.findAllByGameType(GameType.MONTHLY);
         for (Achievement achievement : allAchievements) {
             boolean qualifies = switch (achievement.getType()) {
                 case TOTAL_MONTHLY_2V2_WINS -> monthlyWins.size() >= achievement.getAmount();
