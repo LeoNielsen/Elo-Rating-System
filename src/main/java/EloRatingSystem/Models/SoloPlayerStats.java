@@ -19,19 +19,19 @@ public class SoloPlayerStats {
     private Player player;
 
     @Column(name = "wins", nullable = false)
-    private Integer wins;
+    private Integer wins = 0;
     @Column(name = "lost", nullable = false)
-    private Integer lost;
+    private Integer lost = 0;
     @Column(name = "goals", nullable = false)
-    private Integer goals;
+    private Integer goals = 0;
     @Column(name = "highestELO", nullable = false)
-    private Integer highestELO;
+    private Integer highestELO = 1200;
     @Column(name = "lowestELO", nullable = false)
-    private Integer lowestELO;
+    private Integer lowestELO = 1200;
     @Column(name = "longestWinStreak", nullable = false)
-    private Integer longestWinStreak;
+    private Integer longestWinStreak = 0;
     @Column(name = "currentWinStreak", nullable = false)
-    private Integer currentWinStreak;
+    private Integer currentWinStreak = 0;
 
     public SoloPlayerStats(Player player, Integer wins, Integer lost, Integer goals, Integer highestELO, Integer lowestELO, Integer longestWinStreak, Integer currentWinStreak) {
         this.player = player;
@@ -42,5 +42,9 @@ public class SoloPlayerStats {
         this.lowestELO = lowestELO;
         this.longestWinStreak = longestWinStreak;
         this.currentWinStreak = currentWinStreak;
+    }
+
+    public SoloPlayerStats(Player player) {
+        this.player = player;
     }
 }

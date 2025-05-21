@@ -5,8 +5,10 @@ import EloRatingSystem.Models.Achievement.Achievement;
 import EloRatingSystem.Models.Achievement.PlayerAchievement;
 import EloRatingSystem.Reporitories.Achievements.AchievementRepository;
 import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
+import EloRatingSystem.Reporitories.MonthlyStatsRepository;
 import EloRatingSystem.Reporitories.MonthlyWinnerRepository;
 import EloRatingSystem.Reporitories.PlayerStatsRepository;
+import EloRatingSystem.Reporitories.SoloPlayerStatsRepository;
 import EloRatingSystem.Services.RatingServices.RatingUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,10 @@ public class AchievementService {
 
     @Autowired
     PlayerStatsRepository statsRepository;
+    @Autowired
+    SoloPlayerStatsRepository soloStatsRepository;
+    @Autowired
+    MonthlyStatsRepository monthlyStatsRepository;
     @Autowired
     AchievementRepository achievementRepository;
     @Autowired
@@ -68,18 +74,17 @@ public class AchievementService {
             };
 
             if (qualifies && !playerAchievementIsUnlocked(player, achievement)) {
-                System.out.println("qualy");
                 unlockAchievement(player, achievement);
             }
         }
     }
 
     public void checkAndUnlockAchievementsSolo(Player player, SoloMatch match) {
-        PlayerStats playerStats = statsRepository.findByPlayerId(player.getId())
-                .orElseGet(() -> new PlayerStats(player));
+        SoloPlayerStats playerStats = soloStatsRepository.findByPlayerId(player.getId())
+                .orElseGet(() -> new SoloPlayerStats(player));
 
         int rating = player.getRating();
-        int totalWins = playerStats.getAttackerWins() + playerStats.getDefenderWins();
+        int totalWins = playerStats.getWins();
         int winStreak = playerStats.getLongestWinStreak();
         boolean winTenZero = false;
 

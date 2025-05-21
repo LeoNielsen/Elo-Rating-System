@@ -66,15 +66,14 @@ public class AdminController {
         regenerateService.monthlyStatisticsGenAll();
     }
 
-    @GetMapping("/monthly/player/statgen")
-    public void monthlyStatGen() {
-        regenerateService.playerStatisticsGenAll();
-        regenerateService.monthlyStatisticsGenAll();
-    }
-
     @GetMapping("/solo/player/statgen")
     public void soloPlayerStatGen() {
         regenerateService.regenerateSoloPlayerStatisticsAll();
+    }
+
+    @GetMapping("/monthly/player/statgen")
+    public void monthlyStatGen() {
+        regenerateService.monthlyStatisticsGenAll();
     }
 
     @GetMapping("/match/gen")

@@ -90,8 +90,8 @@ public class RatingService {
         loser.setLost(loser.getLost() + 1);
     }
 
-    private Player newPlayerRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
-        int newPlayerRating = ratingUtils.calculateNewRating(player.getRating(), pointMultiplier, (teamRating + playerOdds) / 2, isWinner);
+    private Player newPlayerRating(Player player, double teamOdds, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
+        int newPlayerRating = ratingUtils.calculateNewRating(player.getRating(), pointMultiplier, (teamOdds + playerOdds) / 2, isWinner);
         PlayerRating playerRating = new PlayerRating(match, player, player.getRating(), newPlayerRating);
         ratingRepository.save(playerRating);
         updatePlayerStats(player, playerRating);

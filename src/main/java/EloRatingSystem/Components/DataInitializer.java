@@ -23,8 +23,8 @@ public class DataInitializer implements CommandLineRunner {
         addIfMissing("rating_1450", "Rating Raider", "Reach 1450 rating", GameType.TEAMS, AchievementType.RATING_REACHED, AchievementMetric.RATING, 1450);
         addIfMissing("rating_1500", "Peak Performer", "Reach 1500 rating", GameType.TEAMS, AchievementType.RATING_REACHED, AchievementMetric.RATING, 1500);
 
-        addIfMissing("rating_1300_solo", "Climber", "Reach 1300 rating in solo", GameType.SOLO, AchievementType.RATING_REACHED_SOLO, AchievementMetric.RATING, 1300);
-        addIfMissing("rating_1350_solo", "Path of One", "Reach 1350 rating in solo", GameType.SOLO, AchievementType.RATING_REACHED_SOLO, AchievementMetric.RATING, 1350);
+        addIfMissing("rating_1300_solo", "Path of One", "Reach 1300 rating in solo", GameType.SOLO, AchievementType.RATING_REACHED_SOLO, AchievementMetric.RATING, 1300);
+        addIfMissing("rating_1350_solo", "Climber", "Reach 1350 rating in solo", GameType.SOLO, AchievementType.RATING_REACHED_SOLO, AchievementMetric.RATING, 1350);
         addIfMissing("rating_1400_solo", "Solo Rush", "Reach 1400 rating in solo", GameType.SOLO, AchievementType.RATING_REACHED_SOLO, AchievementMetric.RATING, 1400);
         addIfMissing("rating_1450_solo", "Lone Raider", "Reach 1450 rating in solo", GameType.SOLO, AchievementType.RATING_REACHED_SOLO, AchievementMetric.RATING, 1450);
         addIfMissing("rating_1500_solo", "Solo Performer", "Reach 1500 rating in solo", GameType.SOLO, AchievementType.RATING_REACHED_SOLO, AchievementMetric.RATING, 1500);
@@ -49,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
         addIfMissing("win_streak_25", "The Inferno", "win 25 times in a row", GameType.TEAMS, AchievementType.WIN_STREAK, AchievementMetric.WIN_STREAK, 25);
 
         addIfMissing("win_streak_5_solo", "Getting Warm", "win 5 times in a row in solo", GameType.SOLO, AchievementType.WIN_STREAK_SOLO, AchievementMetric.WIN_STREAK, 5);
-        addIfMissing("win_streak_10_solo", "Hot solo", "win 10 times in a row in solo", GameType.SOLO, AchievementType.WIN_STREAK_SOLO, AchievementMetric.WIN_STREAK, 10);
+        addIfMissing("win_streak_10_solo", "Hot Solo", "win 10 times in a row in solo", GameType.SOLO, AchievementType.WIN_STREAK_SOLO, AchievementMetric.WIN_STREAK, 10);
         addIfMissing("win_streak_15_solo", "Solo Fire", "win 15 times in a row in solo", GameType.SOLO, AchievementType.WIN_STREAK_SOLO, AchievementMetric.WIN_STREAK, 15);
         addIfMissing("win_streak_20_solo", "Burning Solo", "win 20 times in a row in solo", GameType.SOLO, AchievementType.WIN_STREAK_SOLO, AchievementMetric.WIN_STREAK, 20);
         addIfMissing("win_streak_25_solo", "Lone Inferno", "win 25 times in a row in solo", GameType.SOLO, AchievementType.WIN_STREAK_SOLO, AchievementMetric.WIN_STREAK, 25);
