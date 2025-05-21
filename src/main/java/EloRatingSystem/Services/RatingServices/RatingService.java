@@ -114,10 +114,10 @@ public class RatingService {
 
     public void updatePlayerStats(Player player, PlayerRating rating) {
         Match match = rating.getMatch();
-        boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(),player);
-        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(),match.getRedTeamScore());
+        boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(), player);
+        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
-        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(),match.getRedTeam(),player);
+        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
         Optional<PlayerStats> playerStatsOptional = statsRepository.findByPlayerId(player.getId());
         PlayerStats stats = playerStatsOptional.orElseGet(() ->
@@ -131,12 +131,16 @@ public class RatingService {
                         rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         won ? 1 : 0,
-                        won ? 1 : 0
+                        won ? 1 : 0,
+                        isBlue && match.getRedTeamScore() == 0 || !isBlue && match.getBlueTeamScore() == 0 ? 1 : 0
                 )
         );
 
         if (playerStatsOptional.isPresent()) {
             if (won) {
+                if (ratingUtils.tenZeroMatch(match.getBlueTeamScore(), match.getRedTeamScore())) {
+                    stats.setShutouts(stats.getShutouts() + 1);
+                }
                 if (isAttacker) {
                     stats.setAttackerWins(stats.getAttackerWins() + 1);
                 } else {
@@ -144,6 +148,7 @@ public class RatingService {
                 }
                 stats.setCurrentWinStreak(stats.getCurrentWinStreak() + 1);
                 stats.setLongestWinStreak(Math.max(stats.getLongestWinStreak(), stats.getCurrentWinStreak()));
+
             } else {
                 if (isAttacker) {
                     stats.setAttackerLost(stats.getAttackerLost() + 1);
@@ -159,7 +164,7 @@ public class RatingService {
             stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
         }
         statsRepository.save(stats);
-        achievementService.checkAndUnlockAchievements(player,match);
+        achievementService.checkAndUnlockAchievements(player, match);
     }
 
     public void deleteRatingsByMatch(Long Id) {

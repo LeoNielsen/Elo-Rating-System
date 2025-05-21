@@ -23,6 +23,7 @@ public class PlayerStatisticsResponseDto {
     private Integer lowestELO;
     private Integer longestWinStreak;
     private Integer currentWinStreak;
+    private Integer shutouts;
 
     public PlayerStatisticsResponseDto(Player player, PlayerStats playerStats, int todayRatingChance) {
         this.id = player.getId();
@@ -38,6 +39,7 @@ public class PlayerStatisticsResponseDto {
         this.longestWinStreak = playerStats.getLongestWinStreak();
         this.currentWinStreak = playerStats.getCurrentWinStreak();
         this.todayRatingChance = todayRatingChance;
+        this.shutouts = playerStats.getShutouts();
     }
 
     public PlayerStatisticsResponseDto(Player player, int todayRatingChance) {
@@ -54,6 +56,7 @@ public class PlayerStatisticsResponseDto {
         this.longestWinStreak = 0;
         this.currentWinStreak = 0;
         this.todayRatingChance = todayRatingChance;
+        this.shutouts = 0;
     }
 
     public PlayerStatisticsResponseDto(Player player, MonthlyStats playerStats, int todayRatingChance) {

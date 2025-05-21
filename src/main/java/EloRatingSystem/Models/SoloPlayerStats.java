@@ -32,8 +32,10 @@ public class SoloPlayerStats {
     private Integer longestWinStreak = 0;
     @Column(name = "currentWinStreak", nullable = false)
     private Integer currentWinStreak = 0;
+    @Column(name = "shutouts", nullable = false)
+    private Integer shutouts = 0;
 
-    public SoloPlayerStats(Player player, Integer wins, Integer lost, Integer goals, Integer highestELO, Integer lowestELO, Integer longestWinStreak, Integer currentWinStreak) {
+    public SoloPlayerStats(Player player, Integer wins, Integer lost, Integer goals, Integer highestELO, Integer lowestELO, Integer longestWinStreak, Integer currentWinStreak, Integer shutouts) {
         this.player = player;
         this.wins = wins;
         this.lost = lost;
@@ -42,6 +44,7 @@ public class SoloPlayerStats {
         this.lowestELO = lowestELO;
         this.longestWinStreak = longestWinStreak;
         this.currentWinStreak = currentWinStreak;
+        this.shutouts = shutouts;
     }
 
     public SoloPlayerStats(Player player) {

@@ -6,6 +6,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RatingUtils {
+
+    public boolean tenZeroMatch(int score1, int score2) {
+        return score1 == 0 || score2 == 0;
+    }
+
     public double calculatePointMultiplier(int score1, int score2) {
         return 1 + Math.pow(Math.log10(Math.abs(score1 - score2)), 3);
     }

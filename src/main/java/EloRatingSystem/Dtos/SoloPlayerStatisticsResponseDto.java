@@ -19,6 +19,7 @@ public class SoloPlayerStatisticsResponseDto {
     private Integer longestWinStreak;
     private Integer currentWinStreak;
     private Integer todayRatingChance;
+    private Integer shutouts;
 
 
     public SoloPlayerStatisticsResponseDto(Player player, SoloPlayerStats playerStats, int todayRatingChance) {
@@ -33,6 +34,7 @@ public class SoloPlayerStatisticsResponseDto {
         this.longestWinStreak = playerStats.getLongestWinStreak();
         this.currentWinStreak = playerStats.getCurrentWinStreak();
         this.todayRatingChance = todayRatingChance;
+        this.shutouts = playerStats.getShutouts();
     }
 
     public SoloPlayerStatisticsResponseDto(Player player, int todayRatingChance) {
@@ -47,6 +49,7 @@ public class SoloPlayerStatisticsResponseDto {
         this.longestWinStreak = 0;
         this.currentWinStreak = 0;
         this.todayRatingChance = todayRatingChance;
+        this.shutouts = 0;
     }
 
 }

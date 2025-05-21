@@ -115,12 +115,16 @@ public class SoloRatingService {
                         rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         won ? 1 : 0,
-                        won ? 1 : 0
+                        won ? 1 : 0,
+                        isBlue && match.getRedScore() == 0 || !isBlue && match.getBlueScore() == 0 ? 1 : 0
                 )
         );
 
         if (playerStatsOptional.isPresent()) {
             if (won) {
+                if (ratingUtils.tenZeroMatch(match.getBlueScore(), match.getRedScore())) {
+                    stats.setShutouts(stats.getShutouts() + 1);
+                }
                 stats.setWins(stats.getWins() + 1);
                 stats.setCurrentWinStreak(stats.getCurrentWinStreak() + 1);
                 if (stats.getCurrentWinStreak() > stats.getLongestWinStreak()) {

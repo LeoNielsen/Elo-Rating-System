@@ -60,18 +60,18 @@ public class AdminController {
         playerRepository.deleteAll();
     }
 
-    @GetMapping("/player/statgen")
+    @PostMapping("/player/statgen")
     public void playerStatGen() {
         regenerateService.playerStatisticsGenAll();
         regenerateService.monthlyStatisticsGenAll();
     }
 
-    @GetMapping("/solo/player/statgen")
+    @PostMapping("/solo/player/statgen")
     public void soloPlayerStatGen() {
         regenerateService.regenerateSoloPlayerStatisticsAll();
     }
 
-    @GetMapping("/monthly/player/statgen")
+    @PostMapping("/monthly/player/statgen")
     public void monthlyStatGen() {
         regenerateService.monthlyStatisticsGenAll();
     }
