@@ -39,7 +39,7 @@ public class AchievementService {
         PlayerStats playerStats = statsRepository.findByPlayerId(player.getId())
                 .orElseGet(() -> new PlayerStats(player));
 
-        int rating = player.getRating();
+        int rating = playerStats.getHighestELO();
         int totalWins = playerStats.getAttackerWins() + playerStats.getDefenderWins();
         int winStreak = playerStats.getLongestWinStreak();
         boolean winTenZeroAsDef = false;
@@ -84,7 +84,7 @@ public class AchievementService {
         SoloPlayerStats playerStats = soloStatsRepository.findByPlayerId(player.getId())
                 .orElseGet(() -> new SoloPlayerStats(player));
 
-        int rating = player.getRating();
+        int rating = playerStats.getHighestELO();
         int totalWins = playerStats.getWins();
         int winStreak = playerStats.getLongestWinStreak();
         boolean winTenZero = false;
