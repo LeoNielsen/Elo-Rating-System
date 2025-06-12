@@ -40,6 +40,7 @@ public class AchievementService {
                 .orElseGet(() -> new PlayerStats(player));
 
         int rating = playerStats.getHighestELO();
+        int currentRating = player.getRating();
         int totalWins = playerStats.getAttackerWins() + playerStats.getDefenderWins();
         int winStreak = playerStats.getLongestWinStreak();
         boolean winTenZeroAsDef = false;
@@ -69,7 +70,7 @@ public class AchievementService {
                 case WIN_STREAK -> winStreak >= achievement.getAmount();
                 case WIN_10_ZERO_AS_DEFENDER -> winTenZeroAsDef;
                 case WIN_10_ZERO_AS_ATTACKER -> winTenZeroAsAtk;
-                case WIN_AGAINST_HIGHER_RATED -> won && lowerRatingThenTeam(rating,
+                case WIN_AGAINST_HIGHER_RATED -> won && lowerRatingThenTeam(currentRating,
                         isBlue ? match.getRedTeam() : match.getBlueTeam(), achievement.getAmount());
                 default -> false;
             };
@@ -85,6 +86,7 @@ public class AchievementService {
                 .orElseGet(() -> new SoloPlayerStats(player));
 
         int rating = playerStats.getHighestELO();
+        int currentRating = player.getSoloRating();
         int totalWins = playerStats.getWins();
         int winStreak = playerStats.getLongestWinStreak();
         boolean winTenZero = false;
@@ -107,7 +109,7 @@ public class AchievementService {
                 case TOTAL_WINS_SOLO -> totalWins >= achievement.getAmount();
                 case WIN_STREAK_SOLO -> winStreak >= achievement.getAmount();
                 case WIN_10_ZERO_SOLO -> winTenZero;
-                case WIN_AGAINST_HIGHER_RATED_SOLO -> won && lowerRatingThenPlayer(rating,
+                case WIN_AGAINST_HIGHER_RATED_SOLO -> won && lowerRatingThenPlayer(currentRating,
                         isBlue? match.getRedPlayer().getRating() : match.getBluePlayer().getRating(),
                         achievement.getAmount());
                 default -> false;
