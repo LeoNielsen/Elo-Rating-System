@@ -1,7 +1,7 @@
 package EloRatingSystem.Services;
 
+import EloRatingSystem.Dtos.Match2v2ResponseDto;
 import EloRatingSystem.Dtos.MatchRequestDto;
-import EloRatingSystem.Dtos.MatchResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Match;
@@ -38,33 +38,33 @@ public class MatchService {
     @Autowired
     PlayerAchievementRepository playerAchievementRepository;
 
-    public Mono<List<MatchResponseDto>> getAllMatches() {
+    public Mono<List<Match2v2ResponseDto>> getAllMatches() {
         List<Match> matches = matchRepository.findAll();
-        List<MatchResponseDto> matchResponseDtoList = new ArrayList<>();
+        List<Match2v2ResponseDto> matchResponseDtoList = new ArrayList<>();
         for (Match match : matches) {
-            matchResponseDtoList.add(new MatchResponseDto(match));
+            matchResponseDtoList.add(new Match2v2ResponseDto(match));
         }
 
         return Mono.just(matchResponseDtoList);
     }
 
-    public Mono<List<MatchResponseDto>> getRecentMatches() {
+    public Mono<List<Match2v2ResponseDto>> getRecentMatches() {
         List<Match> matches = matchRepository.findTop100ByOrderByIdDesc();
-        List<MatchResponseDto> matchResponseDtoList = new ArrayList<>();
+        List<Match2v2ResponseDto> matchResponseDtoList = new ArrayList<>();
         for (Match match : matches) {
-            matchResponseDtoList.add(new MatchResponseDto(match));
+            matchResponseDtoList.add(new Match2v2ResponseDto(match));
         }
 
         return Mono.just(matchResponseDtoList);
     }
 
-    public Mono<MatchResponseDto> getMatchById(Long id) {
+    public Mono<Match2v2ResponseDto> getMatchById(Long id) {
         Optional<Match> match = matchRepository.findById(id);
-        return match.map(value -> Mono.just(new MatchResponseDto(value)))
+        return match.map(value -> Mono.just(new Match2v2ResponseDto(value)))
                 .orElseGet(() -> Mono.error(new ApiException(String.format("match %s doesn't exist", id), HttpStatus.BAD_REQUEST)));
     }
 
-    public Mono<MatchResponseDto> newMatch(MatchRequestDto requestDto) {
+    public Mono<Match2v2ResponseDto> newMatch(MatchRequestDto requestDto) {
         Optional<Team> redTeamOptional = teamRepository.findById(requestDto.getRedTeamId());
         Optional<Team> blueTeamOptional = teamRepository.findById(requestDto.getBlueTeamId());
 
@@ -79,7 +79,7 @@ public class MatchService {
             monthlyRatingService.newRating(match);
             match = matchRepository.save(match);
 
-            return Mono.just(new MatchResponseDto(match));
+            return Mono.just(new Match2v2ResponseDto(match));
         }
 
         return Mono.error(new ApiException(

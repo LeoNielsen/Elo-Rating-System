@@ -2,6 +2,7 @@ package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.*;
 import EloRatingSystem.Models.Match;
+import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.SoloMatch;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.MonthlyRatingRepository;
@@ -104,7 +105,7 @@ public class CsvController {
                             return teamService.newTeam(teamRequest);
                         });
 
-                Mono<MatchResponseDto> Match = Mono.zip(teamRed, teamBlue)
+                Mono<Match2v2ResponseDto> Match = Mono.zip(teamRed, teamBlue)
                         .flatMap(tuple -> {
                             TeamResponseDto redTeam = tuple.getT1();
                             TeamResponseDto blueTeam = tuple.getT2();
@@ -128,13 +129,13 @@ public class CsvController {
     }
 
     @PostMapping("/upload-json")
-    public String uploadJson(@RequestBody List<MatchResponseDto> matches) {
+    public String uploadJson(@RequestBody List<Match> matches) {
         try {
-            for (MatchResponseDto jsonMatchDto : matches) {
-                PlayerResponseDto redDefender = jsonMatchDto.getRedTeam().getDefender();
-                PlayerResponseDto redAttacker = jsonMatchDto.getRedTeam().getAttacker();
-                PlayerResponseDto blueDefender = jsonMatchDto.getBlueTeam().getDefender();
-                PlayerResponseDto blueAttacker = jsonMatchDto.getBlueTeam().getAttacker();
+            for (Match jsonMatchDto : matches) {
+                Player redDefender = jsonMatchDto.getRedTeam().getDefender();
+                Player redAttacker = jsonMatchDto.getRedTeam().getAttacker();
+                Player blueDefender = jsonMatchDto.getBlueTeam().getDefender();
+                Player blueAttacker = jsonMatchDto.getBlueTeam().getAttacker();
 
                 Mono<PlayerResponseDto> r_d = playerService.checkIfPlayerExists(redDefender.getNameTag()) ?
                         playerService.getByNameTag(redDefender.getNameTag()) :
@@ -166,7 +167,7 @@ public class CsvController {
                             return teamService.newTeam(new TeamRequestDto(ba.getId(), bd.getId()));
                         });
 
-                Mono<MatchResponseDto> matchMono = Mono.zip(teamRed, teamBlue)
+                Mono<Match2v2ResponseDto> matchMono = Mono.zip(teamRed, teamBlue)
                         .flatMap(tuple -> {
                             TeamResponseDto red = tuple.getT1();
                             TeamResponseDto blue = tuple.getT2();

@@ -1,9 +1,6 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Dtos.MatchRequestDto;
-import EloRatingSystem.Dtos.MatchResponseDto;
-import EloRatingSystem.Dtos.SoloMatchRequestDto;
-import EloRatingSystem.Dtos.SoloMatchResponseDto;
+import EloRatingSystem.Dtos.*;
 import EloRatingSystem.Services.MatchService;
 import EloRatingSystem.Services.SoloMatchService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,22 +21,22 @@ public class MatchController {
     SoloMatchService soloMatchService;
 
     @GetMapping("/{id}")
-    public Mono<MatchResponseDto> getMatchById(@PathVariable Long id) {
+    public Mono<Match2v2ResponseDto> getMatchById(@PathVariable Long id) {
         return matchService.getMatchById(id);
     }
 
     @GetMapping()
-    public Mono<List<MatchResponseDto>> getRecentMatches() {
+    public Mono<List<Match2v2ResponseDto>> getRecentMatches() {
         return matchService.getRecentMatches();
     }
 
     @GetMapping("/all")
-    public Mono<List<MatchResponseDto>> getAllMatches() {
+    public Mono<List<Match2v2ResponseDto>> getAllMatches() {
         return matchService.getAllMatches();
     }
 
     @PostMapping
-    public Mono<MatchResponseDto> newMatch(@RequestBody MatchRequestDto requestDto) {
+    public Mono<Match2v2ResponseDto> newMatch(@RequestBody MatchRequestDto requestDto) {
         return matchService.newMatch(requestDto);
     }
 
