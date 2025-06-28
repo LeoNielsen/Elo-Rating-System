@@ -1,8 +1,8 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Dtos.PlayerRequestDto;
-import EloRatingSystem.Dtos.PlayerResponseDto;
-import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.PlayerRequestDto;
+import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.PlayerStatisticsResponseDto;
 import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Services.PlayerService;

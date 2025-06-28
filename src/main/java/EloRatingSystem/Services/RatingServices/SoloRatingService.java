@@ -1,7 +1,6 @@
 package EloRatingSystem.Services.RatingServices;
 
-import EloRatingSystem.Dtos.ChartDataDto;
-import EloRatingSystem.Dtos.PlayerResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
 import EloRatingSystem.Models.Player;
@@ -18,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,12 +47,9 @@ public class SoloRatingService {
     }
 
     public Mono<List<ChartDataDto>> getSoloChartData() {
-        List<SoloPlayerRating> ratings = soloRatingRepository.findAll();
-        List<ChartDataDto> chartDataDtoList = ratings.stream()
-                .map(rating -> {
-                    SoloMatch match = soloMatchRepository.findById(rating.getSoloMatch().getId()).orElseThrow();
-                    return new ChartDataDto(match.getId(), new PlayerResponseDto(rating.getPlayer()), rating.getNewRating(), match.getDate());
-                })
+        List<SoloPlayerDailyStats> dailyStatsList = soloPlayerDailyStatsRepository.findAll();
+        List<ChartDataDto> chartDataDtoList = dailyStatsList.stream()
+                .map(ChartDataDto::new)
                 .toList();
         return Mono.just(chartDataDtoList);
     }
@@ -83,19 +79,19 @@ public class SoloRatingService {
         SoloPlayerRating soloPlayerRating = new SoloPlayerRating(match, player, player.getSoloRating(), newPlayerRating);
         soloRatingRepository.save(soloPlayerRating);
         updatePlayerStats(player, soloPlayerRating);
-        updatePlayerDailyStats(newPlayerRating - player.getSoloRating(), player);
+        updatePlayerDailyStats(LocalDate.now(),newPlayerRating - player.getSoloRating(), player,newPlayerRating);
         player.setSoloRating(newPlayerRating);
     }
 
-    public void updatePlayerDailyStats(int ratingChange, Player player) {
-        Date today = new Date(System.currentTimeMillis());
-        soloPlayerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today).
+    public void updatePlayerDailyStats(LocalDate date,int ratingChange, Player player,int playerRating) {
+        soloPlayerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), date).
                 ifPresentOrElse(
                         stats -> {
                             stats.setRatingChange(stats.getRatingChange() + ratingChange);
+                            stats.setRating(playerRating);
                             soloPlayerDailyStatsRepository.save(stats);
                         },
-                        () -> soloPlayerDailyStatsRepository.save(new SoloPlayerDailyStats(player, today, ratingChange))
+                        () -> soloPlayerDailyStatsRepository.save(new SoloPlayerDailyStats(player, date, ratingChange, playerRating))
                 );
     }
 
@@ -150,12 +146,12 @@ public class SoloRatingService {
         achievementService.checkAndUnlockAchievementsSolo(player,match);
     }
 
-    public void deleteRatingsBySoloMatch(Long id) {
+    public void deleteRatingsBySoloMatch(LocalDate date,Long id) {
         List<SoloPlayerRating> playerRatingList = soloRatingRepository.findAllBySoloMatchId(id);
         for (SoloPlayerRating rating : playerRatingList) {
             Player player = rating.getPlayer();
             player.setSoloRating(rating.getOldRating());
-            updatePlayerDailyStats(rating.getOldRating() - rating.getNewRating(), player);
+            updatePlayerDailyStats(date,rating.getOldRating() - rating.getNewRating(), player, rating.getOldRating());
             playerRepository.save(player);
             soloRatingRepository.deleteById(rating.getId());
         }

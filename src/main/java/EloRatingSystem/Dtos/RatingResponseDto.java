@@ -1,5 +1,6 @@
 package EloRatingSystem.Dtos;
 
+import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
 import EloRatingSystem.Models.MonthlyRating;
 import EloRatingSystem.Models.PlayerRating;
 import EloRatingSystem.Models.SoloPlayerRating;

@@ -61,14 +61,14 @@ public class RegenerateService {
 
     public void playerStatisticsGenAll() {
         List<Player> players = playerRepository.findAll();
+        playerDailyStatsRepository.deleteAll();
         for (Player player : players) {
             regeneratePlayerStatistics(player);
         }
     }
 
     public void regeneratePlayerStatistics(Player player) {
-        Date today = new Date(System.currentTimeMillis());
-        Optional<PlayerDailyStats> dailyStats = playerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today);
+        Optional<PlayerDailyStats> dailyStats = playerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), LocalDate.now());
         dailyStats.ifPresent(stats -> playerDailyStatsRepository.delete(stats));
 
         Optional<PlayerStats> statsOpt = playerStatsRepository.findByPlayerId(player.getId());
@@ -81,22 +81,20 @@ public class RegenerateService {
             List<PlayerRating> ratings = ratingRepository.findAllByMatchIdAndPlayerId(match.getId(), player.getId());
             PlayerRating rating = ratings.get(0);
             ratingService.updatePlayerStats(player, rating);
-            if (match.getDate().toLocalDate().equals(today.toLocalDate())) {
-                ratingService.updatePlayerDailyStats(rating.getNewRating() - rating.getOldRating(), player);
-            }
-            achievementService.checkAndUnlockAchievements(player,match);
+            ratingService.updatePlayerDailyStats(match.getDate().toLocalDate(), rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
         }
     }
 
     public void regenerateSoloPlayerStatisticsAll() {
         List<Player> players = playerRepository.findAll();
+        soloPlayerDailyStatsRepository.deleteAll();
         for (Player player : players) {
             regenerateSoloPlayerStatistics(player);
         }
     }
 
     public void regenerateSoloPlayerStatistics(Player player) {
-        Date today = new Date(System.currentTimeMillis());
+        LocalDate today = LocalDate.now();
         Optional<SoloPlayerDailyStats> dailyStats = soloPlayerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today);
         dailyStats.ifPresent(stats -> soloPlayerDailyStatsRepository.delete(stats));
 
@@ -110,10 +108,7 @@ public class RegenerateService {
             SoloPlayerRating rating = soloRatingRepository
                     .findBySoloMatchIdAndPlayerId(match.getId(), player.getId()).orElseThrow();
             soloRatingService.updatePlayerStats(player, rating);
-            if (match.getDate().toLocalDate().equals(today.toLocalDate())) {
-                soloRatingService.updatePlayerDailyStats(rating.getNewRating() - rating.getOldRating(), player);
-            }
-            achievementService.checkAndUnlockAchievementsSolo(player,match);
+            soloRatingService.updatePlayerDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), player,rating.getNewRating());
         }
     }
 
@@ -139,16 +134,15 @@ public class RegenerateService {
         for (Match match : matchesToday) {
             List<MonthlyRating> ratings = monthlyRatingRepository.findAllByMatchId(match.getId());
             for (MonthlyRating rating : ratings) {
-                monthlyRatingService.updateMonthlyDailyStats(rating.getNewRating() - rating.getOldRating(), rating.getPlayer());
+                monthlyRatingService.updateMonthlyDailyStats(rating.getNewRating() - rating.getOldRating(), rating.getPlayer(),rating.getNewRating());
             }
         }
     }
 
     public void regenerateMonthlyStatistics(Player player) {
-        Date today = new Date(System.currentTimeMillis());
-        LocalDate localToday = today.toLocalDate();
-        int month = localToday.getMonthValue();
-        int year = localToday.getYear();
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int year = today.getYear();
 
         Optional<MonthlyDailyStats> dailyStats = monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today);
         dailyStats.ifPresent(stats -> monthlyDailyStatsRepository.delete(stats));
@@ -166,8 +160,8 @@ public class RegenerateService {
                         .findAllByMatchIdAndPlayerId(match.getId(), player.getId());
                 for (MonthlyRating rating : ratings) {
                     monthlyRatingService.updateMonthlyStats(player, rating, month, year);
-                    if (match.getDate().toLocalDate().equals(today.toLocalDate())) {
-                        monthlyRatingService.updateMonthlyDailyStats(rating.getNewRating() - rating.getOldRating(), player);
+                    if (match.getDate().toLocalDate().equals(today)) {
+                        monthlyRatingService.updateMonthlyDailyStats(rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
                     }
                 }
             }

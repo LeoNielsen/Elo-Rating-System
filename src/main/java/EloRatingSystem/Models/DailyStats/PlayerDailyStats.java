@@ -2,17 +2,15 @@ package EloRatingSystem.Models.DailyStats;
 
 import EloRatingSystem.Models.Player;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor
-@Table(name = "PlayerDailyStats")
 public class PlayerDailyStats extends DailyStatsAbstract {
 
-    public PlayerDailyStats(Player player, Date date, int ratingChange) {
-        super(player, date, ratingChange);
+    public PlayerDailyStats(Player player, LocalDate date, int ratingChange, int rating) {
+        super(player, date, ratingChange, rating);
     }
 }

@@ -90,7 +90,7 @@ public class MatchService {
     @Transactional
     public void deleteLatestMatch() {
         Match match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        ratingService.deleteRatingsByMatch(match.getId());
+        ratingService.deleteRatingsByMatch(match.getDate().toLocalDate(),match.getId());
 
         Team winner = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getRedTeam() : match.getBlueTeam();
         Team loser = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getBlueTeam() : match.getRedTeam();
@@ -100,7 +100,7 @@ public class MatchService {
 
         teamRepository.save(winner);
         teamRepository.save(loser);
-        monthlyRatingService.deleteRatingsByMatch(match.getId());
+        monthlyRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(),match.getId());
         matchRepository.deleteById(match.getId());
 
         playerAchievementRepository.deleteAllByPlayerIdAndGameType(winner.getDefender().getId(), GameType.TEAMS);

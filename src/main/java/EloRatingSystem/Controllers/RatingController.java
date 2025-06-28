@@ -1,6 +1,6 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Dtos.ChartDataDto;
+import EloRatingSystem.Dtos.PlayerDtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Services.RatingServices.RatingService;
 import EloRatingSystem.Services.RatingServices.SoloRatingService;

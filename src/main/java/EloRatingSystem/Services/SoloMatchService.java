@@ -77,7 +77,7 @@ public class SoloMatchService {
     @Transactional
     public void deleteLatestSoloMatch() {
         SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        soloRatingService.deleteRatingsBySoloMatch(match.getId());
+        soloRatingService.deleteRatingsBySoloMatch(match.getDate().toLocalDate(),match.getId());
 
         Player redPlayer = match.getRedPlayer();
         Player bluePlayer = match.getBluePlayer();

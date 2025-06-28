@@ -1,27 +1,26 @@
 package EloRatingSystem.Services;
 
-import EloRatingSystem.Dtos.PlayerRequestDto;
-import EloRatingSystem.Dtos.PlayerResponseDto;
-import EloRatingSystem.Dtos.PlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.PlayerRequestDto;
+import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.PlayerStatisticsResponseDto;
 import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
-import EloRatingSystem.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
 import EloRatingSystem.Models.MonthlyStats;
 import EloRatingSystem.Models.Player;
-import EloRatingSystem.Models.PlayerStats;
 import EloRatingSystem.Models.SoloPlayerStats;
 import EloRatingSystem.Reporitories.DailyStats.MonthlyDailyStatsRepository;
-import EloRatingSystem.Reporitories.DailyStats.PlayerDailyStatsRepository;
 import EloRatingSystem.Reporitories.DailyStats.SoloPlayerDailyStatsRepository;
-import EloRatingSystem.Reporitories.*;
+import EloRatingSystem.Reporitories.MonthlyStatsRepository;
+import EloRatingSystem.Reporitories.PlayerRepository;
+import EloRatingSystem.Reporitories.PlayerStatsRepository;
+import EloRatingSystem.Reporitories.SoloPlayerStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +35,6 @@ public class PlayerService {
     PlayerStatsRepository playerStatsRepository;
     @Autowired
     MonthlyStatsRepository monthlyStatsRepository;
-    @Autowired
-    PlayerDailyStatsRepository playerDailyStatsRepository;
     @Autowired
     MonthlyDailyStatsRepository monthlyDailyStatsRepository;
     @Autowired
@@ -100,21 +97,9 @@ public class PlayerService {
     }
 
     public PlayerStatisticsResponseDto playerStatistics(Player player) {
-        int todayRatingChance = 0;
-        Date date = new Date(System.currentTimeMillis());
-        Optional<PlayerDailyStats> playerDailyStats = playerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), date);
-        if (playerDailyStats.isPresent()) {
-            todayRatingChance = playerDailyStats.get().getRatingChange();
-        }
-        Optional<PlayerStats> playerStatsOptional = playerStatsRepository.findByPlayerId(player.getId());
-        if (playerStatsOptional.isPresent()) {
-            return new PlayerStatisticsResponseDto(player, playerStatsOptional.get(), todayRatingChance);
-        } else {
-            return new PlayerStatisticsResponseDto(player, todayRatingChance);
-        }
+        return playerStatsRepository.findCombinedStatsByPlayerIdAndDate(player.getId(),LocalDate.now())
+                .orElseGet(() -> new PlayerStatisticsResponseDto(player, 0));
     }
-
-
 
     public Mono<SoloPlayerStatisticsResponseDto> getSoloStatistics(Long id) {
         Optional<Player> playerOptional = playerRepository.findById(id);
@@ -128,7 +113,7 @@ public class PlayerService {
 
     private SoloPlayerStatisticsResponseDto soloPlayerStatistics(Player player) {
         int todayRatingChance = 0;
-        Date date = new Date(System.currentTimeMillis());
+        LocalDate date = LocalDate.now();
         Optional<SoloPlayerDailyStats> playerDailyStats = soloPlayerDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), date);
         if (playerDailyStats.isPresent()) {
             todayRatingChance = playerDailyStats.get().getRatingChange();
@@ -188,7 +173,7 @@ public class PlayerService {
 
     public PlayerStatisticsResponseDto monthlyStatistics(Player player, int month, int year) {
         int todayRatingChance = 0;
-        Date date = new Date(System.currentTimeMillis());
+        LocalDate date = LocalDate.now();
         Optional<MonthlyDailyStats> playerDailyStats = monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), date);
         if (playerDailyStats.isPresent()) {
             todayRatingChance = playerDailyStats.get().getRatingChange();

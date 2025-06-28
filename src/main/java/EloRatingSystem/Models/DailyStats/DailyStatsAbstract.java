@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -19,13 +19,16 @@ public abstract class DailyStatsAbstract {
     @ManyToOne
     private Player player;
     @Column(name = "date", nullable = false)
-    private Date date;
+    private LocalDate date;
     @Column(name = "ratingChange", nullable = false)
     private int ratingChange;
+    @Column(name = "Rating", nullable = false)
+    private int rating;
 
-    public DailyStatsAbstract(Player player, Date date, int ratingChange) {
+    public DailyStatsAbstract(Player player, LocalDate date, int ratingChange,int rating) {
         this.player = player;
         this.date = date;
         this.ratingChange = ratingChange;
+        this.rating = rating;
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +45,7 @@ public class MonthlyRatingService {
 
         rankingCalculator(winner, loser, match, month, year);
     }
+
     public void newRating(Match match, int month, int year) {
         boolean redWon = match.getRedTeamScore() > match.getBlueTeamScore();
         Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
@@ -96,27 +96,28 @@ public class MonthlyRatingService {
         MonthlyRating monthlyRating = new MonthlyRating(match, player, oldMonthlyRating, newMonthlyRating);
         monthlyRatingRepository.save(monthlyRating);
         updateMonthlyStats(player, monthlyRating, month, year);
-        updateMonthlyDailyStats(newMonthlyRating - oldMonthlyRating, player);
+        updateMonthlyDailyStats(newMonthlyRating - oldMonthlyRating, player,newMonthlyRating);
     }
 
-    public void updateMonthlyDailyStats(int ratingChange, Player player) {
-        Date today = new Date(System.currentTimeMillis());
+    public void updateMonthlyDailyStats(int ratingChange, Player player, int monthlyRating) {
+        LocalDate today = LocalDate.now();
         monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today)
                 .ifPresentOrElse(
                         stats -> {
                             stats.setRatingChange(stats.getRatingChange() + ratingChange);
+                            stats.setRating(monthlyRating);
                             monthlyDailyStatsRepository.save(stats);
                         },
-                        () -> monthlyDailyStatsRepository.save(new MonthlyDailyStats(player, today, ratingChange))
+                        () -> monthlyDailyStatsRepository.save(new MonthlyDailyStats(player, today, ratingChange, monthlyRating))
                 );
     }
 
     public void updateMonthlyStats(Player player, MonthlyRating rating, int month, int year) {
         Match match = rating.getMatch();
-        boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(),player);
-        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(),match.getRedTeamScore());
+        boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(), player);
+        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
-        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(),match.getRedTeam(),player);
+        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
 
         Optional<MonthlyStats> statsOpt = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
@@ -165,16 +166,15 @@ public class MonthlyRatingService {
         monthlyStatsRepository.save(stats);
     }
 
-    public void deleteRatingsByMatch(Long id) {
-        LocalDate today = LocalDate.now();
-        int year = today.getYear();
-        int month = today.getMonthValue();
+    public void deleteRatingsByMatch(LocalDate date,Long id) {
+        int year = date.getYear();
+        int month = date.getMonthValue();
         List<MonthlyRating> playerRatingList = monthlyRatingRepository.findAllByMatchId(id);
         for (MonthlyRating rating : playerRatingList) {
             Player player = rating.getPlayer();
             MonthlyStats stats = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year).orElseThrow();
             stats.setMonthlyRating(rating.getOldRating());
-            updateMonthlyDailyStats(rating.getOldRating() - rating.getNewRating(), player);
+            updateMonthlyDailyStats(rating.getOldRating() - rating.getNewRating(), player, rating.getOldRating());
             monthlyRatingRepository.deleteById(rating.getId());
         }
     }

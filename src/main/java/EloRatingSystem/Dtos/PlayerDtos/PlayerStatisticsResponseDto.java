@@ -1,4 +1,4 @@
-package EloRatingSystem.Dtos;
+package EloRatingSystem.Dtos.PlayerDtos;
 
 import EloRatingSystem.Models.MonthlyStats;
 import EloRatingSystem.Models.Player;
