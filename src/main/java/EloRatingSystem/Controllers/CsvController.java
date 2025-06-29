@@ -80,7 +80,6 @@ public class CsvController {
                         playerService.newPlayer(new PlayerRequestDto(csvMatchDto.getBlueAttacker()));
 
 
-
                 Mono<TeamResponseDto> teamRed = Mono.zip(r_d, r_a)
                         .flatMap(tuple -> {
                             PlayerResponseDto redDefender = tuple.getT1();
@@ -108,11 +107,14 @@ public class CsvController {
                             return teamService.newTeam(teamRequest);
                         });
 
-                Mono<Match2v2ResponseDto> Match = Mono.zip(teamRed, teamBlue)
+                Mono<Match2v2ResponseDto> Match = Mono.zip(r_d, r_a, b_d, b_a)
                         .flatMap(tuple -> {
-                            TeamResponseDto redTeam = tuple.getT1();
-                            TeamResponseDto blueTeam = tuple.getT2();
-                            return matchService.newMatch(new MatchRequestDto(redTeam.getId(), blueTeam.getId(), csvMatchDto.getRedScore(), csvMatchDto.getBlueScore()));
+                            PlayerResponseDto redAtk = tuple.getT1();
+                            PlayerResponseDto redDef = tuple.getT2();
+                            PlayerResponseDto blueAtk = tuple.getT3();
+                            PlayerResponseDto blueDef = tuple.getT4();
+                            return matchService.newMatch(new MatchRequestDto(redAtk.getId(), redDef.getId(), blueAtk.getId(), blueDef.getId(),
+                                    csvMatchDto.getRedScore(), csvMatchDto.getBlueScore()));
                         });
 
                 Match.flatMap(matchResponseDto -> {
@@ -156,25 +158,13 @@ public class CsvController {
                         playerService.getByNameTag(blueAttacker.getNameTag()) :
                         playerService.newPlayer(new PlayerRequestDto(blueAttacker.getNameTag()));
 
-                Mono<TeamResponseDto> teamRed = Mono.zip(r_d, r_a)
+                Mono<Match2v2ResponseDto> matchMono = Mono.zip(r_d, r_a, b_d, b_a)
                         .flatMap(tuple -> {
-                            PlayerResponseDto rd = tuple.getT1();
-                            PlayerResponseDto ra = tuple.getT2();
-                            return teamService.newTeam(new TeamRequestDto(ra.getId(), rd.getId()));
-                        });
-
-                Mono<TeamResponseDto> teamBlue = Mono.zip(b_d, b_a)
-                        .flatMap(tuple -> {
-                            PlayerResponseDto bd = tuple.getT1();
-                            PlayerResponseDto ba = tuple.getT2();
-                            return teamService.newTeam(new TeamRequestDto(ba.getId(), bd.getId()));
-                        });
-
-                Mono<Match2v2ResponseDto> matchMono = Mono.zip(teamRed, teamBlue)
-                        .flatMap(tuple -> {
-                            TeamResponseDto red = tuple.getT1();
-                            TeamResponseDto blue = tuple.getT2();
-                            return matchService.newMatch(new MatchRequestDto(red.getId(), blue.getId(),
+                            PlayerResponseDto redAtk = tuple.getT1();
+                            PlayerResponseDto redDef = tuple.getT2();
+                            PlayerResponseDto blueAtk = tuple.getT3();
+                            PlayerResponseDto blueDef = tuple.getT4();
+                            return matchService.newMatch(new MatchRequestDto(redAtk.getId(), redDef.getId(), blueAtk.getId(), blueDef.getId(),
                                     jsonMatchDto.getRedTeamScore(), jsonMatchDto.getBlueTeamScore()));
                         });
 

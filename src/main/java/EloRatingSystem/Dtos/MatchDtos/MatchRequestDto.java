@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MatchRequestDto {
 
-    private Long redTeamId;
-    private Long blueTeamId;
-    private Integer redTeamScore;
-    private Integer blueTeamScore;
+    private Long redAtkId;
+    private Long redDefId;
+    private Long blueAtkId;
+    private Long blueDefId;
+    private Integer redScore;
+    private Integer blueScore;
 
 }

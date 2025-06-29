@@ -5,9 +5,11 @@ import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Match;
+import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.Team;
 import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
 import EloRatingSystem.Reporitories.MatchRepository;
+import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.TeamRepository;
 import EloRatingSystem.Services.RatingServices.MonthlyRatingService;
 import EloRatingSystem.Services.RatingServices.RatingService;
@@ -29,6 +31,8 @@ public class MatchService {
     MatchRepository matchRepository;
     @Autowired
     TeamRepository teamRepository;
+    @Autowired
+    PlayerRepository playerRepository;
     @Autowired
     RatingService ratingService;
     @Autowired
@@ -65,32 +69,41 @@ public class MatchService {
     }
 
     public Mono<Match2v2ResponseDto> newMatch(MatchRequestDto requestDto) {
-        Optional<Team> redTeamOptional = teamRepository.findById(requestDto.getRedTeamId());
-        Optional<Team> blueTeamOptional = teamRepository.findById(requestDto.getBlueTeamId());
-
-        if (blueTeamOptional.isPresent() && redTeamOptional.isPresent()) {
-            Team redTeam = redTeamOptional.get();
-            Team blueTeam = blueTeamOptional.get();
+        try {
+            Team redTeam = getTeam(requestDto.getRedAtkId(), requestDto.getRedDefId());
+            Team blueTeam = getTeam(requestDto.getBlueAtkId(), requestDto.getBlueDefId());
 
             Match match = matchRepository.save(new Match(new Date(System.currentTimeMillis()), redTeam, blueTeam,
-                    requestDto.getRedTeamScore(), requestDto.getBlueTeamScore()));
+                    requestDto.getRedScore(), requestDto.getBlueScore()));
 
             match = ratingService.newRating(match);
             monthlyRatingService.newRating(match);
             match = matchRepository.save(match);
 
             return Mono.just(new Match2v2ResponseDto(match));
+        } catch (ApiException e) {
+            return Mono.error(e);
         }
+    }
 
-        return Mono.error(new ApiException(
-                String.format("Either team %s or %s does not exits", requestDto.getRedTeamId(), requestDto.getBlueTeamId())
-                , HttpStatus.BAD_REQUEST));
+    public Team getTeam(long atkId, long defId) throws ApiException {
+        Optional<Team> teamOptional = teamRepository.findByAttackerIdAndDefenderId(atkId, defId);
+        if (teamOptional.isPresent()) {
+            return teamOptional.get();
+        } else {
+            Player atk = playerRepository.findById(atkId)
+                    .orElseThrow(() -> new ApiException(String.format("player %s doesn't exist", atkId), HttpStatus.BAD_REQUEST));
+            Player def = playerRepository.findById(defId)
+                    .orElseThrow(() -> new ApiException(String.format("player %s doesn't exist", defId), HttpStatus.BAD_REQUEST));
+            ;
+            return teamRepository.save(new Team(atk, def));
+        }
     }
 
     @Transactional
     public void deleteLatestMatch() {
         Match match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        ratingService.deleteRatingsByMatch(match.getDate().toLocalDate(),match.getId());
+        ratingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
 
         Team winner = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getRedTeam() : match.getBlueTeam();
         Team loser = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getBlueTeam() : match.getRedTeam();
@@ -100,7 +113,7 @@ public class MatchService {
 
         teamRepository.save(winner);
         teamRepository.save(loser);
-        monthlyRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(),match.getId());
+        monthlyRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
         matchRepository.deleteById(match.getId());
 
         playerAchievementRepository.deleteAllByPlayerIdAndGameType(winner.getDefender().getId(), GameType.TEAMS);
