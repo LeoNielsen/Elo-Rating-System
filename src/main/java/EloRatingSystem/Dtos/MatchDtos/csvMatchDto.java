@@ -1,4 +1,4 @@
-package EloRatingSystem.Dtos;
+package EloRatingSystem.Dtos.MatchDtos;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;

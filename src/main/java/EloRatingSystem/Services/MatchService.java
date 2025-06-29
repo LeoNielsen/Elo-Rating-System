@@ -1,7 +1,7 @@
 package EloRatingSystem.Services;
 
-import EloRatingSystem.Dtos.Match2v2ResponseDto;
-import EloRatingSystem.Dtos.MatchRequestDto;
+import EloRatingSystem.Dtos.MatchDtos.Match2v2ResponseDto;
+import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Match;

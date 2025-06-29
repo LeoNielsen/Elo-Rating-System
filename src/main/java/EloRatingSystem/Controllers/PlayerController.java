@@ -3,7 +3,7 @@ package EloRatingSystem.Controllers;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerStatisticsResponseDto;
-import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Services.PlayerService;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package EloRatingSystem.Dtos;
+package EloRatingSystem.Dtos.MatchDtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

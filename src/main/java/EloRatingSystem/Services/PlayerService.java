@@ -3,7 +3,7 @@ package EloRatingSystem.Services;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerStatisticsResponseDto;
-import EloRatingSystem.Dtos.SoloPlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;

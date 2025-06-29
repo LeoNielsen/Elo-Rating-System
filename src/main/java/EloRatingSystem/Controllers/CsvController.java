@@ -1,6 +1,7 @@
 package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.*;
+import EloRatingSystem.Dtos.MatchDtos.*;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
 import EloRatingSystem.Models.Match;
@@ -197,23 +198,23 @@ public class CsvController {
     public String soloUploadJson(@RequestBody List<SoloMatchResponseDto> matches) {
         try {
             for (SoloMatchResponseDto jsonMatchDto : matches) {
-                PlayerResponseDto red = jsonMatchDto.getRedPlayer();
-                PlayerResponseDto blue = jsonMatchDto.getBluePlayer();
+                String red = jsonMatchDto.getRedPlayer();
+                String blue = jsonMatchDto.getBluePlayer();
 
-                Mono<PlayerResponseDto> r_d = playerService.checkIfPlayerExists(red.getNameTag()) ?
-                        playerService.getByNameTag(red.getNameTag()) :
-                        playerService.newPlayer(new PlayerRequestDto(red.getNameTag()));
+                Mono<PlayerResponseDto> r_d = playerService.checkIfPlayerExists(red) ?
+                        playerService.getByNameTag(red) :
+                        playerService.newPlayer(new PlayerRequestDto(red));
 
-                Mono<PlayerResponseDto> r_a = playerService.checkIfPlayerExists(blue.getNameTag()) ?
-                        playerService.getByNameTag(blue.getNameTag()) :
-                        playerService.newPlayer(new PlayerRequestDto(blue.getNameTag()));
+                Mono<PlayerResponseDto> r_a = playerService.checkIfPlayerExists(blue) ?
+                        playerService.getByNameTag(blue) :
+                        playerService.newPlayer(new PlayerRequestDto(blue));
 
                 Mono<SoloMatchResponseDto> matchMono = Mono.zip(r_d, r_a)
                         .flatMap(tuple -> {
                             PlayerResponseDto r = tuple.getT1();
                             PlayerResponseDto b = tuple.getT2();
                             return soloMatchService.newSoloMatch(new SoloMatchRequestDto(r.getId(), b.getId(),
-                                    jsonMatchDto.getRedTeamScore(), jsonMatchDto.getBlueTeamScore()));
+                                    jsonMatchDto.getRedScore(), jsonMatchDto.getBlueScore()));
                         });
 
                 matchMono.flatMap(matchResponseDto -> {

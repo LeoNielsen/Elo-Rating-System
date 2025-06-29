@@ -1,7 +1,7 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Dtos.MatchRequestDto;
-import EloRatingSystem.Dtos.SoloMatchRequestDto;
+import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
+import EloRatingSystem.Dtos.MatchDtos.SoloMatchRequestDto;
 import EloRatingSystem.Dtos.TeamRequestDto;
 import EloRatingSystem.Dtos.TeamResponseDto;
 import EloRatingSystem.Models.Player;
