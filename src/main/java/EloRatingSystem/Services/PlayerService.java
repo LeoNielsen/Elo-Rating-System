@@ -47,6 +47,9 @@ public class PlayerService {
         List<Player> players = playerRepository.findAll();
         List<PlayerResponseDto> playerResponseDtoList = new ArrayList<>();
         for (Player player : players) {
+            if(!player.getActive()) {
+                continue;
+            }
             playerResponseDtoList.add(new PlayerResponseDto(player));
         }
 
@@ -90,6 +93,9 @@ public class PlayerService {
 
         List<Player> players = playerRepository.findAll();
         for (Player player : players) {
+            if(!player.getActive()){
+                continue;
+            }
             playerStatistics.add(playerStatistics(player));
         }
 
@@ -136,12 +142,6 @@ public class PlayerService {
 
         return Mono.just(playerStatistics);
     }
-
-
-
-
-
-
 
     public Mono<List<PlayerStatisticsResponseDto>> getAllMonthlyStatistics() {
         LocalDate today = LocalDate.now();

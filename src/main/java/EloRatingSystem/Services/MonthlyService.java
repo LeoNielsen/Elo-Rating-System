@@ -1,5 +1,6 @@
 package EloRatingSystem.Services;
 
+import EloRatingSystem.Dtos.PlayerDtos.MonthlyWinnerDto;
 import EloRatingSystem.Models.MonthlyStats;
 import EloRatingSystem.Models.MonthlyWinner;
 import EloRatingSystem.Reporitories.MonthlyStatsRepository;
@@ -7,6 +8,7 @@ import EloRatingSystem.Reporitories.MonthlyWinnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -49,5 +51,12 @@ public class MonthlyService {
             ));
             achievementService.checkAndUnlockAchievementsMonthly(stats.getPlayer());
         }
+    }
+
+
+    public Mono<MonthlyWinnerDto> getLastMonthWinner() {
+        LocalDate previousMonthDate = LocalDate.now().minusMonths(1);
+        return Mono.just(new MonthlyWinnerDto(monthlyWinnerRepository.findByMonthAndYear(previousMonthDate.getMonthValue(), previousMonthDate.getYear())
+                        .orElseGet(MonthlyWinner::new)));
     }
 }

@@ -1,10 +1,8 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Dtos.PlayerDtos.PlayerRequestDto;
-import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
-import EloRatingSystem.Dtos.PlayerDtos.PlayerStatisticsResponseDto;
-import EloRatingSystem.Dtos.PlayerDtos.SoloPlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.PlayerDtos.*;
 import EloRatingSystem.Reporitories.PlayerRepository;
+import EloRatingSystem.Services.MonthlyService;
 import EloRatingSystem.Services.PlayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,8 @@ public class PlayerController {
     PlayerRepository playerRepository;
     @Autowired
     PlayerService playerService;
+    @Autowired
+    MonthlyService monthlyService;
 
     @GetMapping("/all")
     public Mono<List<PlayerResponseDto>> getAll() {
@@ -73,6 +73,9 @@ public class PlayerController {
     public Mono<List<SoloPlayerStatisticsResponseDto>> getAllSoloStatistics() {
         return playerService.getAllSoloStatistics();
     }
-
+    @GetMapping("/monthly/winner/last")
+    public Mono<MonthlyWinnerDto> getLastMonthWinner() {
+        return monthlyService.getLastMonthWinner();
+    }
 
 }

@@ -52,6 +52,9 @@ public class TeamService {
 
         List<TeamResponseDto> teamResponseDtoList = new ArrayList<>();
         for (Team t:teams) {
+            if(!t.getAttacker().getActive() || !t.getDefender().getActive()){
+                continue;
+            }
             teamResponseDtoList.add(new TeamResponseDto(t));
         }
         return Mono.just(teamResponseDtoList);
