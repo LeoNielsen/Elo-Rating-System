@@ -1,6 +1,5 @@
 package EloRatingSystem.Dtos;
 
-import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
 import EloRatingSystem.Models.Team;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,15 +9,15 @@ import lombok.NoArgsConstructor;
 public class TeamResponseDto {
 
     private Long id;
-    private PlayerResponseDto attacker;
-    private PlayerResponseDto defender;
+    private String attacker;
+    private String defender;
     private Integer won;
     private Integer lost;
 
     public TeamResponseDto(Team team){
         this.id = team.getId();
-        this.attacker = new PlayerResponseDto(team.getAttacker());
-        this.defender = new PlayerResponseDto(team.getDefender());
+        this.attacker = team.getAttacker().getNameTag();
+        this.defender = team.getDefender().getNameTag();
         this.won = team.getWon();
         this.lost = team.getLost();
     }
