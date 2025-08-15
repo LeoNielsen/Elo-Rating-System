@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,10 +54,20 @@ public class MonthlyService {
         }
     }
 
-
     public Mono<MonthlyWinnerDto> getLastMonthWinner() {
         LocalDate previousMonthDate = LocalDate.now().minusMonths(1);
         return Mono.just(new MonthlyWinnerDto(monthlyWinnerRepository.findByMonthAndYear(previousMonthDate.getMonthValue(), previousMonthDate.getYear())
-                        .orElseGet(MonthlyWinner::new)));
+                .orElseGet(MonthlyWinner::new)));
+    }
+
+    public Mono<List<MonthlyWinnerDto>> getAllMonthWinners() {
+        List<MonthlyWinner> monthlyWinners = monthlyWinnerRepository.findAll();
+
+        List<MonthlyWinnerDto> monthlyWinnerDTOS = new ArrayList<>();
+        for (MonthlyWinner monthlyWinner : monthlyWinners) {
+            monthlyWinnerDTOS.add(new MonthlyWinnerDto(monthlyWinner));
+        }
+
+        return Mono.just(monthlyWinnerDTOS);
     }
 }

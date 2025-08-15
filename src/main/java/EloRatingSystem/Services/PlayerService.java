@@ -4,11 +4,14 @@ import EloRatingSystem.Dtos.PlayerDtos.PlayerRequestDto;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerResponseDto;
 import EloRatingSystem.Dtos.PlayerDtos.PlayerStatisticsResponseDto;
 import EloRatingSystem.Dtos.PlayerDtos.SoloPlayerStatisticsResponseDto;
+import EloRatingSystem.Dtos.RecordDto;
+import EloRatingSystem.Dtos.RecordsDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
 import EloRatingSystem.Models.MonthlyStats;
 import EloRatingSystem.Models.Player;
+import EloRatingSystem.Models.PlayerStats;
 import EloRatingSystem.Models.SoloPlayerStats;
 import EloRatingSystem.Reporitories.DailyStats.MonthlyDailyStatsRepository;
 import EloRatingSystem.Reporitories.DailyStats.SoloPlayerDailyStatsRepository;
@@ -23,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -184,11 +188,106 @@ public class PlayerService {
     }
 
 
+    public Mono<RecordsDto> getRecords() {
+        List<PlayerStats> playerStatsList = playerStatsRepository.findAll(); // 2v2 stats
+        List<SoloPlayerStats> soloPlayerStatsList = soloPlayerStatsRepository.findAll(); // 1v1 stats
 
+        RecordsDto records = new RecordsDto();
+        
 
+        // --- 2v2 Records ---
+        records.setHighestRating2v2(playerStatsList.stream()
+                .max(Comparator.comparingInt(PlayerStats::getHighestELO))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getHighestELO()))
+                .orElse(null));
 
+        records.setLowestRating2v2(playerStatsList.stream()
+                .min(Comparator.comparingInt(PlayerStats::getLowestELO))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLowestELO()))
+                .orElse(null));
 
+        records.setMostGames2v2(playerStatsList.stream()
+                .max(Comparator.comparingInt(ps -> ps.getAttackerWins() + ps.getDefenderWins() + ps.getAttackerLost() + ps.getDefenderLost()))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getAttackerWins() + ps.getDefenderWins() + ps.getAttackerLost() + ps.getDefenderLost()))
+                .orElse(null));
 
+        records.setMostWins2v2(playerStatsList.stream()
+                .max(Comparator.comparingInt(ps -> ps.getAttackerWins() + ps.getDefenderWins()))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getAttackerWins() + ps.getDefenderWins()))
+                .orElse(null));
 
+        records.setMostAttackerWins(playerStatsList.stream()
+                .max(Comparator.comparingInt(PlayerStats::getAttackerWins))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getAttackerWins()))
+                .orElse(null));
+
+        records.setMostDefenderWins(playerStatsList.stream()
+                .max(Comparator.comparingInt(PlayerStats::getDefenderWins))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getDefenderWins()))
+                .orElse(null));
+
+        records.setMostLost2v2(playerStatsList.stream()
+                .max(Comparator.comparingInt(ps -> ps.getAttackerLost() + ps.getDefenderLost()))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getAttackerLost() + ps.getDefenderLost()))
+                .orElse(null));
+
+        records.setMostAttackerLost(playerStatsList.stream()
+                .max(Comparator.comparingInt(PlayerStats::getAttackerLost))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getAttackerLost()))
+                .orElse(null));
+
+        records.setMostDefenderLost(playerStatsList.stream()
+                .max(Comparator.comparingInt(PlayerStats::getDefenderLost))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getDefenderLost()))
+                .orElse(null));
+
+        records.setMostGoals2v2(playerStatsList.stream()
+                .max(Comparator.comparingInt(PlayerStats::getGoals))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getGoals()))
+                .orElse(null));
+
+        records.setLongestWinStreak2v2(playerStatsList.stream()
+                .max(Comparator.comparingInt(PlayerStats::getLongestWinStreak))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLongestWinStreak()))
+                .orElse(null));
+
+        // --- 1v1 Records ---
+        records.setHighestRating1v1(soloPlayerStatsList.stream()
+                .max(Comparator.comparingInt(SoloPlayerStats::getHighestELO))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getHighestELO()))
+                .orElse(null));
+
+        records.setLowestRating1v1(soloPlayerStatsList.stream()
+                .min(Comparator.comparingInt(SoloPlayerStats::getLowestELO))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLowestELO()))
+                .orElse(null));
+
+        records.setMostGames1v1(soloPlayerStatsList.stream()
+                .max(Comparator.comparingInt(ps -> ps.getWins() + ps.getLost()))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getWins() + ps.getLost()))
+                .orElse(null));
+
+        records.setMostWins1v1(soloPlayerStatsList.stream()
+                .max(Comparator.comparingInt(SoloPlayerStats::getWins))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getWins()))
+                .orElse(null));
+
+        records.setMostLost1v1(soloPlayerStatsList.stream()
+                .max(Comparator.comparingInt(SoloPlayerStats::getLost))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLost()))
+                .orElse(null));
+
+        records.setMostGoals1v1(soloPlayerStatsList.stream()
+                .max(Comparator.comparingInt(SoloPlayerStats::getGoals))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getGoals()))
+                .orElse(null));
+
+        records.setLowestRating1v1(soloPlayerStatsList.stream()
+                .max(Comparator.comparingInt(SoloPlayerStats::getLongestWinStreak))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLongestWinStreak()))
+                .orElse(null));
+
+        return Mono.just(records);
+    }
 
 }

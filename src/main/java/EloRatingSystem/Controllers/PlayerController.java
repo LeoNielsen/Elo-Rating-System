@@ -1,6 +1,7 @@
 package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.PlayerDtos.*;
+import EloRatingSystem.Dtos.RecordsDto;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Services.MonthlyService;
 import EloRatingSystem.Services.PlayerService;
@@ -78,4 +79,14 @@ public class PlayerController {
         return monthlyService.getLastMonthWinner();
     }
 
+    @GetMapping("/monthly/winner/all")
+    public Mono<List<MonthlyWinnerDto>> getAllMonthWinners() {
+        return monthlyService.getAllMonthWinners();
+    }
+
+
+    @GetMapping("/records")
+    public Mono<RecordsDto> getRecords() {
+        return playerService.getRecords();
+    }
 }
