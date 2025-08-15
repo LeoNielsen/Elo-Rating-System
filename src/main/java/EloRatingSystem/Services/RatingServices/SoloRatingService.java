@@ -131,14 +131,9 @@ public class SoloRatingService {
                 stats.setCurrentWinStreak(0);
             }
 
-            int currentElo = player.getRating();
-            if (currentElo > stats.getHighestELO()) {
-                stats.setHighestELO(currentElo);
-            }
-            if (currentElo < stats.getLowestELO()) {
-                stats.setLowestELO(currentElo);
-            }
-
+            int newRating = rating.getNewRating();
+            stats.setHighestELO(Math.max(stats.getHighestELO(), newRating));
+            stats.setLowestELO(Math.min(stats.getLowestELO(), newRating));
             stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueScore() : match.getRedScore()));
         }
 
