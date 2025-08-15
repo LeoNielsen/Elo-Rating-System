@@ -24,7 +24,7 @@ public class SoloPlayerStatisticsResponseDto {
 
     public SoloPlayerStatisticsResponseDto(Player player, SoloPlayerStats playerStats, int todayRatingChance) {
         this.id = player.getId();
-        this.nameTag = player.getNameTag();
+        this.nameTag = formatPlayerName(player);
         this.rating = player.getSoloRating();
         this.wins = playerStats.getWins();
         this.lost = playerStats.getLost();
@@ -39,7 +39,7 @@ public class SoloPlayerStatisticsResponseDto {
 
     public SoloPlayerStatisticsResponseDto(Player player, int todayRatingChance) {
         this.id = player.getId();
-        this.nameTag = player.getNameTag();
+        this.nameTag = formatPlayerName(player);
         this.rating = player.getSoloRating();
         this.wins = 0;
         this.lost = 0;
@@ -51,5 +51,7 @@ public class SoloPlayerStatisticsResponseDto {
         this.todayRatingChance = todayRatingChance;
         this.shutouts = 0;
     }
-
+    private String formatPlayerName(Player player) {
+        return player.getNameTag() + (player.getActive() ? "" : " (Inactive)");
+    }
 }

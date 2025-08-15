@@ -93,9 +93,6 @@ public class PlayerService {
 
         List<Player> players = playerRepository.findAll();
         for (Player player : players) {
-            if(!player.getActive()){
-                continue;
-            }
             playerStatistics.add(playerStatistics(player));
         }
 

@@ -1,6 +1,7 @@
 package EloRatingSystem.Dtos.MatchDtos;
 
 import EloRatingSystem.Models.Match;
+import EloRatingSystem.Models.Player;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,11 +23,17 @@ public class Match2v2ResponseDto {
     public Match2v2ResponseDto(Match match) {
         this.id = match.getId();
         this.date = match.getDate();
-        this.redAtk = match.getRedTeam().getAttacker().getNameTag();
-        this.redDef = match.getRedTeam().getDefender().getNameTag();
-        this.blueAtk = match.getBlueTeam().getAttacker().getNameTag();
-        this.blueDef = match.getBlueTeam().getDefender().getNameTag();
+
+        this.redAtk = formatPlayerName(match.getRedTeam().getAttacker());
+        this.redDef = formatPlayerName(match.getRedTeam().getDefender());
+        this.blueAtk = formatPlayerName(match.getBlueTeam().getAttacker());
+        this.blueDef = formatPlayerName(match.getBlueTeam().getDefender());
+
         this.redScore = match.getRedTeamScore();
         this.blueScore = match.getBlueTeamScore();
+    }
+
+    private String formatPlayerName(Player player) {
+        return player.getNameTag() + (player.getActive() ? "" : " (Inactive)");
     }
 }

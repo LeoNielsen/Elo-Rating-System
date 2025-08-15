@@ -1,5 +1,6 @@
 package EloRatingSystem.Dtos.MatchDtos;
 
+import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.SoloMatch;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,9 +20,12 @@ public class SoloMatchResponseDto {
     public SoloMatchResponseDto(SoloMatch match) {
         this.id = match.getId();
         this.date = match.getDate();
-        this.redPlayer = match.getRedPlayer().getNameTag();
-        this.bluePlayer = match.getBluePlayer().getNameTag();
+        this.redPlayer = formatPlayerName(match.getRedPlayer());
+        this.bluePlayer = formatPlayerName(match.getBluePlayer());
         this.redScore = match.getRedScore();
         this.blueScore = match.getBlueScore();
+    }
+    private String formatPlayerName(Player player) {
+        return player.getNameTag() + (player.getActive() ? "" : " (Inactive)");
     }
 }

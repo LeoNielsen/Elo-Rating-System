@@ -27,7 +27,7 @@ public class PlayerStatisticsResponseDto {
 
     public PlayerStatisticsResponseDto(Player player, PlayerStats playerStats, int todayRatingChance) {
         this.id = player.getId();
-        this.nameTag = player.getNameTag();
+        this.nameTag = formatPlayerName(player);
         this.rating = player.getRating();
         this.attackerWins = playerStats.getAttackerWins();
         this.defenderWins = playerStats.getDefenderWins();
@@ -44,7 +44,7 @@ public class PlayerStatisticsResponseDto {
 
     public PlayerStatisticsResponseDto(Player player, int todayRatingChance) {
         this.id = player.getId();
-        this.nameTag = player.getNameTag();
+        this.nameTag = formatPlayerName(player);
         this.rating = player.getRating();
         this.attackerWins = 0;
         this.defenderWins = 0;
@@ -61,7 +61,7 @@ public class PlayerStatisticsResponseDto {
 
     public PlayerStatisticsResponseDto(Player player, MonthlyStats playerStats, int todayRatingChance) {
         this.id = player.getId();
-        this.nameTag = player.getNameTag();
+        this.nameTag = formatPlayerName(player);
         this.rating = playerStats.getMonthlyRating();
         this.attackerWins = playerStats.getAttackerWins();
         this.defenderWins = playerStats.getDefenderWins();
@@ -73,5 +73,9 @@ public class PlayerStatisticsResponseDto {
         this.longestWinStreak = playerStats.getLongestWinStreak();
         this.currentWinStreak = playerStats.getCurrentWinStreak();
         this.todayRatingChance = todayRatingChance;
+    }
+
+    private String formatPlayerName(Player player) {
+        return player.getNameTag() + (player.getActive() ? "" : " (Inactive)");
     }
 }
