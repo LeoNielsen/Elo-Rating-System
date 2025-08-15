@@ -2,6 +2,7 @@ package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Dtos.PlayerDtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
+import EloRatingSystem.Services.RatingServices.MonthlyRatingService;
 import EloRatingSystem.Services.RatingServices.RatingService;
 import EloRatingSystem.Services.RatingServices.SoloRatingService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,8 @@ public class RatingController {
     RatingService ratingService;
     @Autowired
     SoloRatingService soloRatingService;
+    @Autowired
+    MonthlyRatingService monthlyRatingService;
 
     @GetMapping("/match/{id}")
     public Mono<List<RatingResponseDto>> getRatingByMatchId(@PathVariable Long id) {
@@ -41,6 +44,10 @@ public class RatingController {
     @GetMapping("/solo/chart")
     public Mono<List<ChartDataDto>> getSoloChartData() {
         return soloRatingService.getSoloChartData();
+    }
+    @GetMapping("/monthly/chart")
+    public Mono<List<ChartDataDto>> getMonthlyChartData() {
+        return monthlyRatingService.getChartData();
     }
 
 }

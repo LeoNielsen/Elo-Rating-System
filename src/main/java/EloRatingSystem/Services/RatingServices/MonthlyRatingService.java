@@ -1,5 +1,6 @@
 package EloRatingSystem.Services.RatingServices;
 
+import EloRatingSystem.Dtos.PlayerDtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Models.*;
@@ -32,6 +33,17 @@ public class MonthlyRatingService {
                 .map(RatingResponseDto::new)
                 .toList();
         return Mono.just(dtoList);
+    }
+
+    public Mono<List<ChartDataDto>> getChartData() {
+        LocalDate today = LocalDate.now();
+        int month = today.getMonthValue();
+        int year = today.getYear();
+        List<MonthlyDailyStats> dailyStatsList = monthlyDailyStatsRepository.findAllByMonthAndYear(year,month);
+        List<ChartDataDto> chartDataDtoList = dailyStatsList.stream()
+                .map(ChartDataDto::new)
+                .toList();
+        return Mono.just(chartDataDtoList);
     }
 
     public void newRating(Match match) {
