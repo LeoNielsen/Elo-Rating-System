@@ -12,11 +12,11 @@ public class RecordsDto {
     private RecordDto mostGames1v1;
     private RecordDto mostWins2v2;
     private RecordDto mostAttackerWins;
-    private RecordDto mostDefenderWins;;
+    private RecordDto mostDefenderWins;
     private RecordDto mostWins1v1;
     private RecordDto mostLost2v2;
     private RecordDto mostAttackerLost;
-    private RecordDto mostDefenderLost;;
+    private RecordDto mostDefenderLost;
     private RecordDto mostLost1v1;
     private RecordDto mostGoals2v2;
     private RecordDto mostGoals1v1;
