@@ -282,7 +282,7 @@ public class PlayerService {
                 .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getGoals()))
                 .orElse(null));
 
-        records.setLowestRating1v1(soloPlayerStatsList.stream()
+        records.setLongestWinStreak1v1(soloPlayerStatsList.stream()
                 .max(Comparator.comparingInt(SoloPlayerStats::getLongestWinStreak))
                 .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLongestWinStreak()))
                 .orElse(null));
