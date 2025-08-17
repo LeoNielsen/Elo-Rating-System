@@ -22,4 +22,8 @@ public class RecordsDto {
     private RecordDto mostGoals1v1;
     private RecordDto longestWinStreak2v2;
     private RecordDto longestWinStreak1v1;
+    private RecordDto highestDailyEloChange2v2;
+    private RecordDto lowestDailyEloChange2v2;
+    private RecordDto highestDailyEloChange1v1;
+    private RecordDto lowestDailyEloChange1v1;
 }

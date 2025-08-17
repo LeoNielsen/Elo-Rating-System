@@ -8,12 +8,14 @@ import EloRatingSystem.Dtos.RecordDto;
 import EloRatingSystem.Dtos.RecordsDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
+import EloRatingSystem.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
 import EloRatingSystem.Models.MonthlyStats;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.PlayerStats;
 import EloRatingSystem.Models.SoloPlayerStats;
 import EloRatingSystem.Reporitories.DailyStats.MonthlyDailyStatsRepository;
+import EloRatingSystem.Reporitories.DailyStats.PlayerDailyStatsRepository;
 import EloRatingSystem.Reporitories.DailyStats.SoloPlayerDailyStatsRepository;
 import EloRatingSystem.Reporitories.MonthlyStatsRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
@@ -45,6 +47,8 @@ public class PlayerService {
     SoloPlayerStatsRepository soloPlayerStatsRepository;
     @Autowired
     SoloPlayerDailyStatsRepository soloPlayerDailyStatsRepository;
+    @Autowired
+    PlayerDailyStatsRepository playerDailyStatsRepository;
 
 
     public Mono<List<PlayerResponseDto>> getAllPlayers() {
@@ -191,6 +195,8 @@ public class PlayerService {
     public Mono<RecordsDto> getRecords() {
         List<PlayerStats> playerStatsList = playerStatsRepository.findAll(); // 2v2 stats
         List<SoloPlayerStats> soloPlayerStatsList = soloPlayerStatsRepository.findAll(); // 1v1 stats
+        List<PlayerDailyStats> playerDailyStatsList = playerDailyStatsRepository.findAll();
+        List<SoloPlayerDailyStats> soloPlayerDailyStatsList = soloPlayerDailyStatsRepository.findAll();
 
         RecordsDto records = new RecordsDto();
         
@@ -251,6 +257,16 @@ public class PlayerService {
                 .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLongestWinStreak()))
                 .orElse(null));
 
+        records.setHighestDailyEloChange2v2(playerDailyStatsList.stream()
+                .max(Comparator.comparingInt(PlayerDailyStats::getRatingChange))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getRatingChange()))
+                .orElse(null));
+
+        records.setLowestDailyEloChange2v2(playerDailyStatsList.stream()
+                .min(Comparator.comparingInt(PlayerDailyStats::getRatingChange))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getRatingChange()))
+                .orElse(null));
+
         // --- 1v1 Records ---
         records.setHighestRating1v1(soloPlayerStatsList.stream()
                 .max(Comparator.comparingInt(SoloPlayerStats::getHighestELO))
@@ -285,6 +301,16 @@ public class PlayerService {
         records.setLongestWinStreak1v1(soloPlayerStatsList.stream()
                 .max(Comparator.comparingInt(SoloPlayerStats::getLongestWinStreak))
                 .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getLongestWinStreak()))
+                .orElse(null));
+
+        records.setHighestDailyEloChange1v1(soloPlayerDailyStatsList.stream()
+                .max(Comparator.comparingInt(SoloPlayerDailyStats::getRatingChange))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getRatingChange()))
+                .orElse(null));
+
+        records.setLowestDailyEloChange1v1(soloPlayerDailyStatsList.stream()
+                .min(Comparator.comparingInt(SoloPlayerDailyStats::getRatingChange))
+                .map(ps -> new RecordDto(ps.getPlayer().getNameTag(), ps.getRatingChange()))
                 .orElse(null));
 
         return Mono.just(records);
