@@ -108,19 +108,18 @@ public class MonthlyRatingService {
         MonthlyRating monthlyRating = new MonthlyRating(match, player, oldMonthlyRating, newMonthlyRating);
         monthlyRatingRepository.save(monthlyRating);
         updateMonthlyStats(player, monthlyRating, month, year);
-        updateMonthlyDailyStats(newMonthlyRating - oldMonthlyRating, player,newMonthlyRating);
+        updateMonthlyDailyStats(LocalDate.now(),newMonthlyRating - oldMonthlyRating, player,newMonthlyRating);
     }
 
-    public void updateMonthlyDailyStats(int ratingChange, Player player, int monthlyRating) {
-        LocalDate today = LocalDate.now();
-        monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today)
+    public void updateMonthlyDailyStats(LocalDate date,int ratingChange, Player player, int monthlyRating) {
+        monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), date)
                 .ifPresentOrElse(
                         stats -> {
                             stats.setRatingChange(stats.getRatingChange() + ratingChange);
                             stats.setRating(monthlyRating);
                             monthlyDailyStatsRepository.save(stats);
                         },
-                        () -> monthlyDailyStatsRepository.save(new MonthlyDailyStats(player, today, ratingChange, monthlyRating))
+                        () -> monthlyDailyStatsRepository.save(new MonthlyDailyStats(player, date, ratingChange, monthlyRating))
                 );
     }
 
@@ -186,7 +185,6 @@ public class MonthlyRatingService {
             Player player = rating.getPlayer();
             MonthlyStats stats = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year).orElseThrow();
             stats.setMonthlyRating(rating.getOldRating());
-            updateMonthlyDailyStats(rating.getOldRating() - rating.getNewRating(), player, rating.getOldRating());
             monthlyRatingRepository.deleteById(rating.getId());
         }
     }

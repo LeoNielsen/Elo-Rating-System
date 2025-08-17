@@ -4,6 +4,7 @@ import EloRatingSystem.Dtos.MatchDtos.Match2v2ResponseDto;
 import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
 import EloRatingSystem.Dtos.MatchDtos.SoloMatchRequestDto;
 import EloRatingSystem.Dtos.MatchDtos.SoloMatchResponseDto;
+import EloRatingSystem.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Services.MatchService;
 import EloRatingSystem.Services.SoloMatchService;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,13 @@ public class MatchController {
         return soloMatchService.newSoloMatch(requestDto);
     }
 
-
+    @GetMapping("/statistics")
+    public Mono<MatchStatisticsDto> matchStatistics() {
+        return matchService.getStatistics();
+    }
+    @GetMapping("/solo/statistics")
+    public Mono<MatchStatisticsDto> matchSoloStatistics() {
+        return soloMatchService.getSoloStatistics();
+    }
 
 }

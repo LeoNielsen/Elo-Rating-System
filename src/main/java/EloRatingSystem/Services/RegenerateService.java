@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -56,8 +57,6 @@ public class RegenerateService {
     SoloRatingRepository soloRatingRepository;
     @Autowired
     SoloMatchRepository soloMatchRepository;
-    @Autowired
-    AchievementService achievementService;
 
     public void playerStatisticsGenAll() {
         List<Player> players = playerRepository.findAll();
@@ -127,14 +126,17 @@ public class RegenerateService {
 
         monthlyDailyStatsRepository.deleteAll();
 
-        Date date = new Date(System.currentTimeMillis());
-        List<Match> matchesToday = matchRepository.findAllByDate(date);
+        YearMonth yearMonth = YearMonth.now();
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+        List<Match> matchesToday = matchRepository.findAllByDateBetween(Date.valueOf(start),
+                Date.valueOf(end));
         matchesToday.sort(Comparator.comparingLong(Match::getId));
 
         for (Match match : matchesToday) {
             List<MonthlyRating> ratings = monthlyRatingRepository.findAllByMatchId(match.getId());
             for (MonthlyRating rating : ratings) {
-                monthlyRatingService.updateMonthlyDailyStats(rating.getNewRating() - rating.getOldRating(), rating.getPlayer(),rating.getNewRating());
+                monthlyRatingService.updateMonthlyDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), rating.getPlayer(),rating.getNewRating());
             }
         }
     }
@@ -160,8 +162,8 @@ public class RegenerateService {
                         .findAllByMatchIdAndPlayerId(match.getId(), player.getId());
                 for (MonthlyRating rating : ratings) {
                     monthlyRatingService.updateMonthlyStats(player, rating, month, year);
-                    if (match.getDate().toLocalDate().equals(today)) {
-                        monthlyRatingService.updateMonthlyDailyStats(rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
+                    if (match.getDate().toLocalDate().getMonth().equals(today.getMonth())) {
+                        monthlyRatingService.updateMonthlyDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
                     }
                 }
             }

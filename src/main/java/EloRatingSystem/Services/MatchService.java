@@ -2,6 +2,7 @@ package EloRatingSystem.Services;
 
 import EloRatingSystem.Dtos.MatchDtos.Match2v2ResponseDto;
 import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
+import EloRatingSystem.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Match;
@@ -95,7 +96,6 @@ public class MatchService {
                     .orElseThrow(() -> new ApiException(String.format("player %s doesn't exist", atkId), HttpStatus.BAD_REQUEST));
             Player def = playerRepository.findById(defId)
                     .orElseThrow(() -> new ApiException(String.format("player %s doesn't exist", defId), HttpStatus.BAD_REQUEST));
-            ;
             return teamRepository.save(new Team(atk, def));
         }
     }
@@ -131,5 +131,26 @@ public class MatchService {
         regenerateService.regenerateMonthlyStatistics(winner.getAttacker());
         regenerateService.regenerateMonthlyStatistics(loser.getAttacker());
 
+    }
+
+    public Mono<MatchStatisticsDto> getStatistics() {
+
+        int redWins = 0;
+        int blueWins = 0;
+        int redGoals = 0;
+        int blueGoals = 0;
+
+        List<Match> matches = matchRepository.findAll();
+        for (Match match : matches) {
+            if (match.getRedTeamScore() == 10) {
+                redWins++;
+            } else {
+                blueWins++;
+            }
+            redGoals += match.getRedTeamScore();
+            blueGoals += match.getBlueTeamScore();
+        }
+
+        return Mono.just(new MatchStatisticsDto(redWins, blueWins, redGoals, blueGoals));
     }
 }

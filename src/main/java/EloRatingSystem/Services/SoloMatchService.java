@@ -2,6 +2,7 @@ package EloRatingSystem.Services;
 
 import EloRatingSystem.Dtos.MatchDtos.SoloMatchRequestDto;
 import EloRatingSystem.Dtos.MatchDtos.SoloMatchResponseDto;
+import EloRatingSystem.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Player;
@@ -89,5 +90,27 @@ public class SoloMatchService {
 
         regenerateService.regenerateSoloPlayerStatistics(redPlayer);
         regenerateService.regenerateSoloPlayerStatistics(bluePlayer);
+    }
+
+    public Mono<MatchStatisticsDto> getSoloStatistics() {
+
+        int redWins = 0;
+        int blueWins = 0;
+        int redGoals = 0;
+        int blueGoals = 0;
+
+        List<SoloMatch> matches = soloMatchRepository.findAll();
+        for (SoloMatch match : matches) {
+            if (match.getRedScore() == 10) {
+                redWins++;
+            } else {
+                blueWins++;
+            }
+            redGoals += match.getRedScore();
+            blueGoals += match.getBlueScore();
+        }
+
+        return Mono.just(new MatchStatisticsDto(redWins, blueWins, redGoals, blueGoals));
+
     }
 }
