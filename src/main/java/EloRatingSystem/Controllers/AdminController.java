@@ -22,6 +22,8 @@ public class AdminController {
     @Autowired
     MatchService matchService;
     @Autowired
+    PlayerService playerService;
+    @Autowired
     MonthlyService monthlyService;
     @Autowired
     SoloMatchService soloMatchService;
@@ -29,8 +31,6 @@ public class AdminController {
     PlayerRepository playerRepository;
     @Autowired
     RegenerateService regenerateService;
-    @Autowired
-    TeamService teamService;
 
     @DeleteMapping("/match/latest")
     public void deleteLatestMatch() {
@@ -45,6 +45,11 @@ public class AdminController {
     @GetMapping("/test")
     public String secured() {
         return "Hello! From Admin";
+    }
+
+    @PutMapping("/player/activation/{nameTag}")
+    public void deactivatePlayerById(@PathVariable String nameTag) {
+        playerService.deactivatePlayerByNameTag(nameTag);
     }
 
     // Only works on players that haven't played any games

@@ -84,7 +84,6 @@ public class PlayerController {
         return monthlyService.getAllMonthWinners();
     }
 
-
     @GetMapping("/records")
     public Mono<RecordsDto> getRecords() {
         return playerService.getRecords();

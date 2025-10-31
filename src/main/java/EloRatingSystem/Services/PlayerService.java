@@ -73,6 +73,19 @@ public class PlayerService {
         return Mono.error(new ApiException(String.format("%s Doesn't exist", nameTag), HttpStatus.BAD_REQUEST));
     }
 
+
+    public void deactivatePlayerByNameTag(String nameTag) {
+        Optional<Player> playerOpt = playerRepository.findByNameTagIgnoreCase(nameTag);
+        if (playerOpt.isPresent()) {
+            Player player = playerOpt.get();
+            player.setActive(!player.getActive());
+            playerRepository.save(player);
+            Mono.just(new PlayerResponseDto(player));
+            return;
+        }
+        Mono.error(new ApiException(String.format("%s Doesn't exist", nameTag), HttpStatus.BAD_REQUEST));
+    }
+
     public Mono<PlayerResponseDto> newPlayer(PlayerRequestDto requestDto) {
         if (!checkIfPlayerExists(requestDto.getNameTag())) {
             Player player = new Player(requestDto.getNameTag(), 1200, 1200, true);
