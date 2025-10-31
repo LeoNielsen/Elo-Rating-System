@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class MonthlyService {
                     month,
                     stats.getMonthlyRating()
             ));
-            achievementService.checkAndUnlockAchievementsMonthly(stats.getPlayer());
+            achievementService.checkAndUnlockAchievementsMonthly(stats.getPlayer(), Date.valueOf(LocalDate.now()));
         }
     }
 

@@ -5,8 +5,9 @@ import EloRatingSystem.Dtos.MatchDtos.SoloMatchResponseDto;
 import EloRatingSystem.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Achievement.GameType;
+import EloRatingSystem.Models.Achievement.PlayerAchievement;
 import EloRatingSystem.Models.Player;
-import EloRatingSystem.Models.SoloMatch;
+import EloRatingSystem.Models.Match.SoloMatch;
 import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
 import EloRatingSystem.Reporitories.SoloMatchRepository;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,18 +80,24 @@ public class SoloMatchService {
     @Transactional
     public void deleteLatestSoloMatch() {
         SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        soloRatingService.deleteRatingsBySoloMatch(match.getDate().toLocalDate(),match.getId());
+        soloRatingService.deleteRatingsBySoloMatch(match.getDate().toLocalDate(), match.getId());
 
         Player redPlayer = match.getRedPlayer();
         Player bluePlayer = match.getBluePlayer();
 
         soloMatchRepository.deleteById(match.getId());
 
-        playerAchievementRepository.deleteAllByPlayerIdAndGameType(redPlayer.getId(), GameType.SOLO);
-        playerAchievementRepository.deleteAllByPlayerIdAndGameType(bluePlayer.getId(), GameType.SOLO);
-
-        regenerateService.regenerateSoloPlayerStatistics(redPlayer);
-        regenerateService.regenerateSoloPlayerStatistics(bluePlayer);
+        List<Player> players = new ArrayList<>(Arrays.asList(
+                redPlayer,
+                bluePlayer
+        ));
+        for (Player player : players) {
+            List<PlayerAchievement> PA = playerAchievementRepository.findAllByPlayerIdAndDateAndGameType(player.getId(), match.getDate(), GameType.SOLO);
+            if (!PA.isEmpty()) {
+                playerAchievementRepository.deleteAll(PA);
+            }
+            regenerateService.regenerateSoloPlayerStatistics(player);
+        }
     }
 
     public Mono<MatchStatisticsDto> getSoloStatistics() {

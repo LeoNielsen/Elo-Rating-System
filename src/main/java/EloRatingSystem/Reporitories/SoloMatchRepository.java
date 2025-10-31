@@ -1,6 +1,6 @@
 package EloRatingSystem.Reporitories;
 
-import EloRatingSystem.Models.SoloMatch;
+import EloRatingSystem.Models.Match.SoloMatch;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;

@@ -4,6 +4,7 @@ import EloRatingSystem.Dtos.PlayerDtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Models.*;
+import EloRatingSystem.Models.Match.Match;
 import EloRatingSystem.Reporitories.DailyStats.MonthlyDailyStatsRepository;
 import EloRatingSystem.Reporitories.MonthlyRatingRepository;
 import EloRatingSystem.Reporitories.MonthlyStatsRepository;
@@ -185,6 +186,8 @@ public class MonthlyRatingService {
             Player player = rating.getPlayer();
             MonthlyStats stats = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year).orElseThrow();
             stats.setMonthlyRating(rating.getOldRating());
+            updateMonthlyDailyStats(date,rating.getOldRating() - rating.getNewRating(), player, rating.getOldRating());
+            monthlyStatsRepository.save(stats);
             monthlyRatingRepository.deleteById(rating.getId());
         }
     }

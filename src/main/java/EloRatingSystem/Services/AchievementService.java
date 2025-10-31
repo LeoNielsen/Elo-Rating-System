@@ -4,6 +4,8 @@ import EloRatingSystem.Models.*;
 import EloRatingSystem.Models.Achievement.Achievement;
 import EloRatingSystem.Models.Achievement.GameType;
 import EloRatingSystem.Models.Achievement.PlayerAchievement;
+import EloRatingSystem.Models.Match.Match;
+import EloRatingSystem.Models.Match.SoloMatch;
 import EloRatingSystem.Reporitories.Achievements.AchievementRepository;
 import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
 import EloRatingSystem.Reporitories.MonthlyStatsRepository;
@@ -14,6 +16,7 @@ import EloRatingSystem.Services.RatingServices.RatingUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,7 +79,7 @@ public class AchievementService {
             };
 
             if (qualifies && !playerAchievementIsUnlocked(player, achievement)) {
-                unlockAchievement(player, achievement);
+                unlockAchievement(player, achievement, match.getDate());
             }
         }
     }
@@ -92,7 +95,7 @@ public class AchievementService {
         boolean winTenZero = false;
 
         boolean isBlue = match.getBluePlayer() == player;
-        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueScore(),match.getRedScore());
+        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueScore(), match.getRedScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
 
 
@@ -110,18 +113,18 @@ public class AchievementService {
                 case WIN_STREAK_SOLO -> winStreak >= achievement.getAmount();
                 case WIN_10_ZERO_SOLO -> winTenZero;
                 case WIN_AGAINST_HIGHER_RATED_SOLO -> won && lowerRatingThenPlayer(currentRating,
-                        isBlue? match.getRedPlayer().getRating() : match.getBluePlayer().getRating(),
+                        isBlue ? match.getRedPlayer().getRating() : match.getBluePlayer().getRating(),
                         achievement.getAmount());
                 default -> false;
             };
 
             if (qualifies && !playerAchievementIsUnlocked(player, achievement)) {
-                unlockAchievement(player, achievement);
+                unlockAchievement(player, achievement, match.getDate());
             }
         }
     }
 
-    public void checkAndUnlockAchievementsMonthly(Player player) {
+    public void checkAndUnlockAchievementsMonthly(Player player, Date date) {
         List<MonthlyWinner> monthlyWins = monthlyWinnerRepository.findAllByPlayerId(player.getId());
 
         List<Achievement> allAchievements = achievementRepository.findAllByGameType(GameType.MONTHLY);
@@ -132,12 +135,12 @@ public class AchievementService {
             };
 
             if (qualifies && !playerAchievementIsUnlocked(player, achievement)) {
-                unlockAchievement(player, achievement);
+                unlockAchievement(player, achievement, date);
             }
         }
     }
 
-    private void unlockAchievement(Player player, Achievement achievement) {
+    private void unlockAchievement(Player player, Achievement achievement, Date date) {
         Optional<PlayerAchievement> playerAchievementOptional = playerAchievementRepository
                 .findByPlayerIdAndAchievementId(player.getId(), achievement.getId());
         if (playerAchievementOptional.isPresent()) {
@@ -145,7 +148,7 @@ public class AchievementService {
             playerAchievement.setUnlocked(true);
             playerAchievementRepository.save(playerAchievement);
         } else {
-            playerAchievementRepository.save(new PlayerAchievement(player,achievement,true));
+            playerAchievementRepository.save(new PlayerAchievement(player, achievement, true, date));
         }
     }
 

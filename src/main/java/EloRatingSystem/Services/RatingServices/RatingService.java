@@ -4,6 +4,7 @@ import EloRatingSystem.Dtos.PlayerDtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Models.*;
+import EloRatingSystem.Models.Match.Match;
 import EloRatingSystem.Reporitories.DailyStats.PlayerDailyStatsRepository;
 import EloRatingSystem.Reporitories.MatchRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
@@ -173,5 +174,4 @@ public class RatingService {
             ratingRepository.deleteById(rating.getId());
         }
     }
-
 }

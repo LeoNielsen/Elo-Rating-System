@@ -4,6 +4,8 @@ import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Models.DailyStats.SoloPlayerDailyStats;
 import EloRatingSystem.Models.*;
+import EloRatingSystem.Models.Match.Match;
+import EloRatingSystem.Models.Match.SoloMatch;
 import EloRatingSystem.Reporitories.DailyStats.MonthlyDailyStatsRepository;
 import EloRatingSystem.Reporitories.DailyStats.PlayerDailyStatsRepository;
 import EloRatingSystem.Reporitories.DailyStats.SoloPlayerDailyStatsRepository;

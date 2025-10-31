@@ -5,7 +5,8 @@ import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
 import EloRatingSystem.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Models.Achievement.GameType;
-import EloRatingSystem.Models.Match;
+import EloRatingSystem.Models.Achievement.PlayerAchievement;
+import EloRatingSystem.Models.Match.Match;
 import EloRatingSystem.Models.Player;
 import EloRatingSystem.Models.Team;
 import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,24 +115,23 @@ public class MatchService {
 
         teamRepository.save(winner);
         teamRepository.save(loser);
+
         monthlyRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
         matchRepository.deleteById(match.getId());
 
-        playerAchievementRepository.deleteAllByPlayerIdAndGameType(winner.getDefender().getId(), GameType.TEAMS);
-        playerAchievementRepository.deleteAllByPlayerIdAndGameType(loser.getDefender().getId(), GameType.TEAMS);
-        playerAchievementRepository.deleteAllByPlayerIdAndGameType(winner.getAttacker().getId(), GameType.TEAMS);
-        playerAchievementRepository.deleteAllByPlayerIdAndGameType(loser.getAttacker().getId(), GameType.TEAMS);
-
-        regenerateService.regeneratePlayerStatistics(winner.getDefender());
-        regenerateService.regeneratePlayerStatistics(loser.getDefender());
-        regenerateService.regeneratePlayerStatistics(winner.getAttacker());
-        regenerateService.regeneratePlayerStatistics(loser.getAttacker());
-
-        regenerateService.regenerateMonthlyStatistics(winner.getDefender());
-        regenerateService.regenerateMonthlyStatistics(loser.getDefender());
-        regenerateService.regenerateMonthlyStatistics(winner.getAttacker());
-        regenerateService.regenerateMonthlyStatistics(loser.getAttacker());
-
+        List<Player> players = new ArrayList<>(Arrays.asList(
+                winner.getAttacker(),
+                winner.getDefender(),
+                loser.getAttacker(),
+                loser.getDefender()
+        ));
+        for (Player player : players) {
+            List<PlayerAchievement> PA = playerAchievementRepository.findAllByPlayerIdAndDateAndGameType(player.getId(), match.getDate(), GameType.TEAMS);
+            if (!PA.isEmpty()) {
+                playerAchievementRepository.deleteAll(PA);
+            }
+            regenerateService.regeneratePlayerStatistics(player);
+        }
     }
 
     public Mono<MatchStatisticsDto> getStatistics() {
