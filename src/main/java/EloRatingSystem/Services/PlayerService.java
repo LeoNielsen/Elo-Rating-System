@@ -101,7 +101,9 @@ public class PlayerService {
 
         List<Player> players = playerRepository.findAll();
         for (Player player : players) {
-            playerStatistics.add(playerStatistics(player));
+            if(player.getActive()){
+                playerStatistics.add(playerStatistics(player));
+            }
         }
 
         return Mono.just(playerStatistics);
@@ -142,7 +144,9 @@ public class PlayerService {
 
         List<Player> players = playerRepository.findAll();
         for (Player player : players) {
-            playerStatistics.add(soloPlayerStatistics(player));
+            if(player.getActive()){
+                playerStatistics.add(soloPlayerStatistics(player));
+            }
         }
 
         return Mono.just(playerStatistics);

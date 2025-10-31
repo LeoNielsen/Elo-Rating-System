@@ -13,6 +13,9 @@ public class ChartDataDto {
     private LocalDate date;
 
     public ChartDataDto(DailyStatsAbstract dailyStatsAbstract){
+        if (!dailyStatsAbstract.getPlayer().getActive()){
+            return;
+        }
         this.playerTag = dailyStatsAbstract.getPlayer().getNameTag();
         this.rating = dailyStatsAbstract.getRating();
         this.date = dailyStatsAbstract.getDate();
