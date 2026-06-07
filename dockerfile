@@ -1,17 +1,25 @@
-# Build stage
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM eclipse-temurin:21-jdk AS build
+
 WORKDIR /app
 
+COPY mvnw .
+COPY .mvn .mvn
 COPY pom.xml .
-COPY src ./src
+RUN ./mvnw dependency:go-offline
 
-RUN mvn -q -DskipTests package
+COPY src src
+RUN ./mvnw clean package -DskipTests
 
-# Runtime stage (multi-arch friendly)
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:21-jre
+
 WORKDIR /app
+
+# Modtag profil fra GitHub Actions
+ARG SPRING_PROFILES_ACTIVE=production
+ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE
 
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"]

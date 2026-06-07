@@ -1,8 +1,8 @@
-name: Build and push backend image (prod)
+name: Build and push backend image (test)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "test" ]
 
 jobs:
   build-and-push:
@@ -35,7 +35,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image (prod)
+      - name: Build and push Docker image (test)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -43,7 +43,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
-            SPRING_PROFILES_ACTIVE=production
+            SPRING_PROFILES_ACTIVE=test
           tags: |
-            ${{ steps.vars.outputs.IMAGE }}:latest
-            ${{ steps.vars.outputs.IMAGE }}:${{ github.sha }}
+            ${{ steps.vars.outputs.IMAGE }}-test:latest
+            ${{ steps.vars.outputs.IMAGE }}-test:${{ github.sha }}
