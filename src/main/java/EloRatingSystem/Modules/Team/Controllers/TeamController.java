@@ -1,0 +1,40 @@
+package EloRatingSystem.Modules.Team.Controllers;
+
+import EloRatingSystem.Modules.Team.Dtos.TeamRequestDto;
+import EloRatingSystem.Modules.Team.Dtos.TeamResponseDto;
+import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
+import EloRatingSystem.Modules.Team.Services.TeamService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("team")
+@Slf4j
+public class TeamController {
+
+    @Autowired
+    TeamRepository teamRepository;
+    @Autowired
+    TeamService teamService;
+
+    @GetMapping("/{id}")
+    public Mono<TeamResponseDto> getTeamById(@PathVariable Long id) {
+        // TODO: make service method
+        return Mono.just(new TeamResponseDto(teamRepository.findById(id).orElseThrow()));
+    }
+
+    @GetMapping("/all")
+    public  Mono<List<TeamResponseDto>> getAllTeams(){
+       return teamService.getAllTeams();
+    }
+
+    @PostMapping
+    public Mono<TeamResponseDto> newTeam(@RequestBody TeamRequestDto requestDto) {
+        return teamService.newTeam(requestDto);
+    }
+
+}

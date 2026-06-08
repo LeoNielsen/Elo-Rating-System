@@ -1,12 +1,14 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Matches.Dtos.MatchRequestDto;
-import EloRatingSystem.Matches.Dtos.SoloMatchRequestDto;
-import EloRatingSystem.Matches.Services.MatchService;
-import EloRatingSystem.Matches.Services.SoloMatchService;
-import EloRatingSystem.Models.Player;
-import EloRatingSystem.Reporitories.PlayerRepository;
+import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
+import EloRatingSystem.Modules.Matches.Services.MatchService;
+import EloRatingSystem.Modules.Matches.Services.SoloMatchService;
+import EloRatingSystem.Modules.player.Models.Player;
+import EloRatingSystem.Modules.Monthly.Services.MonthlyService;
+import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
 import EloRatingSystem.Services.*;
+import EloRatingSystem.Modules.player.Services.PlayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
