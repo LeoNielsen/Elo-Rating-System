@@ -1,9 +1,9 @@
-package EloRatingSystem.Controllers;
+package EloRatingSystem.Achievement.Controllers;
 
-import EloRatingSystem.Models.Achievement.Achievement;
-import EloRatingSystem.Models.Achievement.PlayerAchievement;
-import EloRatingSystem.Reporitories.Achievements.AchievementRepository;
-import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
+import EloRatingSystem.Achievement.Models.Achievement;
+import EloRatingSystem.Achievement.Models.PlayerAchievement;
+import EloRatingSystem.Achievement.Repositories.AchievementRepository;
+import EloRatingSystem.Achievement.Repositories.PlayerAchievementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

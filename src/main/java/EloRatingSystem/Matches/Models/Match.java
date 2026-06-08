@@ -1,4 +1,4 @@
-package EloRatingSystem.Models.Match;
+package EloRatingSystem.Matches.Models;
 
 import EloRatingSystem.Models.Team;
 import jakarta.persistence.*;

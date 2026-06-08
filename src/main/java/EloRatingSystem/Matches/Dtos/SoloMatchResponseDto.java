@@ -1,7 +1,7 @@
-package EloRatingSystem.Dtos.MatchDtos;
+package EloRatingSystem.Matches.Dtos;
 
 import EloRatingSystem.Models.Player;
-import EloRatingSystem.Models.Match.SoloMatch;
+import EloRatingSystem.Matches.Models.SoloMatch;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

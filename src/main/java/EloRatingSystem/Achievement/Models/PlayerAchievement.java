@@ -1,5 +1,7 @@
-package EloRatingSystem.Models.Achievement;
+package EloRatingSystem.Achievement.Models;
 
+import EloRatingSystem.Matches.Models.Match;
+import EloRatingSystem.Matches.Models.SoloMatch;
 import EloRatingSystem.Models.Player;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,11 +32,19 @@ public class PlayerAchievement {
 
     private Date date;
 
-    public PlayerAchievement(Player player, Achievement achievement, boolean unlocked, Date date) {
+    @ManyToOne
+    private SoloMatch soloMatch;
+
+    @ManyToOne
+    private Match teamMatch;
+
+    public PlayerAchievement(Player player, Achievement achievement, boolean unlocked, Date date, Match teamMatch,  SoloMatch soloMatch) {
         this.player = player;
         this.achievement = achievement;
         this.unlocked = unlocked;
         this.gameType = achievement.getGameType();
         this.date = date;
+        this.teamMatch = teamMatch;
+        this.soloMatch = soloMatch;
     }
 }

@@ -1,7 +1,7 @@
-package EloRatingSystem.Reporitories.Achievements;
+package EloRatingSystem.Achievement.Repositories;
 
-import EloRatingSystem.Models.Achievement.Achievement;
-import EloRatingSystem.Models.Achievement.GameType;
+import EloRatingSystem.Achievement.Models.Achievement;
+import EloRatingSystem.Achievement.Models.GameType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package EloRatingSystem.Models.Achievement;
+package EloRatingSystem.Achievement.Models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

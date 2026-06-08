@@ -1,4 +1,4 @@
-package EloRatingSystem.Models.Achievement;
+package EloRatingSystem.Achievement.Models;
 
 public enum AchievementMetric {
     RATING,

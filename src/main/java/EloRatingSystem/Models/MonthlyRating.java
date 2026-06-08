@@ -1,6 +1,6 @@
 package EloRatingSystem.Models;
 
-import EloRatingSystem.Models.Match.Match;
+import EloRatingSystem.Matches.Models.Match;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

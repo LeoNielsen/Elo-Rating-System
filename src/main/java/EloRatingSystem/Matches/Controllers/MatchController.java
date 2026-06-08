@@ -1,12 +1,12 @@
-package EloRatingSystem.Controllers;
+package EloRatingSystem.Matches.Controllers;
 
-import EloRatingSystem.Dtos.MatchDtos.Match2v2ResponseDto;
-import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
-import EloRatingSystem.Dtos.MatchDtos.SoloMatchRequestDto;
-import EloRatingSystem.Dtos.MatchDtos.SoloMatchResponseDto;
+import EloRatingSystem.Matches.Dtos.Match2v2ResponseDto;
+import EloRatingSystem.Matches.Dtos.MatchRequestDto;
+import EloRatingSystem.Matches.Dtos.SoloMatchRequestDto;
+import EloRatingSystem.Matches.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Dtos.MatchStatisticsDto;
-import EloRatingSystem.Services.MatchService;
-import EloRatingSystem.Services.SoloMatchService;
+import EloRatingSystem.Matches.Services.MatchService;
+import EloRatingSystem.Matches.Services.SoloMatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

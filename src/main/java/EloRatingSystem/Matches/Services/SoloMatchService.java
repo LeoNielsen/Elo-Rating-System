@@ -1,17 +1,18 @@
-package EloRatingSystem.Services;
+package EloRatingSystem.Matches.Services;
 
-import EloRatingSystem.Dtos.MatchDtos.SoloMatchRequestDto;
-import EloRatingSystem.Dtos.MatchDtos.SoloMatchResponseDto;
+import EloRatingSystem.Matches.Dtos.SoloMatchRequestDto;
+import EloRatingSystem.Matches.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Models.Achievement.GameType;
-import EloRatingSystem.Models.Achievement.PlayerAchievement;
+import EloRatingSystem.Achievement.Models.GameType;
+import EloRatingSystem.Achievement.Models.PlayerAchievement;
 import EloRatingSystem.Models.Player;
-import EloRatingSystem.Models.Match.SoloMatch;
-import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
+import EloRatingSystem.Matches.Models.SoloMatch;
+import EloRatingSystem.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Reporitories.PlayerRepository;
-import EloRatingSystem.Reporitories.SoloMatchRepository;
+import EloRatingSystem.Matches.Repositories.SoloMatchRepository;
 import EloRatingSystem.Services.RatingServices.SoloRatingService;
+import EloRatingSystem.Services.RegenerateService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

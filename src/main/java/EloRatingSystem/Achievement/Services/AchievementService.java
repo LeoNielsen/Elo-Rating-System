@@ -1,13 +1,13 @@
-package EloRatingSystem.Services;
+package EloRatingSystem.Achievement.Services;
 
 import EloRatingSystem.Models.*;
-import EloRatingSystem.Models.Achievement.Achievement;
-import EloRatingSystem.Models.Achievement.GameType;
-import EloRatingSystem.Models.Achievement.PlayerAchievement;
-import EloRatingSystem.Models.Match.Match;
-import EloRatingSystem.Models.Match.SoloMatch;
-import EloRatingSystem.Reporitories.Achievements.AchievementRepository;
-import EloRatingSystem.Reporitories.Achievements.PlayerAchievementRepository;
+import EloRatingSystem.Achievement.Models.Achievement;
+import EloRatingSystem.Achievement.Models.GameType;
+import EloRatingSystem.Achievement.Models.PlayerAchievement;
+import EloRatingSystem.Matches.Models.Match;
+import EloRatingSystem.Matches.Models.SoloMatch;
+import EloRatingSystem.Achievement.Repositories.AchievementRepository;
+import EloRatingSystem.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Reporitories.MonthlyStatsRepository;
 import EloRatingSystem.Reporitories.MonthlyWinnerRepository;
 import EloRatingSystem.Reporitories.PlayerStatsRepository;
@@ -79,7 +79,7 @@ public class AchievementService {
             };
 
             if (qualifies && !playerAchievementIsUnlocked(player, achievement)) {
-                unlockAchievement(player, achievement, match.getDate());
+                unlockAchievement(player, achievement, match.getDate(), match, null);
             }
         }
     }
@@ -119,7 +119,7 @@ public class AchievementService {
             };
 
             if (qualifies && !playerAchievementIsUnlocked(player, achievement)) {
-                unlockAchievement(player, achievement, match.getDate());
+                unlockAchievement(player, achievement, match.getDate(), null,match);
             }
         }
     }
@@ -135,12 +135,12 @@ public class AchievementService {
             };
 
             if (qualifies && !playerAchievementIsUnlocked(player, achievement)) {
-                unlockAchievement(player, achievement, date);
+                unlockAchievement(player, achievement, date, null, null);
             }
         }
     }
 
-    private void unlockAchievement(Player player, Achievement achievement, Date date) {
+    private void unlockAchievement(Player player, Achievement achievement, Date date, Match teamMatch, SoloMatch soloMatch) {
         Optional<PlayerAchievement> playerAchievementOptional = playerAchievementRepository
                 .findByPlayerIdAndAchievementId(player.getId(), achievement.getId());
         if (playerAchievementOptional.isPresent()) {
@@ -148,7 +148,7 @@ public class AchievementService {
             playerAchievement.setUnlocked(true);
             playerAchievementRepository.save(playerAchievement);
         } else {
-            playerAchievementRepository.save(new PlayerAchievement(player, achievement, true, date));
+            playerAchievementRepository.save(new PlayerAchievement(player, achievement, true, date, teamMatch, soloMatch));
         }
     }
 

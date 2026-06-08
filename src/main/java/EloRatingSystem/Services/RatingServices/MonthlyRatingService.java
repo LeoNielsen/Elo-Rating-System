@@ -4,7 +4,7 @@ import EloRatingSystem.Dtos.PlayerDtos.ChartDataDto;
 import EloRatingSystem.Dtos.RatingResponseDto;
 import EloRatingSystem.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Models.*;
-import EloRatingSystem.Models.Match.Match;
+import EloRatingSystem.Matches.Models.Match;
 import EloRatingSystem.Reporitories.DailyStats.MonthlyDailyStatsRepository;
 import EloRatingSystem.Reporitories.MonthlyRatingRepository;
 import EloRatingSystem.Reporitories.MonthlyStatsRepository;

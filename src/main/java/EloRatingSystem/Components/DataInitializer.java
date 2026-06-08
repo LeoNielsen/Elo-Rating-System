@@ -1,10 +1,10 @@
 package EloRatingSystem.Components;
 
-import EloRatingSystem.Models.Achievement.Achievement;
-import EloRatingSystem.Models.Achievement.AchievementMetric;
-import EloRatingSystem.Models.Achievement.AchievementType;
-import EloRatingSystem.Models.Achievement.GameType;
-import EloRatingSystem.Reporitories.Achievements.AchievementRepository;
+import EloRatingSystem.Achievement.Models.Achievement;
+import EloRatingSystem.Achievement.Models.AchievementMetric;
+import EloRatingSystem.Achievement.Models.AchievementType;
+import EloRatingSystem.Achievement.Models.GameType;
+import EloRatingSystem.Achievement.Repositories.AchievementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
