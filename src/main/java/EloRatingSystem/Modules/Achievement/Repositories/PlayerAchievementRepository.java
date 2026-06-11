@@ -15,5 +15,9 @@ public interface PlayerAchievementRepository extends JpaRepository<PlayerAchieve
     List<PlayerAchievement> findAllByPlayerId(Long playerId);
     List<PlayerAchievement> findAllByPlayerIdAndDateAndGameType(Long playerId, Date date, GameType gameType);
 
+    void deleteAllByMatchId(Long matchId);
+
+    void deleteAllBySoloMatchId(Long soloMatchId);
+
     void deleteAllByPlayerIdAndGameType(Long playerId, GameType gameType);
 }

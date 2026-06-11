@@ -29,10 +29,19 @@ public class MonthlyRating {
     @Column(name = "newRating", nullable = false)
     private Integer newRating;
 
-    public MonthlyRating(Match match, Player player, Integer oldRating, Integer newRating) {
+    @Column(name = "year", nullable = false)
+    private Integer year;
+
+    @Column(name = "month", nullable = false)
+    private Integer month;
+
+    public MonthlyRating(Match match, Player player, Integer oldRating, Integer newRating, Integer year, Integer month) {
         this.match = match;
         this.player = player;
         this.oldRating = oldRating;
         this.newRating = newRating;
+        this.year = year;
+        this.month = month;
     }
+
 }

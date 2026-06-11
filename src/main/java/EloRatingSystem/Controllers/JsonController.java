@@ -4,21 +4,22 @@ import EloRatingSystem.Modules.Matches.Dtos.Match2v2ResponseDto;
 import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchResponseDto;
-import EloRatingSystem.Modules.player.Dtos.PlayerRequestDto;
-import EloRatingSystem.Modules.player.Dtos.PlayerResponseDto;
 import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
 import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
 import EloRatingSystem.Modules.Matches.Services.MatchService;
-import EloRatingSystem.Modules.player.Services.PlayerService;
 import EloRatingSystem.Modules.Matches.Services.SoloMatchService;
+import EloRatingSystem.Modules.player.Dtos.PlayerRequestDto;
+import EloRatingSystem.Modules.player.Dtos.PlayerResponseDto;
+import EloRatingSystem.Modules.player.Services.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -41,54 +42,51 @@ public class JsonController {
     SoloMatchRepository soloMatchRepository;
 
     @PostMapping("/upload")
-    public String uploadJson(@RequestBody List<Match2v2ResponseDto> matches) {
-        try {
-            for (Match2v2ResponseDto jsonMatchDto : matches) {
-                PlayerRequestDto redDefender = new PlayerRequestDto(jsonMatchDto.getRedDef());
-                PlayerRequestDto redAttacker = new PlayerRequestDto(jsonMatchDto.getRedAtk());
-                PlayerRequestDto blueDefender = new PlayerRequestDto(jsonMatchDto.getBlueDef());
-                PlayerRequestDto blueAttacker = new PlayerRequestDto(jsonMatchDto.getBlueAtk());
+    public Mono<String> uploadJson(@RequestBody List<Match2v2ResponseDto> matches) {
 
-                Mono<PlayerResponseDto> r_d = playerService.checkIfPlayerExists(redDefender.getNameTag()) ?
-                        playerService.getByNameTag(redDefender.getNameTag()) :
-                        playerService.newPlayer(new PlayerRequestDto(redDefender.getNameTag()));
+        return Flux.fromIterable(matches)
+                .concatMap(jsonMatchDto -> {
 
-                Mono<PlayerResponseDto> r_a = playerService.checkIfPlayerExists(redAttacker.getNameTag()) ?
-                        playerService.getByNameTag(redAttacker.getNameTag()) :
-                        playerService.newPlayer(new PlayerRequestDto(redAttacker.getNameTag()));
+                    PlayerRequestDto redDefender = new PlayerRequestDto(jsonMatchDto.getRedDef());
+                    PlayerRequestDto redAttacker = new PlayerRequestDto(jsonMatchDto.getRedAtk());
+                    PlayerRequestDto blueDefender = new PlayerRequestDto(jsonMatchDto.getBlueDef());
+                    PlayerRequestDto blueAttacker = new PlayerRequestDto(jsonMatchDto.getBlueAtk());
 
-                Mono<PlayerResponseDto> b_d = playerService.checkIfPlayerExists(blueDefender.getNameTag()) ?
-                        playerService.getByNameTag(blueDefender.getNameTag()) :
-                        playerService.newPlayer(new PlayerRequestDto(blueDefender.getNameTag()));
+                    Mono<PlayerResponseDto> r_d = playerService.checkIfPlayerExists(redDefender.getNameTag()) ?
+                            playerService.getByNameTag(redDefender.getNameTag()) :
+                            playerService.newPlayer(new PlayerRequestDto(redDefender.getNameTag()));
 
-                Mono<PlayerResponseDto> b_a = playerService.checkIfPlayerExists(blueAttacker.getNameTag()) ?
-                        playerService.getByNameTag(blueAttacker.getNameTag()) :
-                        playerService.newPlayer(new PlayerRequestDto(blueAttacker.getNameTag()));
+                    Mono<PlayerResponseDto> r_a = playerService.checkIfPlayerExists(redAttacker.getNameTag()) ?
+                            playerService.getByNameTag(redAttacker.getNameTag()) :
+                            playerService.newPlayer(new PlayerRequestDto(redAttacker.getNameTag()));
 
-                Mono<Match2v2ResponseDto> matchMono = Mono.zip(r_d, r_a, b_d, b_a)
-                        .flatMap(tuple -> {
-                            PlayerResponseDto redAtk = tuple.getT1();
-                            PlayerResponseDto redDef = tuple.getT2();
-                            PlayerResponseDto blueAtk = tuple.getT3();
-                            PlayerResponseDto blueDef = tuple.getT4();
-                            return matchService.newMatch(new MatchRequestDto(redAtk.getId(), redDef.getId(), blueAtk.getId(), blueDef.getId(),
-                                    jsonMatchDto.getRedScore(), jsonMatchDto.getBlueScore()));
-                        });
+                    Mono<PlayerResponseDto> b_d = playerService.checkIfPlayerExists(blueDefender.getNameTag()) ?
+                            playerService.getByNameTag(blueDefender.getNameTag()) :
+                            playerService.newPlayer(new PlayerRequestDto(blueDefender.getNameTag()));
 
-                matchMono.flatMap(matchResponseDto -> {
-                    Match match = matchRepository.findById(matchResponseDto.getId()).orElseThrow();
-                    match.setDate(jsonMatchDto.getDate());
-                    matchRepository.save(match);
-                    return Mono.empty();
-                }).subscribe();
+                    Mono<PlayerResponseDto> b_a = playerService.checkIfPlayerExists(blueAttacker.getNameTag()) ?
+                            playerService.getByNameTag(blueAttacker.getNameTag()) :
+                            playerService.newPlayer(new PlayerRequestDto(blueAttacker.getNameTag()));
 
-
-            }
-
-            return "JSON uploaded successfully!";
-        } catch (Exception e) {
-            return "Error processing JSON: " + e.getMessage();
-        }
+                    return Mono.zip(r_d, r_a, b_d, b_a)
+                            .flatMap(tuple -> {
+                                MatchRequestDto req = new MatchRequestDto(
+                                        tuple.getT2().getId(),
+                                        tuple.getT1().getId(),
+                                        tuple.getT3().getId(),
+                                        tuple.getT4().getId(),
+                                        jsonMatchDto.getRedScore(),
+                                        jsonMatchDto.getBlueScore()
+                                );
+                                return matchService.newMatch(req);
+                            })
+                            .flatMap(matchResponse -> {
+                                Match match = matchRepository.findById(matchResponse.getId()).orElseThrow();
+                                match.setDate(jsonMatchDto.getDate());
+                                return Mono.just(matchRepository.save(match));
+                            });
+                })
+                .then(Mono.just("JSON uploaded successfully!"));
     }
 
     @PostMapping("/solo/upload")

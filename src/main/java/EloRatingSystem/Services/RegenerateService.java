@@ -17,6 +17,8 @@ import EloRatingSystem.Modules.Stats.Models.MonthlyStats;
 import EloRatingSystem.Modules.Stats.Models.PlayerStats;
 import EloRatingSystem.Modules.Stats.Models.SoloPlayerStats;
 import EloRatingSystem.Modules.Stats.Repositories.*;
+import EloRatingSystem.Modules.Stats.Services.MonthlyStatsService;
+import EloRatingSystem.Modules.Stats.Services.StatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
 import EloRatingSystem.Modules.player.Models.Player;
@@ -51,6 +53,8 @@ public class RegenerateService {
     @Autowired
     RatingService ratingService;
     @Autowired
+    StatsService statsService;
+    @Autowired
     RatingRepository ratingRepository;
     @Autowired
     MonthlyRatingRepository monthlyRatingRepository;
@@ -60,6 +64,8 @@ public class RegenerateService {
     MonthlyDailyStatsRepository monthlyDailyStatsRepository;
     @Autowired
     MonthlyStatsRepository monthlyStatsRepository;
+    @Autowired
+    MonthlyStatsService monthlyStatsService;
     @Autowired
     SoloPlayerStatsRepository soloPlayerStatsRepository;
     @Autowired
@@ -92,7 +98,7 @@ public class RegenerateService {
         for (Match match : matches) {
             List<PlayerRating> ratings = ratingRepository.findAllByMatchIdAndPlayerId(match.getId(), player.getId());
             PlayerRating rating = ratings.get(0);
-            ratingService.updatePlayerStats(player, rating);
+            statsService.updatePlayerStats(player, rating);
             ratingService.updatePlayerDailyStats(match.getDate().toLocalDate(), rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
         }
     }
@@ -174,7 +180,7 @@ public class RegenerateService {
                 List<MonthlyRating> ratings = monthlyRatingRepository
                         .findAllByMatchIdAndPlayerId(match.getId(), player.getId());
                 for (MonthlyRating rating : ratings) {
-                    monthlyRatingService.updateMonthlyStats(player, rating, month, year);
+                    monthlyStatsService.updateMonthlyStats(player, rating, month, year);
                     if (match.getDate().toLocalDate().getMonth().equals(today.getMonth())) {
                         monthlyRatingService.updateMonthlyDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
                     }

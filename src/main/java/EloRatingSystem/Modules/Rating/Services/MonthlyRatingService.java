@@ -1,23 +1,23 @@
 package EloRatingSystem.Modules.Rating.Services;
 
-import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
+import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Rating.Dtos.RatingResponseDto;
 import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
+import EloRatingSystem.Modules.Rating.Repositories.MonthlyRatingRepository;
+import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.MonthlyDailyStats;
-import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Stats.Models.MonthlyStats;
+import EloRatingSystem.Modules.Stats.Repositories.MonthlyDailyStatsRepository;
+import EloRatingSystem.Modules.Stats.Repositories.MonthlyStatsRepository;
+import EloRatingSystem.Modules.Stats.Services.MonthlyStatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.player.Models.Player;
-import EloRatingSystem.Modules.Stats.Repositories.MonthlyDailyStatsRepository;
-import EloRatingSystem.Modules.Rating.Repositories.MonthlyRatingRepository;
-import EloRatingSystem.Modules.Stats.Repositories.MonthlyStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MonthlyRatingService {
@@ -28,6 +28,8 @@ public class MonthlyRatingService {
     MonthlyDailyStatsRepository monthlyDailyStatsRepository;
     @Autowired
     MonthlyStatsRepository monthlyStatsRepository;
+    @Autowired
+    MonthlyStatsService monthlyStatsService;
     @Autowired
     RatingUtils ratingUtils;
 
@@ -109,9 +111,9 @@ public class MonthlyRatingService {
         MonthlyStats monthlyStats = getStatsOrDefault(player.getId(), month, year);
         int oldMonthlyRating = monthlyStats.getMonthlyRating();
         int newMonthlyRating = ratingUtils.calculateNewRating(oldMonthlyRating, pointMultiplier, (teamRating + playerOdds) / 2, isWinner);
-        MonthlyRating monthlyRating = new MonthlyRating(match, player, oldMonthlyRating, newMonthlyRating);
+        MonthlyRating monthlyRating = new MonthlyRating(match, player, oldMonthlyRating, newMonthlyRating, year, month);
         monthlyRatingRepository.save(monthlyRating);
-        updateMonthlyStats(player, monthlyRating, month, year);
+        monthlyStatsService.updateMonthlyStats(player, monthlyRating, month, year);
         updateMonthlyDailyStats(LocalDate.now(),newMonthlyRating - oldMonthlyRating, player,newMonthlyRating);
     }
 
@@ -127,59 +129,7 @@ public class MonthlyRatingService {
                 );
     }
 
-    public void updateMonthlyStats(Player player, MonthlyRating rating, int month, int year) {
-        Match match = rating.getMatch();
-        boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(), player);
-        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
-        boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
-        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
-
-        Optional<MonthlyStats> statsOpt = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
-        MonthlyStats stats = statsOpt.orElseGet(() ->
-                new MonthlyStats(
-                        player,
-                        year,
-                        month,
-                        rating.getNewRating(),
-                        isAttacker && won ? 1 : 0,
-                        !isAttacker && won ? 1 : 0,
-                        isAttacker && !won ? 1 : 0,
-                        !isAttacker && !won ? 1 : 0,
-                        isBlue ? match.getBlueTeamScore() : match.getRedTeamScore(),
-                        rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
-                        rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
-                        won ? 1 : 0,
-                        won ? 1 : 0
-                )
-        );
-
-        if (statsOpt.isPresent()) {
-            if (won) {
-                if (isAttacker) {
-                    stats.setAttackerWins(stats.getAttackerWins() + 1);
-                } else {
-                    stats.setDefenderWins(stats.getDefenderWins() + 1);
-                }
-                stats.setCurrentWinStreak(stats.getCurrentWinStreak() + 1);
-                stats.setLongestWinStreak(Math.max(stats.getLongestWinStreak(), stats.getCurrentWinStreak()));
-            } else {
-                if (isAttacker) {
-                    stats.setAttackerLost(stats.getAttackerLost() + 1);
-                } else {
-                    stats.setDefenderLost(stats.getDefenderLost() + 1);
-                }
-                stats.setCurrentWinStreak(0);
-            }
-
-            int newRating = rating.getNewRating();
-            stats.setMonthlyRating(rating.getNewRating());
-            stats.setHighestELO(Math.max(stats.getHighestELO(), newRating));
-            stats.setLowestELO(Math.min(stats.getLowestELO(), newRating));
-            stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
-        }
-        monthlyStatsRepository.save(stats);
-    }
 
     public void deleteRatingsByMatch(LocalDate date,Long id) {
         int year = date.getYear();
@@ -193,5 +143,12 @@ public class MonthlyRatingService {
             monthlyStatsRepository.save(stats);
             monthlyRatingRepository.deleteById(rating.getId());
         }
+    }
+
+    public int getHighestELOByPlayerId(Long playerId,  int month, int year){
+        return monthlyRatingRepository.findTopByPlayerIdAndMonthAndYearOrderByNewRatingDesc(playerId, month,year).getNewRating();
+    }
+    public int getLowestELOByPlayerId(Long playerId, int month, int year){
+        return monthlyRatingRepository.findTopByPlayerIdAndMonthAndYearOrderByNewRatingAsc(playerId, month,year).getNewRating();
     }
 }

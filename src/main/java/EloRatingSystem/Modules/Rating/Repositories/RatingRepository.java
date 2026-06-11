@@ -11,4 +11,6 @@ public interface RatingRepository extends JpaRepository<PlayerRating,Long> {
 
     List<PlayerRating> findAllByMatchId(Long id);
     List<PlayerRating> findAllByMatchIdAndPlayerId(Long matchId,Long playerId);
+    PlayerRating findTopByPlayerIdOrderByNewRatingDesc(Long playerId);
+    PlayerRating findTopByPlayerIdOrderByNewRatingAsc(Long playerId);
 }

@@ -1,22 +1,19 @@
 package EloRatingSystem.Modules.Matches.Services;
 
+import EloRatingSystem.Exception.ApiException;
+import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Modules.Matches.Dtos.Match2v2ResponseDto;
 import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
-import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
-import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Modules.Achievement.Models.GameType;
-import EloRatingSystem.Modules.Achievement.Models.PlayerAchievement;
 import EloRatingSystem.Modules.Matches.Models.Match;
-import EloRatingSystem.Modules.player.Models.Player;
-import EloRatingSystem.Modules.Team.Models.Team;
-import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
-import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
-import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
+import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
+import EloRatingSystem.Modules.Team.Models.Team;
+import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
+import EloRatingSystem.Modules.player.Models.Player;
+import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
 import EloRatingSystem.Services.RegenerateService;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,7 +21,6 @@ import reactor.core.publisher.Mono;
 
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,38 +96,6 @@ public class MatchService {
             Player def = playerRepository.findById(defId)
                     .orElseThrow(() -> new ApiException(String.format("player %s doesn't exist", defId), HttpStatus.BAD_REQUEST));
             return teamRepository.save(new Team(atk, def));
-        }
-    }
-
-    @Transactional
-    public void deleteLatestMatch() {
-        Match match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        ratingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
-
-        Team winner = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getRedTeam() : match.getBlueTeam();
-        Team loser = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getBlueTeam() : match.getRedTeam();
-
-        winner.setWon(winner.getWon() - 1);
-        loser.setLost(loser.getLost() - 1);
-
-        teamRepository.save(winner);
-        teamRepository.save(loser);
-
-        monthlyRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
-        matchRepository.deleteById(match.getId());
-
-        List<Player> players = new ArrayList<>(Arrays.asList(
-                winner.getAttacker(),
-                winner.getDefender(),
-                loser.getAttacker(),
-                loser.getDefender()
-        ));
-        for (Player player : players) {
-            List<PlayerAchievement> PA = playerAchievementRepository.findAllByPlayerIdAndDateAndGameType(player.getId(), match.getDate(), GameType.TEAMS);
-            if (!PA.isEmpty()) {
-                playerAchievementRepository.deleteAll(PA);
-            }
-            regenerateService.regeneratePlayerStatistics(player);
         }
     }
 

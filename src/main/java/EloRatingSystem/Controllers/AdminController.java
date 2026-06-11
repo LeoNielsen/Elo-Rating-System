@@ -2,6 +2,7 @@ package EloRatingSystem.Controllers;
 
 import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
+import EloRatingSystem.Modules.Matches.Services.MatchDeleteService;
 import EloRatingSystem.Modules.Matches.Services.MatchService;
 import EloRatingSystem.Modules.Matches.Services.SoloMatchService;
 import EloRatingSystem.Modules.player.Models.Player;
@@ -26,6 +27,8 @@ public class AdminController {
     @Autowired
     MatchService matchService;
     @Autowired
+    MatchDeleteService matchDeleteService;
+    @Autowired
     PlayerService playerService;
     @Autowired
     MonthlyService monthlyService;
@@ -38,7 +41,7 @@ public class AdminController {
 
     @DeleteMapping("/match/latest")
     public void deleteLatestMatch() {
-        matchService.deleteLatestMatch();
+        matchDeleteService.deleteLatestMatch();
     }
 
     @DeleteMapping("/match/solo/latest")

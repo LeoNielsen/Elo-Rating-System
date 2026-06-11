@@ -1,19 +1,16 @@
 package EloRatingSystem.Modules.Rating.Services;
 
-import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
+import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Rating.Dtos.RatingResponseDto;
 import EloRatingSystem.Modules.Rating.Models.PlayerRating;
+import EloRatingSystem.Modules.Rating.Repositories.RatingRepository;
+import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.PlayerDailyStats;
-import EloRatingSystem.Modules.Matches.Models.Match;
-import EloRatingSystem.Modules.Achievement.Services.AchievementService;
-import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
-import EloRatingSystem.Modules.Stats.Models.PlayerStats;
+import EloRatingSystem.Modules.Stats.Repositories.PlayerDailyStatsRepository;
+import EloRatingSystem.Modules.Stats.Services.StatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.player.Models.Player;
-import EloRatingSystem.Modules.Stats.Repositories.PlayerDailyStatsRepository;
 import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
-import EloRatingSystem.Modules.Stats.Repositories.PlayerStatsRepository;
-import EloRatingSystem.Modules.Rating.Repositories.RatingRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +18,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -33,13 +29,10 @@ public class RatingService {
     @Autowired
     PlayerDailyStatsRepository dailyStatsRepository;
     @Autowired
-    PlayerStatsRepository statsRepository;
-    @Autowired
-    MatchRepository matchRepository;
+    StatsService statsService;
     @Autowired
     RatingUtils ratingUtils;
-    @Autowired
-    AchievementService achievementService;
+
 
     public Mono<List<RatingResponseDto>> getRatingByMatchId(Long id) {
         List<PlayerRating> ratings = ratingRepository.findAllByMatchId(id);
@@ -94,8 +87,8 @@ public class RatingService {
         int newPlayerRating = ratingUtils.calculateNewRating(player.getRating(), pointMultiplier, (teamOdds + playerOdds) / 2, isWinner);
         PlayerRating playerRating = new PlayerRating(match, player, player.getRating(), newPlayerRating);
         ratingRepository.save(playerRating);
-        updatePlayerStats(player, playerRating);
-        updatePlayerDailyStats(LocalDate.now(),newPlayerRating - player.getRating(), player, newPlayerRating);
+        statsService.updatePlayerStats(player, playerRating);
+        updatePlayerDailyStats(LocalDate.now(), newPlayerRating - player.getRating(), player, newPlayerRating);
         player.setRating(newPlayerRating);
         return player;
     }
@@ -112,69 +105,23 @@ public class RatingService {
                 );
     }
 
-    public void updatePlayerStats(Player player, PlayerRating rating) {
-        Match match = rating.getMatch();
-        boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(), player);
-        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
-        boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
-        boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
-
-        Optional<PlayerStats> playerStatsOptional = statsRepository.findByPlayerId(player.getId());
-        PlayerStats stats = playerStatsOptional.orElseGet(() ->
-                new PlayerStats(
-                        player,
-                        isAttacker && won ? 1 : 0,
-                        !isAttacker && won ? 1 : 0,
-                        isAttacker && !won ? 1 : 0,
-                        !isAttacker && !won ? 1 : 0,
-                        isBlue ? match.getBlueTeamScore() : match.getRedTeamScore(),
-                        rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
-                        rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
-                        won ? 1 : 0,
-                        won ? 1 : 0,
-                        isBlue && match.getRedTeamScore() == 0 || !isBlue && match.getBlueTeamScore() == 0 ? 1 : 0
-                )
-        );
-
-        if (playerStatsOptional.isPresent()) {
-            if (won) {
-                if (ratingUtils.tenZeroMatch(match.getBlueTeamScore(), match.getRedTeamScore())) {
-                    stats.setShutouts(stats.getShutouts() + 1);
-                }
-                if (isAttacker) {
-                    stats.setAttackerWins(stats.getAttackerWins() + 1);
-                } else {
-                    stats.setDefenderWins(stats.getDefenderWins() + 1);
-                }
-                stats.setCurrentWinStreak(stats.getCurrentWinStreak() + 1);
-                stats.setLongestWinStreak(Math.max(stats.getLongestWinStreak(), stats.getCurrentWinStreak()));
-
-            } else {
-                if (isAttacker) {
-                    stats.setAttackerLost(stats.getAttackerLost() + 1);
-                } else {
-                    stats.setDefenderLost(stats.getDefenderLost() + 1);
-                }
-                stats.setCurrentWinStreak(0);
-            }
-
-            int newRating = rating.getNewRating();
-            stats.setHighestELO(Math.max(stats.getHighestELO(), newRating));
-            stats.setLowestELO(Math.min(stats.getLowestELO(), newRating));
-            stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
-        }
-        statsRepository.save(stats);
-        achievementService.checkAndUnlockAchievements(player, match);
-    }
-
-    public void deleteRatingsByMatch(LocalDate date,Long Id) {
+    public void deleteRatingsByMatch(LocalDate date, Long Id) {
         List<PlayerRating> playerRatingList = ratingRepository.findAllByMatchId(Id);
         for (PlayerRating rating : playerRatingList) {
             Player player = rating.getPlayer();
             player.setRating(rating.getOldRating());
-            updatePlayerDailyStats(date,rating.getOldRating() - rating.getNewRating(), player, rating.getOldRating());
+            updatePlayerDailyStats(date, rating.getOldRating() - rating.getNewRating(), player, rating.getOldRating());
             playerRepository.save(player);
             ratingRepository.deleteById(rating.getId());
         }
     }
+
+    public int getHighestELOByPlayerId(Long playerId) {
+        return ratingRepository.findTopByPlayerIdOrderByNewRatingDesc(playerId).getNewRating();
+    }
+
+    public int getLowestELOByPlayerId(Long playerId) {
+        return ratingRepository.findTopByPlayerIdOrderByNewRatingAsc(playerId).getNewRating();
+    }
+
 }

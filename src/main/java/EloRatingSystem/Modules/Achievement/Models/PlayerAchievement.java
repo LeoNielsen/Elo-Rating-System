@@ -36,15 +36,15 @@ public class PlayerAchievement {
     private SoloMatch soloMatch;
 
     @ManyToOne
-    private Match teamMatch;
+    private Match match;
 
-    public PlayerAchievement(Player player, Achievement achievement, boolean unlocked, Date date, Match teamMatch,  SoloMatch soloMatch) {
+    public PlayerAchievement(Player player, Achievement achievement, boolean unlocked, Date date, Match match,  SoloMatch soloMatch) {
         this.player = player;
         this.achievement = achievement;
         this.unlocked = unlocked;
         this.gameType = achievement.getGameType();
         this.date = date;
-        this.teamMatch = teamMatch;
+        this.match = match;
         this.soloMatch = soloMatch;
     }
 }
