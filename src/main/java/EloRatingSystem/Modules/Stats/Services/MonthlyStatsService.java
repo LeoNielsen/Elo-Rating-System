@@ -3,7 +3,7 @@ package EloRatingSystem.Modules.Stats.Services;
 import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
 import EloRatingSystem.Modules.Stats.Models.MonthlyStats;
-import EloRatingSystem.Modules.Stats.Models.Streaks.PlayerStreak;
+import EloRatingSystem.Modules.Stats.Models.Streaks.MonthlyPlayerStreak;
 import EloRatingSystem.Modules.Stats.Repositories.MonthlyStatsRepository;
 import EloRatingSystem.Modules.Stats.Repositories.MonthlyStreakRepository;
 import EloRatingSystem.Modules.Stats.Utils.StatsUtils;
@@ -77,7 +77,7 @@ public class MonthlyStatsService {
             stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
         }
 
-        monthlyStreakRepository.save(new PlayerStreak(match, player, currentStreak));
+        monthlyStreakRepository.save(new MonthlyPlayerStreak(match, year, month, player, currentStreak));
         monthlyStatsRepository.save(stats);
     }
 
@@ -96,10 +96,6 @@ public class MonthlyStatsService {
             } else {
                 stats.setDefenderWins(stats.getDefenderWins() - 1);
             }
-
-            stats.setCurrentWinStreak(stats.getCurrentWinStreak() - 1);
-            if (stats.getCurrentWinStreak() < 0) stats.setCurrentWinStreak(0);
-
         } else {
             if (isAttacker) {
                 stats.setAttackerLost(stats.getAttackerLost() - 1);
@@ -111,8 +107,8 @@ public class MonthlyStatsService {
         int goals = isBlue ? match.getBlueTeamScore() : match.getRedTeamScore();
         stats.setGoals(stats.getGoals() - goals);
 
-        stats.setLongestWinStreak(getLongestStreakByPlayerId(player.getId()));
-        stats.setCurrentWinStreak(getLatestStreakByPlayerId(player.getId()));
+        stats.setLongestWinStreak(getLongestStreakByPlayerId(player.getId(), month, year));
+        stats.setCurrentWinStreak(getLatestStreakByPlayerId(player.getId(), month, year));
 
         stats.setHighestELO(highestELO);
         stats.setLowestELO(lowestELO);
@@ -120,13 +116,20 @@ public class MonthlyStatsService {
         monthlyStatsRepository.save(stats);
     }
 
-    public int getLongestStreakByPlayerId(Long playerId) {
-        return monthlyStreakRepository.findTopByPlayerIdOrderByWinStreakDesc(playerId).getWinStreak();
+    public int getLongestStreakByPlayerId(Long playerId, int month, int year) {
+        return monthlyStreakRepository
+                .findTopByPlayerIdAndMonthAndYearOrderByWinStreakDesc(playerId, month, year)
+                .map(MonthlyPlayerStreak::getWinStreak)
+                .orElse(0);
     }
 
-    public int getLatestStreakByPlayerId(Long playerId) {
-        return monthlyStreakRepository.findTopByPlayerIdOrderByMatchIdDesc(playerId).getWinStreak();
+    public int getLatestStreakByPlayerId(Long playerId, int month, int year) {
+        return monthlyStreakRepository
+                .findTopByPlayerIdAndMonthAndYearOrderByMatchIdDesc(playerId, month, year)
+                .map(MonthlyPlayerStreak::getWinStreak)
+                .orElse(0);
     }
+
 
     public void deleteStreakByMatchId(Long matchId) {
         monthlyStreakRepository.deleteAllByMatchId(matchId);

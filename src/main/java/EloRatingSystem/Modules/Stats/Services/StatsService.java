@@ -105,10 +105,6 @@ public class StatsService {
             } else {
                 stats.setDefenderWins(stats.getDefenderWins() - 1);
             }
-
-            stats.setCurrentWinStreak(stats.getCurrentWinStreak() - 1);
-            if (stats.getCurrentWinStreak() < 0) stats.setCurrentWinStreak(0);
-
         } else {
             if (isAttacker) {
                 stats.setAttackerLost(stats.getAttackerLost() - 1);
@@ -130,11 +126,15 @@ public class StatsService {
     }
 
     public int getLongestStreakByPlayerId(Long playerId){
-        return streakRepository.findTopByPlayerIdOrderByWinStreakDesc(playerId).getWinStreak();
+        return streakRepository.findTopByPlayerIdOrderByWinStreakDesc(playerId)
+                .map(PlayerStreak::getWinStreak)
+                .orElse(0);
     }
 
     public int getLatestStreakByPlayerId(Long playerId){
-        return streakRepository.findTopByPlayerIdOrderByMatchIdDesc(playerId).getWinStreak();
+        return streakRepository.findTopByPlayerIdOrderByMatchIdDesc(playerId)
+                .map(PlayerStreak::getWinStreak)
+                .orElse(0);
     }
 
     public void deleteStreakByMatchId(Long matchId){

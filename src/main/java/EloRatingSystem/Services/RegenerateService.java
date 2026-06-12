@@ -1,19 +1,20 @@
 package EloRatingSystem.Services;
 
+import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
 import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
-import EloRatingSystem.Modules.Rating.Repositories.MonthlyRatingRepository;
-import EloRatingSystem.Modules.Rating.Repositories.RatingRepository;
-import EloRatingSystem.Modules.Rating.Repositories.SoloRatingRepository;
 import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
 import EloRatingSystem.Modules.Rating.Models.PlayerRating;
 import EloRatingSystem.Modules.Rating.Models.SoloPlayerRating;
-import EloRatingSystem.Modules.Stats.Models.DailyStats.MonthlyDailyStats;
+import EloRatingSystem.Modules.Rating.Repositories.MonthlyRatingRepository;
+import EloRatingSystem.Modules.Rating.Repositories.RatingRepository;
+import EloRatingSystem.Modules.Rating.Repositories.SoloRatingRepository;
+import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
+import EloRatingSystem.Modules.Rating.Services.RatingService;
+import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.SoloPlayerDailyStats;
-import EloRatingSystem.Modules.Matches.Models.Match;
-import EloRatingSystem.Modules.Matches.Models.SoloMatch;
-import EloRatingSystem.Modules.Stats.Models.MonthlyStats;
 import EloRatingSystem.Modules.Stats.Models.PlayerStats;
 import EloRatingSystem.Modules.Stats.Models.SoloPlayerStats;
 import EloRatingSystem.Modules.Stats.Repositories.*;
@@ -23,9 +24,6 @@ import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
 import EloRatingSystem.Modules.player.Models.Player;
 import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
-import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
-import EloRatingSystem.Modules.Rating.Services.RatingService;
-import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -67,6 +65,10 @@ public class RegenerateService {
     @Autowired
     MonthlyStatsService monthlyStatsService;
     @Autowired
+    StreakRepository streakRepository;
+    @Autowired
+    MonthlyStreakRepository monthlyStreakRepository;
+    @Autowired
     SoloPlayerStatsRepository soloPlayerStatsRepository;
     @Autowired
     SoloPlayerDailyStatsRepository soloPlayerDailyStatsRepository;
@@ -80,6 +82,7 @@ public class RegenerateService {
     public void playerStatisticsGenAll() {
         List<Player> players = playerRepository.findAll();
         playerDailyStatsRepository.deleteAll();
+        streakRepository.deleteAll();
         for (Player player : players) {
             regeneratePlayerStatistics(player);
         }
@@ -126,13 +129,14 @@ public class RegenerateService {
             SoloPlayerRating rating = soloRatingRepository
                     .findBySoloMatchIdAndPlayerId(match.getId(), player.getId()).orElseThrow();
             soloRatingService.updatePlayerStats(player, rating);
-            soloRatingService.updatePlayerDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), player,rating.getNewRating());
+            soloRatingService.updatePlayerDailyStats(match.getDate().toLocalDate(), rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
         }
     }
 
     public void monthlyStatisticsGenAll() {
         monthlyStatsRepository.deleteAll();
         monthlyRatingRepository.deleteAll();
+        monthlyStreakRepository.deleteAll();
 
         List<Match> matches = matchRepository.findAll();
         matches.sort(Comparator.comparingLong(Match::getId));
@@ -152,42 +156,46 @@ public class RegenerateService {
                 Date.valueOf(end));
         matchesToday.sort(Comparator.comparingLong(Match::getId));
 
+        LocalDate today = LocalDate.now();
+
         for (Match match : matchesToday) {
             List<MonthlyRating> ratings = monthlyRatingRepository.findAllByMatchId(match.getId());
             for (MonthlyRating rating : ratings) {
-                monthlyRatingService.updateMonthlyDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), rating.getPlayer(),rating.getNewRating());
-            }
-        }
-    }
-
-    public void regenerateMonthlyStatistics(Player player) {
-        LocalDate today = LocalDate.now();
-        int month = today.getMonthValue();
-        int year = today.getYear();
-
-        Optional<MonthlyDailyStats> dailyStats = monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today);
-        dailyStats.ifPresent(stats -> monthlyDailyStatsRepository.delete(stats));
-
-        Optional<MonthlyStats> statsOpt = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
-        statsOpt.ifPresent(stats -> monthlyStatsRepository.delete(stats));
-
-        List<Match> matches = getMatchesForPlayer(player);
-        matches.sort(Comparator.comparingLong(Match::getId));
-
-        for (Match match : matches) {
-            LocalDate date = match.getDate().toLocalDate();
-            if (date.getMonthValue() == month && date.getYear() == year) {
-                List<MonthlyRating> ratings = monthlyRatingRepository
-                        .findAllByMatchIdAndPlayerId(match.getId(), player.getId());
-                for (MonthlyRating rating : ratings) {
-                    monthlyStatsService.updateMonthlyStats(player, rating, month, year);
-                    if (match.getDate().toLocalDate().getMonth().equals(today.getMonth())) {
-                        monthlyRatingService.updateMonthlyDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
-                    }
+                if (match.getDate().toLocalDate().equals(today)) {
+                    monthlyRatingService.updateMonthlyDailyStats(match.getDate().toLocalDate(), rating.getNewRating() - rating.getOldRating(), rating.getPlayer(), rating.getNewRating());
                 }
             }
         }
     }
+
+//    public void regenerateMonthlyStatistics(Player player) {
+//        LocalDate today = LocalDate.now();
+//        int month = today.getMonthValue();
+//        int year = today.getYear();
+//
+//        Optional<MonthlyDailyStats> dailyStats = monthlyDailyStatsRepository.findAllByPlayerIdAndDate(player.getId(), today);
+//        dailyStats.ifPresent(stats -> monthlyDailyStatsRepository.delete(stats));
+//
+//        Optional<MonthlyStats> statsOpt = monthlyStatsRepository.findByPlayerIdAndMonthAndYear(player.getId(), month, year);
+//        statsOpt.ifPresent(stats -> monthlyStatsRepository.delete(stats));
+//
+//        List<Match> matches = getMatchesForPlayer(player);
+//        matches.sort(Comparator.comparingLong(Match::getId));
+//
+//        for (Match match : matches) {
+//            LocalDate date = match.getDate().toLocalDate();
+//            if (date.getMonthValue() == month && date.getYear() == year) {
+//                List<MonthlyRating> ratings = monthlyRatingRepository
+//                        .findAllByMatchIdAndPlayerId(match.getId(), player.getId());
+//                for (MonthlyRating rating : ratings) {
+//                    monthlyStatsService.updateMonthlyStats(player, rating, month, year);
+//                    if (match.getDate().toLocalDate().getMonth().equals(today.getMonth())) {
+//                        monthlyRatingService.updateMonthlyDailyStats(match.getDate().toLocalDate(),rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private List<Match> getMatchesForPlayer(Player player) {
         List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(player.getId(), player.getId());

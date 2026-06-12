@@ -146,9 +146,13 @@ public class MonthlyRatingService {
     }
 
     public int getHighestELOByPlayerId(Long playerId,  int month, int year){
-        return monthlyRatingRepository.findTopByPlayerIdAndMonthAndYearOrderByNewRatingDesc(playerId, month,year).getNewRating();
+        return monthlyRatingRepository.findTopByPlayerIdAndMonthAndYearOrderByNewRatingDesc(playerId, month,year)
+                .map(MonthlyRating::getNewRating)
+                .orElse(1200);
     }
     public int getLowestELOByPlayerId(Long playerId, int month, int year){
-        return monthlyRatingRepository.findTopByPlayerIdAndMonthAndYearOrderByNewRatingAsc(playerId, month,year).getNewRating();
+        return monthlyRatingRepository.findTopByPlayerIdAndMonthAndYearOrderByNewRatingAsc(playerId, month,year)
+                .map(MonthlyRating::getNewRating)
+                .orElse(1200);
     }
 }

@@ -20,16 +20,23 @@ public class MonthlyPlayerStreak {
     @ManyToOne
     private Match match;
 
+    @Column(name = "year", nullable = false)
+    private Integer year;
+
+    @Column(name = "month", nullable = false)
+    private Integer month;
+
     @ManyToOne
     private Player player;
 
     @Column(name = "winStreak", nullable = false)
     private Integer winStreak = 0;
 
-    public MonthlyPlayerStreak(Match match, Player player, Integer winStreak) {
+    public MonthlyPlayerStreak(Match match, Integer year, Integer month, Player player, Integer winStreak) {
         this.match = match;
+        this.year = year;
+        this.month = month;
         this.player = player;
         this.winStreak = winStreak;
     }
-
 }

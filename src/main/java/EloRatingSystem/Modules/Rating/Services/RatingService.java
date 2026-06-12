@@ -117,11 +117,15 @@ public class RatingService {
     }
 
     public int getHighestELOByPlayerId(Long playerId) {
-        return ratingRepository.findTopByPlayerIdOrderByNewRatingDesc(playerId).getNewRating();
+        return ratingRepository.findTopByPlayerIdOrderByNewRatingDesc(playerId)
+                .map(PlayerRating::getNewRating)
+                .orElse(1200);
     }
 
     public int getLowestELOByPlayerId(Long playerId) {
-        return ratingRepository.findTopByPlayerIdOrderByNewRatingAsc(playerId).getNewRating();
+        return ratingRepository.findTopByPlayerIdOrderByNewRatingAsc(playerId)
+                .map(PlayerRating::getNewRating)
+                .orElse(1200);
     }
 
 }
