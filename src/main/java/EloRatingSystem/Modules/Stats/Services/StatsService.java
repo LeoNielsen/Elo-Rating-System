@@ -119,8 +119,8 @@ public class StatsService {
         stats.setLongestWinStreak(getLongestStreakByPlayerId(player.getId()));
         stats.setCurrentWinStreak(getLatestStreakByPlayerId(player.getId()));
 
-        stats.setHighestELO(highestELO);
-        stats.setLowestELO(lowestELO);
+        stats.setHighestELO(Math.max(highestELO, 1200));
+        stats.setLowestELO(Math.min(lowestELO, 1200));
 
         statsRepository.save(stats);
     }

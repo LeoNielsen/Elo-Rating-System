@@ -98,8 +98,8 @@ public class SoloStatsService {
         stats.setLongestWinStreak(getLongestStreakByPlayerId(player.getId()));
         stats.setCurrentWinStreak(getLatestStreakByPlayerId(player.getId()));
 
-        stats.setHighestELO(highestELO);
-        stats.setLowestELO(lowestELO);
+        stats.setHighestELO(Math.max(highestELO, 1200));
+        stats.setLowestELO(Math.min(lowestELO,1200));
 
         soloPlayerStatsRepository.save(stats);
     }

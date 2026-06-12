@@ -110,8 +110,8 @@ public class MonthlyStatsService {
         stats.setLongestWinStreak(getLongestStreakByPlayerId(player.getId(), month, year));
         stats.setCurrentWinStreak(getLatestStreakByPlayerId(player.getId(), month, year));
 
-        stats.setHighestELO(highestELO);
-        stats.setLowestELO(lowestELO);
+        stats.setHighestELO(Math.max(highestELO, 1200));
+        stats.setLowestELO(Math.min(lowestELO, 1200));
 
         monthlyStatsRepository.save(stats);
     }
