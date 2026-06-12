@@ -1,19 +1,16 @@
 package EloRatingSystem.Modules.Matches.Services;
 
+import EloRatingSystem.Exception.ApiException;
+import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchResponseDto;
-import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
-import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Modules.Achievement.Models.GameType;
-import EloRatingSystem.Modules.Achievement.Models.PlayerAchievement;
-import EloRatingSystem.Modules.player.Models.Player;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
-import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
-import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
 import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
 import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
-import EloRatingSystem.Services.RegenerateService;
-import jakarta.transaction.Transactional;
+import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
+import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
+import EloRatingSystem.Modules.player.Models.Player;
+import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,7 +18,6 @@ import reactor.core.publisher.Mono;
 
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +29,7 @@ public class SoloMatchService {
     PlayerRepository playerRepository;
     @Autowired
     SoloRatingService soloRatingService;
-    @Autowired
-    RegenerateService regenerateService;
-    @Autowired
-    PlayerAchievementRepository playerAchievementRepository;
+
 
     public Mono<List<SoloMatchResponseDto>> getRecentMatches() {
         List<SoloMatch> matches = soloMatchRepository.findTop100ByOrderByIdDesc();
@@ -78,28 +71,6 @@ public class SoloMatchService {
                 , HttpStatus.BAD_REQUEST));
     }
 
-    @Transactional
-    public void deleteLatestSoloMatch() {
-        SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        soloRatingService.deleteRatingsBySoloMatch(match.getDate().toLocalDate(), match.getId());
-
-        Player redPlayer = match.getRedPlayer();
-        Player bluePlayer = match.getBluePlayer();
-
-        soloMatchRepository.deleteById(match.getId());
-
-        List<Player> players = new ArrayList<>(Arrays.asList(
-                redPlayer,
-                bluePlayer
-        ));
-        for (Player player : players) {
-            List<PlayerAchievement> PA = playerAchievementRepository.findAllByPlayerIdAndDateAndGameType(player.getId(), match.getDate(), GameType.SOLO);
-            if (!PA.isEmpty()) {
-                playerAchievementRepository.deleteAll(PA);
-            }
-            regenerateService.regenerateSoloPlayerStatistics(player);
-        }
-    }
 
     public Mono<MatchStatisticsDto> getSoloStatistics() {
 

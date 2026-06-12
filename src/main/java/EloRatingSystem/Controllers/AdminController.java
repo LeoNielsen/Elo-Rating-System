@@ -46,7 +46,7 @@ public class AdminController {
 
     @DeleteMapping("/match/solo/latest")
     public void deleteLatestSoloMatch() {
-        soloMatchService.deleteLatestSoloMatch();
+        matchDeleteService.deleteLatestSoloMatch();
     }
 
     @GetMapping("/test")

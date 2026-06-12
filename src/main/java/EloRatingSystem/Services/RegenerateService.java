@@ -18,7 +18,7 @@ import EloRatingSystem.Modules.Stats.Models.DailyStats.SoloPlayerDailyStats;
 import EloRatingSystem.Modules.Stats.Models.PlayerStats;
 import EloRatingSystem.Modules.Stats.Models.SoloPlayerStats;
 import EloRatingSystem.Modules.Stats.Repositories.*;
-import EloRatingSystem.Modules.Stats.Services.MonthlyStatsService;
+import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
 import EloRatingSystem.Modules.Stats.Services.StatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
@@ -63,7 +63,7 @@ public class RegenerateService {
     @Autowired
     MonthlyStatsRepository monthlyStatsRepository;
     @Autowired
-    MonthlyStatsService monthlyStatsService;
+    SoloStatsService soloStatsService;
     @Autowired
     StreakRepository streakRepository;
     @Autowired
@@ -128,7 +128,7 @@ public class RegenerateService {
         for (SoloMatch match : matches) {
             SoloPlayerRating rating = soloRatingRepository
                     .findBySoloMatchIdAndPlayerId(match.getId(), player.getId()).orElseThrow();
-            soloRatingService.updatePlayerStats(player, rating);
+            soloStatsService.updatePlayerStats(player, rating);
             soloRatingService.updatePlayerDailyStats(match.getDate().toLocalDate(), rating.getNewRating() - rating.getOldRating(), player, rating.getNewRating());
         }
     }

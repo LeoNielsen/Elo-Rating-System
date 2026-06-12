@@ -2,10 +2,14 @@ package EloRatingSystem.Modules.Matches.Services;
 
 import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
+import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
+import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
 import EloRatingSystem.Modules.Stats.Services.MonthlyStatsService;
+import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
 import EloRatingSystem.Modules.Stats.Services.StatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
@@ -27,7 +31,8 @@ public class MatchDeleteService {
     TeamRepository teamRepository;
     @Autowired
     RatingService ratingService;
-
+    @Autowired
+    SoloRatingService soloRatingService;
     @Autowired
     MonthlyRatingService monthlyRatingService;
     @Autowired
@@ -36,6 +41,10 @@ public class MatchDeleteService {
     StatsService statsService;
     @Autowired
     MonthlyStatsService monthlyStatsService;
+    @Autowired
+    SoloMatchRepository soloMatchRepository;
+    @Autowired
+    SoloStatsService solostatsService;
 
     @Transactional
     public void deleteLatestMatch() {
@@ -78,5 +87,34 @@ public class MatchDeleteService {
         }
 
     }
+
+    @Transactional
+    public void deleteLatestSoloMatch() {
+        SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
+        deleteMatch(match);
+    }
+
+    @Transactional
+    public void deleteMatch(SoloMatch match) {
+        soloRatingService.deleteRatingsBySoloMatch(match.getDate().toLocalDate(), match.getId());
+
+        Player redPlayer = match.getRedPlayer();
+        Player bluePlayer = match.getBluePlayer();
+
+        playerAchievementRepository.deleteAllBySoloMatchId(match.getId());
+
+        soloMatchRepository.deleteById(match.getId());
+        solostatsService.deleteStreakByMatchId(match.getId());
+
+        List<Player> players = new ArrayList<>(Arrays.asList(
+                redPlayer,
+                bluePlayer
+        ));
+
+        for (Player player : players) {
+            solostatsService.undoPlayerStats(player, match, soloRatingService.getHighestELOByPlayerId(player.getId()), soloRatingService.getLowestELOByPlayerId(player.getId()));
+        }
+    }
+
 
 }

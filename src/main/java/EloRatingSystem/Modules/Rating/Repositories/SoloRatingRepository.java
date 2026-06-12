@@ -11,8 +11,10 @@ import java.util.Optional;
 public interface SoloRatingRepository extends JpaRepository<SoloPlayerRating,Long> {
 
     List<SoloPlayerRating> findAllBySoloMatchId(Long id);
-    Optional<SoloPlayerRating> findTopMaxNewRatingByPlayerId(Long id);
-    Optional<SoloPlayerRating> findTopMinNewRatingByPlayerId(Long id);
 
     Optional<SoloPlayerRating> findBySoloMatchIdAndPlayerId(Long id, Long id1);
+
+    Optional<SoloPlayerRating> findTopByPlayerIdOrderByNewRatingDesc(Long playerId);
+
+    Optional<SoloPlayerRating> findTopByPlayerIdOrderByNewRatingAsc(Long playerId);
 }

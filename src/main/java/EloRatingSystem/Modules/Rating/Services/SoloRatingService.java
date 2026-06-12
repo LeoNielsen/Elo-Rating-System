@@ -1,25 +1,21 @@
 package EloRatingSystem.Modules.Rating.Services;
 
-import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
-import EloRatingSystem.Modules.Rating.Dtos.RatingResponseDto;
-import EloRatingSystem.Modules.Stats.Models.DailyStats.SoloPlayerDailyStats;
-import EloRatingSystem.Modules.player.Models.Player;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
+import EloRatingSystem.Modules.Rating.Dtos.RatingResponseDto;
 import EloRatingSystem.Modules.Rating.Models.SoloPlayerRating;
-import EloRatingSystem.Modules.Stats.Models.SoloPlayerStats;
-import EloRatingSystem.Modules.Achievement.Services.AchievementService;
-import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
-import EloRatingSystem.Modules.Stats.Repositories.SoloPlayerDailyStatsRepository;
-import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
-import EloRatingSystem.Modules.Stats.Repositories.SoloPlayerStatsRepository;
 import EloRatingSystem.Modules.Rating.Repositories.SoloRatingRepository;
+import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
+import EloRatingSystem.Modules.Stats.Models.DailyStats.SoloPlayerDailyStats;
+import EloRatingSystem.Modules.Stats.Repositories.SoloPlayerDailyStatsRepository;
+import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
+import EloRatingSystem.Modules.player.Models.Player;
+import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SoloRatingService {
@@ -28,15 +24,12 @@ public class SoloRatingService {
     @Autowired
     PlayerRepository playerRepository;
     @Autowired
-    SoloMatchRepository soloMatchRepository;
-    @Autowired
     SoloPlayerDailyStatsRepository soloPlayerDailyStatsRepository;
-    @Autowired
-    SoloPlayerStatsRepository soloPlayerStatsRepository;
     @Autowired
     RatingUtils ratingUtils;
     @Autowired
-    AchievementService achievementService;
+    SoloStatsService soloStatsService;
+
 
     public Mono<List<RatingResponseDto>> getSoloRatingBySoloMatchId(Long id) {
         List<SoloPlayerRating> ratings = soloRatingRepository.findAllBySoloMatchId(id);
@@ -78,7 +71,7 @@ public class SoloRatingService {
         int newPlayerRating = ratingUtils.calculateNewRating(player.getSoloRating(), pointMultiplier, playerOdds, isWinner);
         SoloPlayerRating soloPlayerRating = new SoloPlayerRating(match, player, player.getSoloRating(), newPlayerRating);
         soloRatingRepository.save(soloPlayerRating);
-        updatePlayerStats(player, soloPlayerRating);
+        soloStatsService.updatePlayerStats(player, soloPlayerRating);
         updatePlayerDailyStats(LocalDate.now(),newPlayerRating - player.getSoloRating(), player,newPlayerRating);
         player.setSoloRating(newPlayerRating);
     }
@@ -95,51 +88,7 @@ public class SoloRatingService {
                 );
     }
 
-    public void updatePlayerStats(Player player, SoloPlayerRating rating) {
-        SoloMatch match = rating.getSoloMatch();
-        boolean isBlue = match.getBluePlayer() == player;
-        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueScore(),match.getRedScore());
-        boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
 
-        Optional<SoloPlayerStats> playerStatsOptional = soloPlayerStatsRepository.findByPlayerId(player.getId());
-        SoloPlayerStats stats = playerStatsOptional.orElseGet(() ->
-                new SoloPlayerStats(
-                        player,
-                        won ? 1 : 0,
-                        !won ? 1 : 0,
-                        isBlue ? match.getBlueScore() : match.getRedScore(),
-                        rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
-                        rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
-                        won ? 1 : 0,
-                        won ? 1 : 0,
-                        isBlue && match.getRedScore() == 0 || !isBlue && match.getBlueScore() == 0 ? 1 : 0
-                )
-        );
-
-        if (playerStatsOptional.isPresent()) {
-            if (won) {
-                if (ratingUtils.tenZeroMatch(match.getBlueScore(), match.getRedScore())) {
-                    stats.setShutouts(stats.getShutouts() + 1);
-                }
-                stats.setWins(stats.getWins() + 1);
-                stats.setCurrentWinStreak(stats.getCurrentWinStreak() + 1);
-                if (stats.getCurrentWinStreak() > stats.getLongestWinStreak()) {
-                    stats.setLongestWinStreak(stats.getCurrentWinStreak());
-                }
-            } else {
-                stats.setLost(stats.getLost() + 1);
-                stats.setCurrentWinStreak(0);
-            }
-
-            int newRating = rating.getNewRating();
-            stats.setHighestELO(Math.max(stats.getHighestELO(), newRating));
-            stats.setLowestELO(Math.min(stats.getLowestELO(), newRating));
-            stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueScore() : match.getRedScore()));
-        }
-
-        soloPlayerStatsRepository.save(stats);
-        achievementService.checkAndUnlockAchievementsSolo(player,match);
-    }
 
     public void deleteRatingsBySoloMatch(LocalDate date,Long id) {
         List<SoloPlayerRating> playerRatingList = soloRatingRepository.findAllBySoloMatchId(id);
@@ -150,5 +99,17 @@ public class SoloRatingService {
             playerRepository.save(player);
             soloRatingRepository.deleteById(rating.getId());
         }
+    }
+
+    public int getHighestELOByPlayerId(Long playerId) {
+        return soloRatingRepository.findTopByPlayerIdOrderByNewRatingDesc(playerId)
+                .map(SoloPlayerRating::getNewRating)
+                .orElse(1200);
+    }
+
+    public int getLowestELOByPlayerId(Long playerId) {
+        return soloRatingRepository.findTopByPlayerIdOrderByNewRatingAsc(playerId)
+                .map(SoloPlayerRating::getNewRating)
+                .orElse(1200);
     }
 }
