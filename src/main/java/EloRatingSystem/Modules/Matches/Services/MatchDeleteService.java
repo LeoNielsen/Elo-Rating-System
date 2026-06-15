@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -31,6 +32,8 @@ public class MatchDeleteService {
     TeamRepository teamRepository;
     @Autowired
     RatingService ratingService;
+    @Autowired
+    MatchService matchService;
     @Autowired
     SoloRatingService soloRatingService;
     @Autowired
@@ -67,9 +70,9 @@ public class MatchDeleteService {
 
         playerAchievementRepository.deleteAllByMatchId(match.getId());
 
-        matchRepository.deleteById(match.getId());
         statsService.deleteStreakByMatchId(match.getId());
         monthlyStatsService.deleteStreakByMatchId(match.getId());
+        matchRepository.deleteById(match.getId());
 
         List<Player> players = new ArrayList<>(Arrays.asList(
                 winner.getAttacker(),
@@ -113,6 +116,31 @@ public class MatchDeleteService {
 
         for (Player player : players) {
             solostatsService.undoPlayerStats(player, match, soloRatingService.getHighestELOByPlayerId(player.getId()), soloRatingService.getLowestELOByPlayerId(player.getId()));
+        }
+    }
+
+    @Transactional
+    public void deleteMatchById(long id) {
+
+        List<Match> matches = matchRepository.findAllByIdGreaterThanEqual(id);
+
+        if (matches.isEmpty()) {
+            return;
+        }
+
+        matches.sort(Comparator.comparingLong(Match::getId));
+
+        for (int i = matches.size() - 1; i >= 0; i--) {
+            deleteMatch(matches.get(i));
+        }
+
+        matches.remove(0);
+
+        for (Match m : matches) {
+            Match match = matchRepository.save(m);
+            ratingService.newRating(match);
+            monthlyRatingService.newRating(match);
+
         }
     }
 

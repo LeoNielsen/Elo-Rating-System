@@ -43,6 +43,10 @@ public class AdminController {
     public void deleteLatestMatch() {
         matchDeleteService.deleteLatestMatch();
     }
+    @DeleteMapping("/match/delete/{id}")
+    public void deleteMatchById(@PathVariable Long id) {
+        matchDeleteService.deleteMatchById(id);
+    }
 
     @DeleteMapping("/match/solo/latest")
     public void deleteLatestSoloMatch() {

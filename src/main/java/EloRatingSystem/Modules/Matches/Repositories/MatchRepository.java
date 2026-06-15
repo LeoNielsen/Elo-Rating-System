@@ -47,4 +47,6 @@ public interface MatchRepository extends JpaRepository<Match,Long> {
     List<Match> findTop100ByOrderByIdDesc();
 
     List<Match> findAllByDateBetween(Date start, Date end);
+
+    List<Match> findAllByIdGreaterThanEqual(Long id);
 }
