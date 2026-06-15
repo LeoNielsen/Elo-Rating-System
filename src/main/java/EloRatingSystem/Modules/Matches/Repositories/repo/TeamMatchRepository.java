@@ -1,6 +1,6 @@
-package EloRatingSystem.Modules.Matches.Repositories;
+package EloRatingSystem.Modules.Matches.Repositories.repo;
 
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MatchRepository extends JpaRepository<Match,Long> {
+public interface TeamMatchRepository extends JpaRepository<TeamMatch,Long> {
 
     @Override
     @NonNull
@@ -20,7 +20,7 @@ public interface MatchRepository extends JpaRepository<Match,Long> {
             "redTeam.defender","redTeam.attacker",
             "blueTeam.defender","blueTeam.attacker"
     })
-    List<Match> findAll();
+    List<TeamMatch> findAll();
 
     @Override
     @NonNull
@@ -29,22 +29,22 @@ public interface MatchRepository extends JpaRepository<Match,Long> {
             "redTeam.defender","redTeam.attacker",
             "blueTeam.defender","blueTeam.attacker"
     })
-    Optional<Match> findById(@NonNull Long id);
-    List<Match> findAllByRedTeamIdOrBlueTeamId(Long red, Long blue);
-    List<Match> findAllByDate(Date date);
+    Optional<TeamMatch> findById(@NonNull Long id);
+    List<TeamMatch> findAllByRedTeamIdOrBlueTeamId(Long red, Long blue);
+    List<TeamMatch> findAllByDate(Date date);
 
     @EntityGraph(attributePaths = {
             "redTeam","blueTeam",
             "redTeam.defender","redTeam.attacker",
             "blueTeam.defender","blueTeam.attacker"
     })
-    Optional<Match> findTop1ByOrderByIdDesc();
+    Optional<TeamMatch> findTop1ByOrderByIdDesc();
     @EntityGraph(attributePaths = {
             "redTeam","blueTeam",
             "redTeam.defender","redTeam.attacker",
             "blueTeam.defender","blueTeam.attacker"
     })
-    List<Match> findTop100ByOrderByIdDesc();
+    List<TeamMatch> findTop100ByOrderByIdDesc();
 
-    List<Match> findAllByDateBetween(Date start, Date end);
+    List<TeamMatch> findAllByDateBetween(Date start, Date end);
 }

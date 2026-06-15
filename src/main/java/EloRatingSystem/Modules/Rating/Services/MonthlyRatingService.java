@@ -1,6 +1,6 @@
 package EloRatingSystem.Modules.Rating.Services;
 
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.Rating.Dtos.RatingResponseDto;
 import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
 import EloRatingSystem.Modules.Rating.Repositories.MonthlyRatingRepository;
@@ -52,28 +52,28 @@ public class MonthlyRatingService {
         return Mono.just(chartDataDtoList);
     }
 
-    public void newRating(Match match) {
+    public void newRating(TeamMatch match) {
         LocalDate today = LocalDate.now();
         int month = today.getMonthValue();
         int year = today.getYear();
 
-        boolean redWon = match.getRedTeamScore() > match.getBlueTeamScore();
+        boolean redWon = match.getRedScore() > match.getBlueScore();
         Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
         Team loser = redWon ? match.getBlueTeam() : match.getRedTeam();
 
         rankingCalculator(winner, loser, match, month, year);
     }
 
-    public void newRating(Match match, int month, int year) {
-        boolean redWon = match.getRedTeamScore() > match.getBlueTeamScore();
+    public void newRating(TeamMatch match, int month, int year) {
+        boolean redWon = match.getRedScore() > match.getBlueScore();
         Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
         Team loser = redWon ? match.getBlueTeam() : match.getRedTeam();
 
         rankingCalculator(winner, loser, match, month, year);
     }
 
-    private void rankingCalculator(Team winner, Team loser, Match match, int month, int year) {
-        double pointMultiplier = ratingUtils.calculatePointMultiplier(match.getRedTeamScore(), match.getBlueTeamScore());
+    private void rankingCalculator(Team winner, Team loser, TeamMatch match, int month, int year) {
+        double pointMultiplier = ratingUtils.calculatePointMultiplier(match.getRedScore(), match.getBlueScore());
 
         double winnerOddsAttacker = calculatePlayerOdds(winner.getAttacker(), loser, month, year);
         double winnerOddsDefender = calculatePlayerOdds(winner.getDefender(), loser, month, year);
@@ -107,7 +107,7 @@ public class MonthlyRatingService {
                 .orElse(new MonthlyStats(1200));
     }
 
-    private void newMonthlyRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, Match match, int month, int year) {
+    private void newMonthlyRating(Player player, double teamRating, double pointMultiplier, double playerOdds, boolean isWinner, TeamMatch match, int month, int year) {
         MonthlyStats monthlyStats = getStatsOrDefault(player.getId(), month, year);
         int oldMonthlyRating = monthlyStats.getMonthlyRating();
         int newMonthlyRating = ratingUtils.calculateNewRating(oldMonthlyRating, pointMultiplier, (teamRating + playerOdds) / 2, isWinner);

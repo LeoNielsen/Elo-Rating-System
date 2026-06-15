@@ -1,6 +1,6 @@
 package EloRatingSystem.Modules.Achievement.Models;
 
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import EloRatingSystem.Modules.player.Models.Player;
 import jakarta.persistence.*;
@@ -36,9 +36,9 @@ public class PlayerAchievement {
     private SoloMatch soloMatch;
 
     @ManyToOne
-    private Match match;
+    private TeamMatch match;
 
-    public PlayerAchievement(Player player, Achievement achievement, boolean unlocked, Date date, Match match,  SoloMatch soloMatch) {
+    public PlayerAchievement(Player player, Achievement achievement, boolean unlocked, Date date, TeamMatch match, SoloMatch soloMatch) {
         this.player = player;
         this.achievement = achievement;
         this.unlocked = unlocked;

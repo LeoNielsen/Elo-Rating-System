@@ -1,7 +1,7 @@
 package EloRatingSystem.Modules.Stats.Services;
 
 import EloRatingSystem.Modules.Achievement.Services.AchievementService;
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.Rating.Models.PlayerRating;
 import EloRatingSystem.Modules.Stats.Models.PlayerStats;
 import EloRatingSystem.Modules.Stats.Models.Streaks.PlayerStreak;
@@ -29,9 +29,9 @@ public class StatsService {
 
 
     public void updatePlayerStats(Player player, PlayerRating rating) {
-        Match match = rating.getMatch();
+        TeamMatch match = rating.getMatch();
         boolean isBlue = statsUtils.isPlayerInTeam(match.getBlueTeam(), player);
-        boolean isBlueWinner = statsUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
+        boolean isBlueWinner = statsUtils.isWinner(match.getBlueScore(), match.getRedScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
         boolean isAttacker = statsUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
@@ -45,18 +45,18 @@ public class StatsService {
                         !isAttacker && won ? 1 : 0,
                         isAttacker && !won ? 1 : 0,
                         !isAttacker && !won ? 1 : 0,
-                        isBlue ? match.getBlueTeamScore() : match.getRedTeamScore(),
+                        isBlue ? match.getBlueScore() : match.getRedScore(),
                         rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         won ? 1 : 0,
                         won ? 1 : 0,
-                        isBlue && match.getRedTeamScore() == 0 || !isBlue && match.getBlueTeamScore() == 0 ? 1 : 0
+                        isBlue && match.getRedScore() == 0 || !isBlue && match.getBlueScore() == 0 ? 1 : 0
                 )
         );
 
         if (playerStatsOptional.isPresent()) {
             if (won) {
-                if (statsUtils.tenZeroMatch(match.getBlueTeamScore(), match.getRedTeamScore())) {
+                if (statsUtils.tenZeroMatch(match.getBlueScore(), match.getRedScore())) {
                     stats.setShutouts(stats.getShutouts() + 1);
                 }
                 if (isAttacker) {
@@ -80,16 +80,16 @@ public class StatsService {
             int newRating = rating.getNewRating();
             stats.setHighestELO(Math.max(stats.getHighestELO(), newRating));
             stats.setLowestELO(Math.min(stats.getLowestELO(), newRating));
-            stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
+            stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueScore() : match.getRedScore()));
         }
         streakRepository.save(new PlayerStreak(match,player,currentStreak));
         statsRepository.save(stats);
         achievementService.checkAndUnlockAchievements(player, match);
     }
 
-    public void undoPlayerStats(Player player, Match match, int highestELO, int lowestELO) {
+    public void undoPlayerStats(Player player, TeamMatch match, int highestELO, int lowestELO) {
         boolean isBlue = statsUtils.isPlayerInTeam(match.getBlueTeam(), player);
-        boolean isBlueWinner = statsUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
+        boolean isBlueWinner = statsUtils.isWinner(match.getBlueScore(), match.getRedScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
         boolean isAttacker = statsUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
@@ -97,7 +97,7 @@ public class StatsService {
                 .orElseThrow(() -> new RuntimeException("Stats missing for player " + player.getNameTag()));
 
         if (won) {
-            if (statsUtils.tenZeroMatch(match.getBlueTeamScore(), match.getRedTeamScore())) {
+            if (statsUtils.tenZeroMatch(match.getBlueScore(), match.getRedScore())) {
                 stats.setShutouts(stats.getShutouts() - 1);
             }
             if (isAttacker) {
@@ -113,7 +113,7 @@ public class StatsService {
             }
         }
 
-        int goals = isBlue ? match.getBlueTeamScore() : match.getRedTeamScore();
+        int goals = isBlue ? match.getBlueScore() : match.getRedScore();
         stats.setGoals(stats.getGoals() - goals);
 
         stats.setLongestWinStreak(getLongestStreakByPlayerId(player.getId()));

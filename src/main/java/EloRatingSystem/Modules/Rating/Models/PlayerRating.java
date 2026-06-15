@@ -1,7 +1,7 @@
 package EloRatingSystem.Modules.Rating.Models;
 
 import EloRatingSystem.Modules.player.Models.Player;
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class PlayerRating {
     private Long id;
 
     @ManyToOne
-    private Match match;
+    private TeamMatch match;
 
     @ManyToOne
     private Player player;
@@ -30,7 +30,7 @@ public class PlayerRating {
     @Column(name = "newRating", nullable = false)
     private Integer newRating;
 
-    public PlayerRating(Match match, Player player, Integer oldRating, Integer newRating){
+    public PlayerRating(TeamMatch match, Player player, Integer oldRating, Integer newRating){
         this.match = match;
         this.player = player;
         this.oldRating = oldRating;

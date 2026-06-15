@@ -1,6 +1,6 @@
 package EloRatingSystem.Modules.Stats.Services;
 
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
 import EloRatingSystem.Modules.Stats.Models.MonthlyStats;
 import EloRatingSystem.Modules.Stats.Models.Streaks.MonthlyPlayerStreak;
@@ -24,9 +24,9 @@ public class MonthlyStatsService {
     MonthlyStreakRepository monthlyStreakRepository;
 
     public void updateMonthlyStats(Player player, MonthlyRating rating, int month, int year) {
-        Match match = rating.getMatch();
+        TeamMatch match = rating.getMatch();
         boolean isBlue = statsUtils.isPlayerInTeam(match.getBlueTeam(), player);
-        boolean isBlueWinner = statsUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
+        boolean isBlueWinner = statsUtils.isWinner(match.getBlueScore(), match.getRedScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
         boolean isAttacker = statsUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
@@ -43,7 +43,7 @@ public class MonthlyStatsService {
                         !isAttacker && won ? 1 : 0,
                         isAttacker && !won ? 1 : 0,
                         !isAttacker && !won ? 1 : 0,
-                        isBlue ? match.getBlueTeamScore() : match.getRedTeamScore(),
+                        isBlue ? match.getBlueScore() : match.getRedScore(),
                         rating.getNewRating() > rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         rating.getNewRating() < rating.getOldRating() ? rating.getNewRating() : rating.getOldRating(),
                         won ? 1 : 0,
@@ -74,16 +74,16 @@ public class MonthlyStatsService {
             stats.setMonthlyRating(rating.getNewRating());
             stats.setHighestELO(Math.max(stats.getHighestELO(), newRating));
             stats.setLowestELO(Math.min(stats.getLowestELO(), newRating));
-            stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueTeamScore() : match.getRedTeamScore()));
+            stats.setGoals(stats.getGoals() + (isBlue ? match.getBlueScore() : match.getRedScore()));
         }
 
         monthlyStreakRepository.save(new MonthlyPlayerStreak(match, year, month, player, currentStreak));
         monthlyStatsRepository.save(stats);
     }
 
-    public void undoPlayerStats(Player player, Match match, int highestELO, int lowestELO, int month, int year) {
+    public void undoPlayerStats(Player player, TeamMatch match, int highestELO, int lowestELO, int month, int year) {
         boolean isBlue = statsUtils.isPlayerInTeam(match.getBlueTeam(), player);
-        boolean isBlueWinner = statsUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
+        boolean isBlueWinner = statsUtils.isWinner(match.getBlueScore(), match.getRedScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
         boolean isAttacker = statsUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
@@ -104,7 +104,7 @@ public class MonthlyStatsService {
             }
         }
 
-        int goals = isBlue ? match.getBlueTeamScore() : match.getRedTeamScore();
+        int goals = isBlue ? match.getBlueScore() : match.getRedScore();
         stats.setGoals(stats.getGoals() - goals);
 
         stats.setLongestWinStreak(getLongestStreakByPlayerId(player.getId(), month, year));

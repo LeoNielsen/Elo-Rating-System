@@ -1,6 +1,6 @@
 package EloRatingSystem.Modules.Stats.Models.Streaks;
 
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.player.Models.Player;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ public class MonthlyPlayerStreak {
     private Long id;
 
     @ManyToOne
-    private Match match;
+    private TeamMatch match;
 
     @Column(name = "year", nullable = false)
     private Integer year;
@@ -32,7 +32,7 @@ public class MonthlyPlayerStreak {
     @Column(name = "winStreak", nullable = false)
     private Integer winStreak = 0;
 
-    public MonthlyPlayerStreak(Match match, Integer year, Integer month, Player player, Integer winStreak) {
+    public MonthlyPlayerStreak(TeamMatch match, Integer year, Integer month, Player player, Integer winStreak) {
         this.match = match;
         this.year = year;
         this.month = month;

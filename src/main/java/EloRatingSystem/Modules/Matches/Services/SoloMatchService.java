@@ -1,14 +1,12 @@
 package EloRatingSystem.Modules.Matches.Services;
 
 import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
-import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
+import EloRatingSystem.Modules.Matches.Repositories.repo.SoloMatchRepository;
 import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
 import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
-import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
 import EloRatingSystem.Modules.player.Models.Player;
 import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +27,6 @@ public class SoloMatchService {
     PlayerRepository playerRepository;
     @Autowired
     SoloRatingService soloRatingService;
-
 
     public Mono<List<SoloMatchResponseDto>> getRecentMatches() {
         List<SoloMatch> matches = soloMatchRepository.findTop100ByOrderByIdDesc();

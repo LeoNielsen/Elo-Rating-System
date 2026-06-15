@@ -2,26 +2,18 @@ package EloRatingSystem.Modules.Matches.Models;
 
 import EloRatingSystem.Modules.player.Models.Player;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "SoloMatch")
-public class SoloMatch {
-
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @Column(name = "date", nullable = false)
-    private Date date;
+public class SoloMatch extends BaseMatch {
 
     @ManyToOne (cascade = CascadeType.PERSIST)
     private Player redPlayer;
@@ -29,17 +21,9 @@ public class SoloMatch {
     @ManyToOne (cascade = CascadeType.PERSIST)
     private Player bluePlayer;
 
-    @Column(name = "redScore", nullable = false)
-    private Integer redScore;
-
-    @Column(name = "blueScore", nullable = false)
-    private Integer blueScore;
-
-    public SoloMatch(Date date, Player redPlayer, Player bluePlayer, Integer redTeamScore, Integer blueTeamScore) {
-        this.date = date;
+    public SoloMatch(Date date, Player redPlayer, Player bluePlayer, Integer redScore, Integer blueScore) {
+        super(date,redScore, blueScore);
         this.redPlayer = redPlayer;
         this.bluePlayer = bluePlayer;
-        this.redScore = redTeamScore;
-        this.blueScore = blueTeamScore;
     }
 }

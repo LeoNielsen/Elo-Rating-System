@@ -1,4 +1,4 @@
-package EloRatingSystem.Modules.Matches.Repositories;
+package EloRatingSystem.Modules.Matches.Repositories.repo;
 
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import org.springframework.data.jpa.repository.EntityGraph;

@@ -1,7 +1,7 @@
 package EloRatingSystem.Modules.Matches.Controllers;
 
-import EloRatingSystem.Modules.Matches.Dtos.Match2v2ResponseDto;
-import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchResponseDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
@@ -25,22 +25,22 @@ public class MatchController {
     SoloMatchService soloMatchService;
 
     @GetMapping("/{id}")
-    public Mono<Match2v2ResponseDto> getMatchById(@PathVariable Long id) {
+    public Mono<TeamMatchResponseDto> getMatchById(@PathVariable Long id) {
         return matchService.getMatchById(id);
     }
 
     @GetMapping()
-    public Mono<List<Match2v2ResponseDto>> getRecentMatches() {
+    public Mono<List<TeamMatchResponseDto>> getRecentMatches() {
         return matchService.getRecentMatches();
     }
 
     @GetMapping("/all")
-    public Mono<List<Match2v2ResponseDto>> getAllMatches() {
+    public Mono<List<TeamMatchResponseDto>> getAllMatches() {
         return matchService.getAllMatches();
     }
 
     @PostMapping
-    public Mono<Match2v2ResponseDto> newMatch(@RequestBody MatchRequestDto requestDto) {
+    public Mono<TeamMatchResponseDto> newMatch(@RequestBody TeamMatchRequestDto requestDto) {
         return matchService.newMatch(requestDto);
     }
 

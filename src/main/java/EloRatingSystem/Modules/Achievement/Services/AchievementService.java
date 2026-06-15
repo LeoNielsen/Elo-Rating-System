@@ -3,7 +3,7 @@ package EloRatingSystem.Modules.Achievement.Services;
 import EloRatingSystem.Modules.Achievement.Models.Achievement;
 import EloRatingSystem.Modules.Achievement.Models.GameType;
 import EloRatingSystem.Modules.Achievement.Models.PlayerAchievement;
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import EloRatingSystem.Modules.Achievement.Repositories.AchievementRepository;
 import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
@@ -42,7 +42,7 @@ public class AchievementService {
     @Autowired
     MonthlyWinnerRepository monthlyWinnerRepository;
 
-    public void checkAndUnlockAchievements(Player player, Match match) {
+    public void checkAndUnlockAchievements(Player player, TeamMatch match) {
         PlayerStats playerStats = statsRepository.findByPlayerId(player.getId())
                 .orElseGet(() -> new PlayerStats(player));
 
@@ -54,13 +54,13 @@ public class AchievementService {
         boolean winTenZeroAsAtk = false;
 
         boolean isBlue = ratingUtils.isPlayerInTeam(match.getBlueTeam(), player);
-        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueTeamScore(), match.getRedTeamScore());
+        boolean isBlueWinner = ratingUtils.isWinner(match.getBlueScore(), match.getRedScore());
         boolean won = isBlue && isBlueWinner || !isBlue && !isBlueWinner;
         boolean isAttacker = ratingUtils.isAttacker(match.getBlueTeam(), match.getRedTeam(), player);
 
 
         if (won) {
-            if (match.getRedTeamScore() == 0 || match.getBlueTeamScore() == 0) {
+            if (match.getRedScore() == 0 || match.getBlueScore() == 0) {
                 if (isAttacker) {
                     winTenZeroAsAtk = true;
                 } else {
@@ -144,7 +144,7 @@ public class AchievementService {
         }
     }
 
-    private void unlockAchievement(Player player, Achievement achievement, Date date, Match teamMatch, SoloMatch soloMatch) {
+    private void unlockAchievement(Player player, Achievement achievement, Date date, TeamMatch teamMatch, SoloMatch soloMatch) {
         Optional<PlayerAchievement> playerAchievementOptional = playerAchievementRepository
                 .findByPlayerIdAndAchievementId(player.getId(), achievement.getId());
         if (playerAchievementOptional.isPresent()) {

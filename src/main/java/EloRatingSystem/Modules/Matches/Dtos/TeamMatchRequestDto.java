@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MatchRequestDto {
+public class TeamMatchRequestDto {
 
     private Long redAtkId;
     private Long redDefId;

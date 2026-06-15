@@ -1,11 +1,13 @@
 package EloRatingSystem.Modules.Matches.Services;
 
 import EloRatingSystem.Exception.ApiException;
-import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
-import EloRatingSystem.Modules.Matches.Dtos.Match2v2ResponseDto;
-import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
-import EloRatingSystem.Modules.Matches.Models.Match;
-import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchResponseDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
+import EloRatingSystem.Modules.Matches.Models.BaseMatch;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
+import EloRatingSystem.Modules.Matches.Repositories.Adapter.MatchRepositoryAdapter;
+import EloRatingSystem.Modules.Matches.Repositories.Impl.TeamMatchRepositoryImpl;
+import EloRatingSystem.Modules.Matches.Repositories.repo.TeamMatchRepository;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
 import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
@@ -13,7 +15,6 @@ import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
 import EloRatingSystem.Modules.player.Models.Player;
 import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
-import EloRatingSystem.Services.RegenerateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class MatchService {
+public class MatchService extends BaseMatchService<TeamMatch> {
 
     @Autowired
-    MatchRepository matchRepository;
+    TeamMatchRepository matchRepository;
+    @Autowired
+    TeamMatchRepositoryImpl matchRepositoryImpl;
     @Autowired
     TeamRepository teamRepository;
     @Autowired
@@ -37,50 +40,50 @@ public class MatchService {
     RatingService ratingService;
     @Autowired
     MonthlyRatingService monthlyRatingService;
-    @Autowired
-    RegenerateService regenerateService;
-    @Autowired
-    PlayerAchievementRepository playerAchievementRepository;
 
-    public Mono<List<Match2v2ResponseDto>> getAllMatches() {
-        List<Match> matches = matchRepository.findAll();
-        List<Match2v2ResponseDto> matchResponseDtoList = new ArrayList<>();
-        for (Match match : matches) {
-            matchResponseDtoList.add(new Match2v2ResponseDto(match));
+    @Override
+    protected MatchRepositoryAdapter<TeamMatch> getRepository() {
+        return matchRepositoryImpl;
+    }
+
+    public Mono<List<TeamMatchResponseDto>> getAllMatches() {
+        List<TeamMatch> matches = matchRepository.findAll();
+        List<TeamMatchResponseDto> matchResponseDtoList = new ArrayList<>();
+        for (TeamMatch match : matches) {
+            matchResponseDtoList.add(new TeamMatchResponseDto(match));
         }
 
         return Mono.just(matchResponseDtoList);
     }
 
-    public Mono<List<Match2v2ResponseDto>> getRecentMatches() {
-        List<Match> matches = matchRepository.findTop100ByOrderByIdDesc();
-        List<Match2v2ResponseDto> matchResponseDtoList = new ArrayList<>();
-        for (Match match : matches) {
-            matchResponseDtoList.add(new Match2v2ResponseDto(match));
+    public Mono<List<TeamMatchResponseDto>> getRecentMatches() {
+        List<TeamMatch> matches = matchRepository.findTop100ByOrderByIdDesc();
+        List<TeamMatchResponseDto> matchResponseDtoList = new ArrayList<>();
+        for (TeamMatch match : matches) {
+            matchResponseDtoList.add(new TeamMatchResponseDto(match));
         }
 
         return Mono.just(matchResponseDtoList);
     }
 
-    public Mono<Match2v2ResponseDto> getMatchById(Long id) {
-        Optional<Match> match = matchRepository.findById(id);
-        return match.map(value -> Mono.just(new Match2v2ResponseDto(value)))
+    public Mono<TeamMatchResponseDto> getMatchById(Long id) {
+        Optional<TeamMatch> match = matchRepository.findById(id);
+        return match.map(value -> Mono.just(new TeamMatchResponseDto(value)))
                 .orElseGet(() -> Mono.error(new ApiException(String.format("match %s doesn't exist", id), HttpStatus.BAD_REQUEST)));
     }
 
-    public Mono<Match2v2ResponseDto> newMatch(MatchRequestDto requestDto) {
+    public Mono<TeamMatchResponseDto> newMatch(TeamMatchRequestDto requestDto) {
         try {
             Team redTeam = getTeam(requestDto.getRedAtkId(), requestDto.getRedDefId());
             Team blueTeam = getTeam(requestDto.getBlueAtkId(), requestDto.getBlueDefId());
 
-            Match match = matchRepository.save(new Match(new Date(System.currentTimeMillis()), redTeam, blueTeam,
+            TeamMatch match = matchRepository.save(new TeamMatch(new Date(System.currentTimeMillis()), redTeam, blueTeam,
                     requestDto.getRedScore(), requestDto.getBlueScore()));
-
             match = ratingService.newRating(match);
             monthlyRatingService.newRating(match);
             match = matchRepository.save(match);
 
-            return Mono.just(new Match2v2ResponseDto(match));
+            return Mono.just(new TeamMatchResponseDto(match));
         } catch (ApiException e) {
             return Mono.error(e);
         }
@@ -106,15 +109,15 @@ public class MatchService {
         int redGoals = 0;
         int blueGoals = 0;
 
-        List<Match> matches = matchRepository.findAll();
-        for (Match match : matches) {
-            if (match.getRedTeamScore() == 10) {
+        List<TeamMatch> matches = matchRepository.findAll();
+        for (TeamMatch match : matches) {
+            if (match.getRedScore() == 10) {
                 redWins++;
             } else {
                 blueWins++;
             }
-            redGoals += match.getRedTeamScore();
-            blueGoals += match.getBlueTeamScore();
+            redGoals += match.getRedScore();
+            blueGoals += match.getBlueScore();
         }
 
         return Mono.just(new MatchStatisticsDto(redWins, blueWins, redGoals, blueGoals));

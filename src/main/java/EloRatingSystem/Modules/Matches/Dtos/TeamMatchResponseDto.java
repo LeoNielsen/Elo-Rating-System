@@ -1,6 +1,6 @@
 package EloRatingSystem.Modules.Matches.Dtos;
 
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.player.Models.Player;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +9,7 @@ import java.sql.Date;
 
 @Data
 @NoArgsConstructor
-public class Match2v2ResponseDto {
+public class TeamMatchResponseDto {
 
     private Long id;
     private Date date;
@@ -20,7 +20,7 @@ public class Match2v2ResponseDto {
     private Integer redScore;
     private Integer blueScore;
 
-    public Match2v2ResponseDto(Match match) {
+    public TeamMatchResponseDto(TeamMatch match) {
         this.id = match.getId();
         this.date = match.getDate();
 
@@ -29,8 +29,8 @@ public class Match2v2ResponseDto {
         this.blueAtk = formatPlayerName(match.getBlueTeam().getAttacker());
         this.blueDef = formatPlayerName(match.getBlueTeam().getDefender());
 
-        this.redScore = match.getRedTeamScore();
-        this.blueScore = match.getBlueTeamScore();
+        this.redScore = match.getRedScore();
+        this.blueScore = match.getBlueScore();
     }
 
     private String formatPlayerName(Player player) {

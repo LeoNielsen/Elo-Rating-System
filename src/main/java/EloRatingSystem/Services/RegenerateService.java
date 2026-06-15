@@ -1,9 +1,9 @@
 package EloRatingSystem.Services;
 
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
-import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
-import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
+import EloRatingSystem.Modules.Matches.Repositories.repo.TeamMatchRepository;
+import EloRatingSystem.Modules.Matches.Repositories.repo.SoloMatchRepository;
 import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
 import EloRatingSystem.Modules.Rating.Models.PlayerRating;
 import EloRatingSystem.Modules.Rating.Models.SoloPlayerRating;
@@ -47,7 +47,7 @@ public class RegenerateService {
     @Autowired
     TeamRepository teamRepository;
     @Autowired
-    MatchRepository matchRepository;
+    TeamMatchRepository matchRepository;
     @Autowired
     RatingService ratingService;
     @Autowired
@@ -95,10 +95,10 @@ public class RegenerateService {
         Optional<PlayerStats> statsOpt = playerStatsRepository.findByPlayerId(player.getId());
         statsOpt.ifPresent(stats -> playerStatsRepository.delete(stats));
 
-        List<Match> matches = getMatchesForPlayer(player);
-        matches.sort(Comparator.comparingLong(Match::getId));
+        List<TeamMatch> matches = getMatchesForPlayer(player);
+        matches.sort(Comparator.comparingLong(TeamMatch::getId));
 
-        for (Match match : matches) {
+        for (TeamMatch match : matches) {
             List<PlayerRating> ratings = ratingRepository.findAllByMatchIdAndPlayerId(match.getId(), player.getId());
             PlayerRating rating = ratings.get(0);
             statsService.updatePlayerStats(player, rating);
@@ -138,9 +138,9 @@ public class RegenerateService {
         monthlyRatingRepository.deleteAll();
         monthlyStreakRepository.deleteAll();
 
-        List<Match> matches = matchRepository.findAll();
-        matches.sort(Comparator.comparingLong(Match::getId));
-        for (Match match : matches) {
+        List<TeamMatch> matches = matchRepository.findAll();
+        matches.sort(Comparator.comparingLong(TeamMatch::getId));
+        for (TeamMatch match : matches) {
             LocalDate date = match.getDate().toLocalDate();
             int month = date.getMonthValue();
             int year = date.getYear();
@@ -152,13 +152,13 @@ public class RegenerateService {
         YearMonth yearMonth = YearMonth.now();
         LocalDate start = yearMonth.atDay(1);
         LocalDate end = yearMonth.atEndOfMonth();
-        List<Match> matchesToday = matchRepository.findAllByDateBetween(Date.valueOf(start),
+        List<TeamMatch> matchesToday = matchRepository.findAllByDateBetween(Date.valueOf(start),
                 Date.valueOf(end));
-        matchesToday.sort(Comparator.comparingLong(Match::getId));
+        matchesToday.sort(Comparator.comparingLong(TeamMatch::getId));
 
         LocalDate today = LocalDate.now();
 
-        for (Match match : matchesToday) {
+        for (TeamMatch match : matchesToday) {
             List<MonthlyRating> ratings = monthlyRatingRepository.findAllByMatchId(match.getId());
             for (MonthlyRating rating : ratings) {
                 if (match.getDate().toLocalDate().equals(today)) {
@@ -197,9 +197,9 @@ public class RegenerateService {
 //        }
 //    }
 
-    private List<Match> getMatchesForPlayer(Player player) {
+    private List<TeamMatch> getMatchesForPlayer(Player player) {
         List<Team> teams = teamRepository.findAllByAttackerIdOrDefenderId(player.getId(), player.getId());
-        List<Match> matches = new ArrayList<>();
+        List<TeamMatch> matches = new ArrayList<>();
         for (Team team : teams) {
             matches.addAll(matchRepository.findAllByRedTeamIdOrBlueTeamId(team.getId(), team.getId()));
         }

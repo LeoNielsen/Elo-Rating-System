@@ -1,6 +1,6 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Services.MatchDeleteService;
 import EloRatingSystem.Modules.Matches.Services.MatchService;
@@ -94,7 +94,7 @@ public class AdminController {
         int x = 1000;
         for (int i = 0; i < x; i++) {
             Collections.shuffle(players);
-            matchService.newMatch(new MatchRequestDto(players.get(1).getId(), players.get(2).getId(), players.get(3).getId(), players.get(4).getId(), 10, rand.nextInt(0, 10)));
+            matchService.newMatch(new TeamMatchRequestDto(players.get(1).getId(), players.get(2).getId(), players.get(3).getId(), players.get(4).getId(), 10, rand.nextInt(0, 10)));
         }
     }
 

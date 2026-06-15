@@ -1,10 +1,10 @@
 package EloRatingSystem.Modules.Matches.Services;
 
 import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
-import EloRatingSystem.Modules.Matches.Models.Match;
+import EloRatingSystem.Modules.Matches.Models.TeamMatch;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
-import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
-import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
+import EloRatingSystem.Modules.Matches.Repositories.repo.TeamMatchRepository;
+import EloRatingSystem.Modules.Matches.Repositories.repo.SoloMatchRepository;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
 import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
@@ -26,7 +26,7 @@ import java.util.List;
 public class MatchDeleteService {
 
     @Autowired
-    MatchRepository matchRepository;
+    TeamMatchRepository matchRepository;
     @Autowired
     TeamRepository teamRepository;
     @Autowired
@@ -48,16 +48,16 @@ public class MatchDeleteService {
 
     @Transactional
     public void deleteLatestMatch() {
-        Match match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
+        TeamMatch match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
         deleteMatch(match);
     }
 
-    private void deleteMatch(Match match) {
+    private void deleteMatch(TeamMatch match) {
         ratingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
         monthlyRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
 
-        Team winner = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getRedTeam() : match.getBlueTeam();
-        Team loser = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getBlueTeam() : match.getRedTeam();
+        Team winner = match.getBlueScore() < match.getRedScore() ? match.getRedTeam() : match.getBlueTeam();
+        Team loser = match.getBlueScore() < match.getRedScore() ? match.getBlueTeam() : match.getRedTeam();
 
         winner.setWon(winner.getWon() - 1);
         loser.setLost(loser.getLost() - 1);
