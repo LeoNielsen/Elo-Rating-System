@@ -34,12 +34,16 @@ public class Match {
     @Column(name = "blueTeamScore", nullable = false)
     private Integer blueTeamScore;
 
-    public Match(Date date, Team redTeam, Team blueTeam, Integer redTeamScore, Integer blueTeamScore) {
+    @Column(name = "createdBy")
+    private String createdBy;
+
+    public Match(Date date, Team redTeam, Team blueTeam, Integer redTeamScore, Integer blueTeamScore, String createdBy) {
         this.date = date;
         this.redTeam = redTeam;
         this.blueTeam = blueTeam;
         this.redTeamScore = redTeamScore;
         this.blueTeamScore = blueTeamScore;
+        this.createdBy = createdBy;
     }
 
 }

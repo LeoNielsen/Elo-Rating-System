@@ -2,8 +2,8 @@ package EloRatingSystem.Modules.Matches.Services;
 
 import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
-import EloRatingSystem.Modules.Matches.Dtos.Match2v2ResponseDto;
-import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchResponseDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
@@ -42,45 +42,45 @@ public class MatchService {
     @Autowired
     PlayerAchievementRepository playerAchievementRepository;
 
-    public Mono<List<Match2v2ResponseDto>> getAllMatches() {
+    public Mono<List<TeamMatchResponseDto>> getAllMatches() {
         List<Match> matches = matchRepository.findAll();
-        List<Match2v2ResponseDto> matchResponseDtoList = new ArrayList<>();
+        List<TeamMatchResponseDto> matchResponseDtoList = new ArrayList<>();
         for (Match match : matches) {
-            matchResponseDtoList.add(new Match2v2ResponseDto(match));
+            matchResponseDtoList.add(new TeamMatchResponseDto(match));
         }
 
         return Mono.just(matchResponseDtoList);
     }
 
-    public Mono<List<Match2v2ResponseDto>> getRecentMatches() {
+    public Mono<List<TeamMatchResponseDto>> getRecentMatches() {
         List<Match> matches = matchRepository.findTop100ByOrderByIdDesc();
-        List<Match2v2ResponseDto> matchResponseDtoList = new ArrayList<>();
+        List<TeamMatchResponseDto> matchResponseDtoList = new ArrayList<>();
         for (Match match : matches) {
-            matchResponseDtoList.add(new Match2v2ResponseDto(match));
+            matchResponseDtoList.add(new TeamMatchResponseDto(match));
         }
 
         return Mono.just(matchResponseDtoList);
     }
 
-    public Mono<Match2v2ResponseDto> getMatchById(Long id) {
+    public Mono<TeamMatchResponseDto> getMatchById(Long id) {
         Optional<Match> match = matchRepository.findById(id);
-        return match.map(value -> Mono.just(new Match2v2ResponseDto(value)))
+        return match.map(value -> Mono.just(new TeamMatchResponseDto(value)))
                 .orElseGet(() -> Mono.error(new ApiException(String.format("match %s doesn't exist", id), HttpStatus.BAD_REQUEST)));
     }
 
-    public Mono<Match2v2ResponseDto> newMatch(MatchRequestDto requestDto) {
+    public Mono<TeamMatchResponseDto> newMatch(TeamMatchRequestDto requestDto, String username) {
         try {
             Team redTeam = getTeam(requestDto.getRedAtkId(), requestDto.getRedDefId());
             Team blueTeam = getTeam(requestDto.getBlueAtkId(), requestDto.getBlueDefId());
 
             Match match = matchRepository.save(new Match(new Date(System.currentTimeMillis()), redTeam, blueTeam,
-                    requestDto.getRedScore(), requestDto.getBlueScore()));
+                    requestDto.getRedScore(), requestDto.getBlueScore(),username));
 
             match = ratingService.newRating(match);
             monthlyRatingService.newRating(match);
             match = matchRepository.save(match);
 
-            return Mono.just(new Match2v2ResponseDto(match));
+            return Mono.just(new TeamMatchResponseDto(match));
         } catch (ApiException e) {
             return Mono.error(e);
         }

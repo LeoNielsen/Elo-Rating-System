@@ -1,7 +1,7 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Modules.Matches.Dtos.Match2v2ResponseDto;
-import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchResponseDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchResponseDto;
 import EloRatingSystem.Modules.Matches.Models.Match;
@@ -42,7 +42,7 @@ public class JsonController {
     SoloMatchRepository soloMatchRepository;
 
     @PostMapping("/upload")
-    public Mono<String> uploadJson(@RequestBody List<Match2v2ResponseDto> matches) {
+    public Mono<String> uploadJson(@RequestBody List<TeamMatchResponseDto> matches) {
 
         return Flux.fromIterable(matches)
                 .concatMap(jsonMatchDto -> {
@@ -70,7 +70,7 @@ public class JsonController {
 
                     return Mono.zip(r_d, r_a, b_d, b_a)
                             .flatMap(tuple -> {
-                                MatchRequestDto req = new MatchRequestDto(
+                                TeamMatchRequestDto req = new TeamMatchRequestDto(
                                         tuple.getT2().getId(),
                                         tuple.getT1().getId(),
                                         tuple.getT3().getId(),
@@ -78,7 +78,7 @@ public class JsonController {
                                         jsonMatchDto.getRedScore(),
                                         jsonMatchDto.getBlueScore()
                                 );
-                                return matchService.newMatch(req);
+                                return matchService.newMatch(req,"admin");
                             })
                             .flatMap(matchResponse -> {
                                 Match match = matchRepository.findById(matchResponse.getId()).orElseThrow();

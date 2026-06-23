@@ -9,7 +9,7 @@ import java.sql.Date;
 
 @Data
 @NoArgsConstructor
-public class Match2v2ResponseDto {
+public class TeamMatchResponseDto {
 
     private Long id;
     private Date date;
@@ -19,8 +19,9 @@ public class Match2v2ResponseDto {
     private String blueDef;
     private Integer redScore;
     private Integer blueScore;
+    private String createdBy;
 
-    public Match2v2ResponseDto(Match match) {
+    public TeamMatchResponseDto(Match match) {
         this.id = match.getId();
         this.date = match.getDate();
 
@@ -31,6 +32,8 @@ public class Match2v2ResponseDto {
 
         this.redScore = match.getRedTeamScore();
         this.blueScore = match.getBlueTeamScore();
+
+        this.createdBy = match.getCreatedBy();
     }
 
     private String formatPlayerName(Player player) {

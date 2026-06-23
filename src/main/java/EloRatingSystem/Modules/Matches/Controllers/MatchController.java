@@ -1,14 +1,18 @@
 package EloRatingSystem.Modules.Matches.Controllers;
 
-import EloRatingSystem.Modules.Matches.Dtos.Match2v2ResponseDto;
-import EloRatingSystem.Modules.Matches.Dtos.MatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchResponseDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchResponseDto;
+import EloRatingSystem.Modules.Matches.Services.MatchDeleteService;
 import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Modules.Matches.Services.MatchService;
 import EloRatingSystem.Modules.Matches.Services.SoloMatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -22,26 +26,36 @@ public class MatchController {
     @Autowired
     MatchService matchService;
     @Autowired
+    MatchDeleteService matchDeleteService;
+    @Autowired
     SoloMatchService soloMatchService;
 
     @GetMapping("/{id}")
-    public Mono<Match2v2ResponseDto> getMatchById(@PathVariable Long id) {
+    public Mono<TeamMatchResponseDto> getMatchById(@PathVariable Long id) {
         return matchService.getMatchById(id);
     }
 
     @GetMapping()
-    public Mono<List<Match2v2ResponseDto>> getRecentMatches() {
+    public Mono<List<TeamMatchResponseDto>> getRecentMatches() {
         return matchService.getRecentMatches();
     }
 
     @GetMapping("/all")
-    public Mono<List<Match2v2ResponseDto>> getAllMatches() {
+    public Mono<List<TeamMatchResponseDto>> getAllMatches() {
         return matchService.getAllMatches();
     }
 
     @PostMapping
-    public Mono<Match2v2ResponseDto> newMatch(@RequestBody MatchRequestDto requestDto) {
-        return matchService.newMatch(requestDto);
+    @PreAuthorize("isAuthenticated()")
+    public Mono<TeamMatchResponseDto> newMatch(@RequestBody TeamMatchRequestDto requestDto, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return matchService.newMatch(requestDto,username);
+    }
+
+    @PreAuthorize("hasRole('admin') or @matchSecurity.isOwner(#id, authentication)")
+    @DeleteMapping("/delete/{id}")
+    public void deleteMatchById(@PathVariable Long id) {
+        matchDeleteService.deleteMatchById(id);
     }
 
     @GetMapping("/solo/{id}")
