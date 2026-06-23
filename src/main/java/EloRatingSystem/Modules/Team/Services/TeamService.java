@@ -47,6 +47,19 @@ public class TeamService {
                 , HttpStatus.BAD_REQUEST));
     }
 
+    public Team getTeam(long atkId, long defId) throws ApiException {
+        Optional<Team> teamOptional = teamRepository.findByAttackerIdAndDefenderId(atkId, defId);
+        if (teamOptional.isPresent()) {
+            return teamOptional.get();
+        } else {
+            Player atk = playerRepository.findById(atkId)
+                    .orElseThrow(() -> new ApiException(String.format("player %s doesn't exist", atkId), HttpStatus.BAD_REQUEST));
+            Player def = playerRepository.findById(defId)
+                    .orElseThrow(() -> new ApiException(String.format("player %s doesn't exist", defId), HttpStatus.BAD_REQUEST));
+            return teamRepository.save(new Team(atk, def));
+        }
+    }
+
     public Mono<List<TeamResponseDto>> getAllTeams() {
         List<Team> teams = teamRepository.findAll();
 

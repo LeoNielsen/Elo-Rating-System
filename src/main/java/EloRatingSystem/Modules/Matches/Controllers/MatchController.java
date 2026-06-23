@@ -58,6 +58,12 @@ public class MatchController {
         matchDeleteService.deleteMatchById(id);
     }
 
+    @PreAuthorize("hasRole('admin') or @matchSecurity.isOwner(#id, authentication)")
+    @PutMapping("/update/{id}")
+    public void updateMatchById(@PathVariable Long id,@RequestBody TeamMatchRequestDto requestDto) {
+        matchDeleteService.updateMatchById(id,requestDto);
+    }
+
     @GetMapping("/solo/{id}")
     public Mono<SoloMatchResponseDto> getSoloMatchById(@PathVariable Long id) {
         return soloMatchService.getSoloMatchById(id);
