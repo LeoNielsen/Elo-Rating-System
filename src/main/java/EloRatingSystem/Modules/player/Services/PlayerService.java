@@ -64,6 +64,15 @@ public class PlayerService {
         return Mono.just(playerResponseDtoList);
     }
 
+    public Player getById(Long playerId) throws ApiException {
+        Optional<Player> player = playerRepository.findById(playerId);
+        if (player.isPresent()) {
+            return player.get();
+        } else {
+            throw new ApiException(String.format("%s Doesn't exist", playerId), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     public Mono<PlayerResponseDto> getByNameTag(String nameTag) {
         Optional<Player> player = playerRepository.findByNameTagIgnoreCase(nameTag);
         if (player.isPresent()) {
@@ -216,7 +225,7 @@ public class PlayerService {
         List<SoloPlayerDailyStats> soloPlayerDailyStatsList = soloPlayerDailyStatsRepository.findAll();
 
         RecordsDto records = new RecordsDto();
-        
+
 
         // --- 2v2 Records ---
         records.setHighestRating2v2(playerStatsList.stream()
@@ -332,5 +341,4 @@ public class PlayerService {
 
         return Mono.just(records);
     }
-
 }

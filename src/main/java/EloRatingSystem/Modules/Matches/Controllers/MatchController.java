@@ -1,13 +1,14 @@
 package EloRatingSystem.Modules.Matches.Controllers;
 
-import EloRatingSystem.Modules.Matches.Dtos.TeamMatchResponseDto;
-import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
 import EloRatingSystem.Modules.Matches.Dtos.SoloMatchResponseDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchResponseDto;
 import EloRatingSystem.Modules.Matches.Services.MatchDeleteService;
-import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Modules.Matches.Services.MatchService;
+import EloRatingSystem.Modules.Matches.Services.MatchUpdateService;
 import EloRatingSystem.Modules.Matches.Services.SoloMatchService;
+import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +28,8 @@ public class MatchController {
     MatchService matchService;
     @Autowired
     MatchDeleteService matchDeleteService;
+    @Autowired
+    MatchUpdateService matchUpdateService;
     @Autowired
     SoloMatchService soloMatchService;
 
@@ -52,18 +55,29 @@ public class MatchController {
         return matchService.newMatch(requestDto,username);
     }
 
-    @PreAuthorize("hasRole('admin') or @matchSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('admin') or @matchSecurity.isMatchOwner(#id, authentication)")
     @DeleteMapping("/delete/{id}")
     public void deleteMatchById(@PathVariable Long id) {
         matchDeleteService.deleteMatchById(id);
     }
 
-    @PreAuthorize("hasRole('admin') or @matchSecurity.isOwner(#id, authentication)")
+    @PreAuthorize("hasRole('admin') or @matchSecurity.isMatchOwner(#id, authentication)")
     @PutMapping("/update/{id}")
     public void updateMatchById(@PathVariable Long id,@RequestBody TeamMatchRequestDto requestDto) {
-        matchDeleteService.updateMatchById(id,requestDto);
+        matchUpdateService.updateMatchById(id,requestDto);
     }
 
+    @PreAuthorize("hasRole('admin') or @matchSecurity.isSoloMatchOwner(#id, authentication)")
+    @DeleteMapping("solo/delete/{id}")
+    public void deleteSoloMatchById(@PathVariable Long id) {
+        matchDeleteService.deleteSoloMatchById(id);
+    }
+
+    @PreAuthorize("hasRole('admin') or @matchSecurity.isSoloMatchOwner(#id, authentication)")
+    @PutMapping("/solo/update/{id}")
+    public void updateSoloMatchById(@PathVariable Long id,@RequestBody SoloMatchRequestDto requestDto) {
+        matchUpdateService.updateSoloMatchById(id,requestDto);
+    }
     @GetMapping("/solo/{id}")
     public Mono<SoloMatchResponseDto> getSoloMatchById(@PathVariable Long id) {
         return soloMatchService.getSoloMatchById(id);
@@ -75,8 +89,10 @@ public class MatchController {
     }
 
     @PostMapping("/solo/new")
-    public Mono<SoloMatchResponseDto> newSoloMatch(@RequestBody SoloMatchRequestDto requestDto) {
-        return soloMatchService.newSoloMatch(requestDto);
+    @PreAuthorize("isAuthenticated()")
+    public Mono<SoloMatchResponseDto> newSoloMatch(@RequestBody SoloMatchRequestDto requestDto, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return soloMatchService.newSoloMatch(requestDto, username);
     }
 
     @GetMapping("/statistics")

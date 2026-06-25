@@ -109,7 +109,7 @@ public class JsonController {
                             PlayerResponseDto r = tuple.getT1();
                             PlayerResponseDto b = tuple.getT2();
                             return soloMatchService.newSoloMatch(new SoloMatchRequestDto(r.getId(), b.getId(),
-                                    jsonMatchDto.getRedScore(), jsonMatchDto.getBlueScore()));
+                                    jsonMatchDto.getRedScore(), jsonMatchDto.getBlueScore()),"admin");
                         });
 
                 matchMono.flatMap(matchResponseDto -> {

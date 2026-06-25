@@ -23,4 +23,6 @@ public interface SoloMatchRepository extends JpaRepository<SoloMatch,Long> {
 
     List<SoloMatch> findAllByRedPlayerIdOrBluePlayerId(Long redId,Long blueId);
     List<SoloMatch> findTop100ByOrderByIdDesc();
+
+    List<SoloMatch> findAllByIdGreaterThanEqual(Long id);
 }

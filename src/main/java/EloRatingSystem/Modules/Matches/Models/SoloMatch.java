@@ -34,12 +34,14 @@ public class SoloMatch {
 
     @Column(name = "blueScore", nullable = false)
     private Integer blueScore;
-
-    public SoloMatch(Date date, Player redPlayer, Player bluePlayer, Integer redTeamScore, Integer blueTeamScore) {
+    @Column(name = "createdBy")
+    private String createdBy;
+    public SoloMatch(Date date, Player redPlayer, Player bluePlayer, Integer redTeamScore, Integer blueTeamScore, String createdBy) {
         this.date = date;
         this.redPlayer = redPlayer;
         this.bluePlayer = bluePlayer;
         this.redScore = redTeamScore;
         this.blueScore = blueTeamScore;
+        this.createdBy = createdBy;
     }
 }

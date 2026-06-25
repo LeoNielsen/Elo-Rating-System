@@ -110,7 +110,7 @@ public class AdminController {
         int x = 10;
         for (int i = 0; i < x; i++) {
             Collections.shuffle(players);
-            soloMatchService.newSoloMatch(new SoloMatchRequestDto(players.get(0).getId(), players.get(1).getId(), 10, rand.nextInt(0, 10)));
+            soloMatchService.newSoloMatch(new SoloMatchRequestDto(players.get(0).getId(), players.get(1).getId(), 10, rand.nextInt(0, 10)),"admin");
         }
     }
 

@@ -1,6 +1,7 @@
 package EloRatingSystem.Modules.Matches.Component;
 
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
+import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,9 +16,25 @@ public class MatchSecurity {
 
     @Autowired
     private final MatchRepository matchRepository;
+    @Autowired
+    private final SoloMatchRepository soloMatchRepository;
 
-    public boolean isOwner(Long matchId, Authentication authentication) {
+    public boolean isMatchOwner(Long matchId, Authentication authentication) {
         var match = matchRepository.findById(matchId).orElse(null);
+        if (match == null) return false;
+
+        if (!match.getDate().toLocalDate().equals(LocalDate.now())) {
+            return false;
+        }
+
+        var jwt = ((JwtAuthenticationToken) authentication).getToken();
+        String username = jwt.getClaim("preferred_username");
+
+        return match.getCreatedBy().equals(username);
+    }
+
+    public boolean isSoloMatchOwner(Long matchId, Authentication authentication) {
+        var match = soloMatchRepository.findById(matchId).orElse(null);
         if (match == null) return false;
 
         if (!match.getDate().toLocalDate().equals(LocalDate.now())) {
