@@ -1,13 +1,11 @@
 package EloRatingSystem.Modules.player.Controllers;
 
-import EloRatingSystem.Modules.Stats.Dtos.RecordsDto;
-import EloRatingSystem.Modules.Monthly.Dtos.MonthlyWinnerDto;
 import EloRatingSystem.Modules.Stats.Dtos.PlayerStatisticsResponseDto;
+import EloRatingSystem.Modules.Stats.Dtos.RecordsDto;
 import EloRatingSystem.Modules.Stats.Dtos.SoloPlayerStatisticsResponseDto;
 import EloRatingSystem.Modules.player.Dtos.PlayerRequestDto;
 import EloRatingSystem.Modules.player.Dtos.PlayerResponseDto;
 import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
-import EloRatingSystem.Modules.Monthly.Services.MonthlyService;
 import EloRatingSystem.Modules.player.Services.PlayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +24,7 @@ public class PlayerController {
     PlayerRepository playerRepository;
     @Autowired
     PlayerService playerService;
-    @Autowired
-    MonthlyService monthlyService;
+
 
     @GetMapping("/all")
     public Mono<List<PlayerResponseDto>> getAll() {
@@ -77,15 +74,6 @@ public class PlayerController {
     @GetMapping("/statistics/solo/all")
     public Mono<List<SoloPlayerStatisticsResponseDto>> getAllSoloStatistics() {
         return playerService.getAllSoloStatistics();
-    }
-    @GetMapping("/monthly/winner/last")
-    public Mono<MonthlyWinnerDto> getLastMonthWinner() {
-        return monthlyService.getLastMonthWinner();
-    }
-
-    @GetMapping("/monthly/winner/all")
-    public Mono<List<MonthlyWinnerDto>> getAllMonthWinners() {
-        return monthlyService.getAllMonthWinners();
     }
 
     @GetMapping("/records")

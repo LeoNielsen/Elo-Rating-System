@@ -1,6 +1,5 @@
 package EloRatingSystem.Modules.Matches.Services;
 
-import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
 import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
@@ -9,7 +8,6 @@ import EloRatingSystem.Modules.Matches.Utils.MatchUtils;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
 import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
-import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,25 +27,9 @@ public class MatchDeleteService {
     @Autowired
     MonthlyRatingService monthlyRatingService;
     @Autowired
-    PlayerAchievementRepository playerAchievementRepository;
-    @Autowired
     SoloMatchRepository soloMatchRepository;
     @Autowired
-    SoloStatsService solostatsService;
-    @Autowired
     MatchUtils matchUtils;
-
-    @Transactional
-    public void deleteLatestMatch() {
-        Match match = matchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        deleteMatch(match);
-    }
-
-    @Transactional
-    public void deleteLatestSoloMatch() {
-        SoloMatch match = soloMatchRepository.findTop1ByOrderByIdDesc().orElseThrow();
-        deleteMatch(match);
-    }
 
     @Transactional
     private void deleteMatch(Match match) {
