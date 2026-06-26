@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -75,37 +74,23 @@ public class RatingService {
         double winnerTeamOdds = (winnerOddsAttacker + winnerOddsDefender) / 2;
         double loserTeamOdds = (loserOddsAttacker + loserOddsDefender) / 2;
 
-        List<PlayerRating> playerRatingList = new ArrayList<>();
-
-        PlayerRating winnerAtk = newPlayerRating(winner.getAttacker(), winnerTeamOdds, pointMultiplier, winnerOddsAttacker, true, match);
-        playerRatingList.add(winnerAtk);
-        winner.setAttacker(winnerAtk.getPlayer());
-
-        PlayerRating winnerDef = newPlayerRating(winner.getDefender(), winnerTeamOdds, pointMultiplier, winnerOddsDefender, true, match);
-        playerRatingList.add(winnerDef);
-        winner.setDefender(winnerDef.getPlayer());
-
-        PlayerRating loserAtk = newPlayerRating(loser.getAttacker(), loserTeamOdds, pointMultiplier, loserOddsAttacker, false, match);
-        playerRatingList.add(loserAtk);
-        loser.setAttacker(loserAtk.getPlayer());
-
-        PlayerRating loserDef = newPlayerRating(loser.getDefender(), loserTeamOdds, pointMultiplier, loserOddsDefender, false, match);
-        playerRatingList.add(loserDef);
-        loser.setDefender(loserDef.getPlayer());
+        winner.setAttacker(newPlayerRating(winner.getAttacker(), winnerTeamOdds, pointMultiplier, winnerOddsAttacker, true, match));
+        winner.setDefender(newPlayerRating(winner.getDefender(), winnerTeamOdds, pointMultiplier, winnerOddsDefender, true, match));
+        loser.setAttacker(newPlayerRating(loser.getAttacker(), loserTeamOdds, pointMultiplier, loserOddsAttacker, false, match));
+        loser.setDefender(newPlayerRating(loser.getDefender(), loserTeamOdds, pointMultiplier, loserOddsDefender, false, match));
 
         winner.setWon(winner.getWon() + 1);
         loser.setLost(loser.getLost() + 1);
-
-        ratingRepository.saveAll(playerRatingList);
     }
 
-    private PlayerRating newPlayerRating(Player player, double teamOdds, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
+    private Player newPlayerRating(Player player, double teamOdds, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {
         int newPlayerRating = ratingUtils.calculateNewRating(player.getRating(), pointMultiplier, (teamOdds + playerOdds) / 2, isWinner);
         PlayerRating playerRating = new PlayerRating(match, player, player.getRating(), newPlayerRating);
+        ratingRepository.save(playerRating);
         statsService.updatePlayerStats(player, playerRating);
         updatePlayerDailyStats(LocalDate.now(), newPlayerRating - player.getRating(), player, newPlayerRating);
         player.setRating(newPlayerRating);
-        return playerRating;
+        return player;
     }
 
     public void updatePlayerDailyStats(LocalDate date, int ratingChange, Player player, int playerRating) {
