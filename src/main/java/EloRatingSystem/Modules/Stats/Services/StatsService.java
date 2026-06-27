@@ -6,7 +6,7 @@ import EloRatingSystem.Modules.Rating.Models.PlayerRating;
 import EloRatingSystem.Modules.Stats.Models.PlayerStats;
 import EloRatingSystem.Modules.Stats.Models.Streaks.PlayerStreak;
 import EloRatingSystem.Modules.Stats.Repositories.PlayerStatsRepository;
-import EloRatingSystem.Modules.Stats.Repositories.StreakRepository;
+import EloRatingSystem.Modules.Stats.Repositories.Streaks.StreakRepository;
 import EloRatingSystem.Modules.Stats.Utils.StatsUtils;
 import EloRatingSystem.Modules.player.Models.Player;
 import org.springframework.beans.factory.annotation.Autowired;

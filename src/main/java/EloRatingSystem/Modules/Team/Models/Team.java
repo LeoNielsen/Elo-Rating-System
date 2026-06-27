@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "Team")
+@Table(name = "team")
 public class Team {
 
     @Id
@@ -30,11 +30,16 @@ public class Team {
     @Column(name = "lost", nullable = false)
     private Integer lost;
 
-    public Team(Player attacker, Player defender){
+    @ManyToOne
+    @JoinColumn(name = "pair_id")
+    private TeamPair pair;
+
+    public Team(Player attacker, Player defender, TeamPair pair){
         this.attacker = attacker;
         this.defender = defender;
         this.won = 0;
         this.lost = 0;
+        this.pair = pair;
     }
 
 }

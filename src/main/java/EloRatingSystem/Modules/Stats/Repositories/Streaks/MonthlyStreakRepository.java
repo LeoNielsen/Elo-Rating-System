@@ -1,4 +1,4 @@
-package EloRatingSystem.Modules.Stats.Repositories;
+package EloRatingSystem.Modules.Stats.Repositories.Streaks;
 
 import EloRatingSystem.Modules.Stats.Models.Streaks.MonthlyPlayerStreak;
 import org.springframework.data.jpa.repository.JpaRepository;

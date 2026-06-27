@@ -1,4 +1,4 @@
-package EloRatingSystem.Modules.Stats.Repositories;
+package EloRatingSystem.Modules.Stats.Repositories.Daily;
 
 import EloRatingSystem.Modules.Stats.Models.DailyStats.PlayerDailyStats;
 import org.springframework.data.jpa.repository.EntityGraph;

@@ -5,7 +5,7 @@ import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
 import EloRatingSystem.Modules.Stats.Models.MonthlyStats;
 import EloRatingSystem.Modules.Stats.Models.Streaks.MonthlyPlayerStreak;
 import EloRatingSystem.Modules.Stats.Repositories.MonthlyStatsRepository;
-import EloRatingSystem.Modules.Stats.Repositories.MonthlyStreakRepository;
+import EloRatingSystem.Modules.Stats.Repositories.Streaks.MonthlyStreakRepository;
 import EloRatingSystem.Modules.Stats.Utils.StatsUtils;
 import EloRatingSystem.Modules.player.Models.Player;
 import org.springframework.beans.factory.annotation.Autowired;

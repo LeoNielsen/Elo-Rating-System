@@ -7,7 +7,7 @@ import EloRatingSystem.Modules.Rating.Repositories.MonthlyRatingRepository;
 import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.MonthlyDailyStats;
 import EloRatingSystem.Modules.Stats.Models.MonthlyStats;
-import EloRatingSystem.Modules.Stats.Repositories.MonthlyDailyStatsRepository;
+import EloRatingSystem.Modules.Stats.Repositories.Daily.MonthlyDailyStatsRepository;
 import EloRatingSystem.Modules.Stats.Repositories.MonthlyStatsRepository;
 import EloRatingSystem.Modules.Stats.Services.MonthlyStatsService;
 import EloRatingSystem.Modules.Team.Models.Team;

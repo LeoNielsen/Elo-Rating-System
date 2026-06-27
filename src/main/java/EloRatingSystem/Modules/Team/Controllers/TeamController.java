@@ -1,12 +1,16 @@
 package EloRatingSystem.Modules.Team.Controllers;
 
-import EloRatingSystem.Modules.Team.Dtos.TeamRequestDto;
+import EloRatingSystem.Modules.Team.Dtos.TeamPairResponseDto;
 import EloRatingSystem.Modules.Team.Dtos.TeamResponseDto;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
 import EloRatingSystem.Modules.Team.Services.TeamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -31,10 +35,15 @@ public class TeamController {
     public  Mono<List<TeamResponseDto>> getAllTeams(){
        return teamService.getAllTeams();
     }
+    @GetMapping("/pair/all")
+    public  Mono<List<TeamPairResponseDto>> getAllPairTeams(){
+       return teamService.getAllTeamPair();
+    }
 
-    @PostMapping
-    public Mono<TeamResponseDto> newTeam(@RequestBody TeamRequestDto requestDto) {
-        return teamService.newTeam(requestDto);
+    @GetMapping("/gen/pair")
+    @PreAuthorize("hasRole('admin')")
+    public void generateTeamPair(){
+        teamService.backfillTeamPairs();
     }
 
 }

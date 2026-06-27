@@ -6,7 +6,7 @@ import EloRatingSystem.Modules.Rating.Models.PlayerRating;
 import EloRatingSystem.Modules.Rating.Repositories.RatingRepository;
 import EloRatingSystem.Modules.Stats.Dtos.ChartDataDto;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.PlayerDailyStats;
-import EloRatingSystem.Modules.Stats.Repositories.PlayerDailyStatsRepository;
+import EloRatingSystem.Modules.Stats.Repositories.Daily.PlayerDailyStatsRepository;
 import EloRatingSystem.Modules.Stats.Services.StatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.player.Models.Player;
