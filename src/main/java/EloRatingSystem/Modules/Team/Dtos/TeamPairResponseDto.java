@@ -15,20 +15,23 @@ public class TeamPairResponseDto {
 
     private Long id;
     private String playerA;
-    private String playerAB;
+    private String playerB;
     private Integer won;
     private Integer lost;
+    private Integer goals;
     private List<TeamResponseDto> teams;
 
     public TeamPairResponseDto(TeamPair pair){
         this.id = pair.getId();
         this.playerA = formatPlayerName(pair.getPlayerA());
-        this.playerAB = formatPlayerName(pair.getPlayerB());
+        this.playerB = formatPlayerName(pair.getPlayerB());
         this.won = 0;
         this.lost = 0;
+        this.goals = 0;
         this.teams = new ArrayList<>();
         for(Team t:pair.getTeams()){
             this.teams.add(new TeamResponseDto(t));
+            this.goals += t.getGoals();
             this.won += t.getWon();
             this.lost += t.getLost();
         }

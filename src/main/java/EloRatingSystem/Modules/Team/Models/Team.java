@@ -30,6 +30,9 @@ public class Team {
     @Column(name = "lost", nullable = false)
     private Integer lost;
 
+    @Column(name = "goals", nullable = false)
+    private Integer goals = 0;
+
     @ManyToOne
     @JoinColumn(name = "pair_id")
     private TeamPair pair;
@@ -37,6 +40,7 @@ public class Team {
     public Team(Player attacker, Player defender, TeamPair pair){
         this.attacker = attacker;
         this.defender = defender;
+        this.goals = 0;
         this.won = 0;
         this.lost = 0;
         this.pair = pair;

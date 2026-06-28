@@ -80,7 +80,9 @@ public class RatingService {
         loser.setDefender(newPlayerRating(loser.getDefender(), loserTeamOdds, pointMultiplier, loserOddsDefender, false, match));
 
         winner.setWon(winner.getWon() + 1);
+        winner.setGoals(winner.getGoals() + Math.max(match.getRedTeamScore(),match.getBlueTeamScore()));
         loser.setLost(loser.getLost() + 1);
+        loser.setGoals(loser.getGoals() + Math.min(match.getRedTeamScore(),match.getBlueTeamScore()));
     }
 
     private Player newPlayerRating(Player player, double teamOdds, double pointMultiplier, double playerOdds, boolean isWinner, Match match) {

@@ -12,6 +12,7 @@ import EloRatingSystem.Modules.Rating.Repositories.RatingRepository;
 import EloRatingSystem.Modules.Rating.Repositories.SoloRatingRepository;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
+import EloRatingSystem.Modules.Rating.Services.RatingUtils;
 import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.SoloPlayerDailyStats;
@@ -59,6 +60,8 @@ public class RegenerateService {
     StatsService statsService;
     @Autowired
     RatingRepository ratingRepository;
+    @Autowired
+    RatingUtils ratingUtils;
     @Autowired
     MonthlyRatingRepository monthlyRatingRepository;
     @Autowired
@@ -211,4 +214,30 @@ public class RegenerateService {
         return matches;
     }
 
+    public void teamStatGenAll() {
+        List<Match> matches = matchRepository.findAll();
+        List<Team> teams = teamRepository.findAll();
+
+        for (Team team : teams) {
+            team.setWon(0);
+            team.setLost(0);
+            team.setGoals(0);
+        }
+
+        teamRepository.saveAll(teams);
+
+        for (Match match : matches) {
+            boolean redWon = ratingUtils.isWinner(match.getRedTeamScore(), match.getBlueTeamScore());
+            Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
+            Team loser = redWon ? match.getBlueTeam() : match.getRedTeam();
+
+            winner.setWon(winner.getWon() + 1);
+            winner.setGoals(winner.getGoals() + Math.max(match.getRedTeamScore(),match.getBlueTeamScore()));
+            loser.setLost(loser.getLost() + 1);
+            loser.setGoals(loser.getGoals() + Math.min(match.getRedTeamScore(),match.getBlueTeamScore()));
+
+            teamRepository.save(winner);
+            teamRepository.save(loser);
+        }
+    }
 }

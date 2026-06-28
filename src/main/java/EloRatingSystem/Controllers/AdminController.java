@@ -50,6 +50,11 @@ public class AdminController {
         regenerateService.monthlyStatisticsGenAll();
     }
 
+    @PostMapping("/team/statgen")
+    public void teamStatGen() {
+        regenerateService.teamStatGenAll();
+    }
+
     @PostMapping("/solo/player/statgen")
     public void soloPlayerStatGen() {
         regenerateService.regenerateSoloPlayerStatisticsAll();
