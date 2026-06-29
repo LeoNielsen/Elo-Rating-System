@@ -15,6 +15,7 @@ public class TeamResponseDto {
     private Integer won;
     private Integer lost;
     private Integer goals;
+    private Integer shutouts;
 
     public TeamResponseDto(Team team){
         this.id = team.getId();
@@ -23,6 +24,7 @@ public class TeamResponseDto {
         this.won = team.getWon();
         this.lost = team.getLost();
         this.goals = team.getGoals();
+        this.shutouts = team.getShutouts();
     }
     private String formatPlayerName(Player player) {
         return player.getNameTag() + (player.getActive() ? "" : " (Inactive)");

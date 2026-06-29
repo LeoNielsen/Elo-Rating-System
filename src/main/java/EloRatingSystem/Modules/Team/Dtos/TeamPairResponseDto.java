@@ -19,6 +19,7 @@ public class TeamPairResponseDto {
     private Integer won;
     private Integer lost;
     private Integer goals;
+    private Integer shutouts;
     private List<TeamResponseDto> teams;
 
     public TeamPairResponseDto(TeamPair pair){
@@ -28,12 +29,14 @@ public class TeamPairResponseDto {
         this.won = 0;
         this.lost = 0;
         this.goals = 0;
+        this.shutouts = 0;
         this.teams = new ArrayList<>();
         for(Team t:pair.getTeams()){
             this.teams.add(new TeamResponseDto(t));
             this.goals += t.getGoals();
             this.won += t.getWon();
             this.lost += t.getLost();
+            this.shutouts += t.getShutouts();
         }
     }
     private String formatPlayerName(Player player) {

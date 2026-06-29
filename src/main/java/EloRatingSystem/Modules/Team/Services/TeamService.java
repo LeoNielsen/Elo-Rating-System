@@ -94,6 +94,11 @@ public class TeamService {
     }
 
 
+    public Mono<TeamPairResponseDto> getTeamPairById(Long id) throws ApiException {
+        TeamPair teamPair = teamPairRepository.findById(id).orElseThrow(() -> new ApiException("Team dosnt exist",HttpStatus.BAD_REQUEST));
+        return Mono.just(new TeamPairResponseDto(teamPair));
+    }
+
     @Transactional
     public void backfillTeamPairs() {
 

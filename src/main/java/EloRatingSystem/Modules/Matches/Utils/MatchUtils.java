@@ -48,6 +48,7 @@ public class MatchUtils {
 
         winner.setWon(winner.getWon() - 1);
         loser.setLost(loser.getLost() - 1);
+        winner.setShutouts(winner.getShutouts() + ((match.getRedTeamScore() == 0 || match.getBlueTeamScore() == 0)? 1 : 0));
         winner.setGoals(winner.getGoals() - Math.max(match.getRedTeamScore(),match.getBlueTeamScore()));
         loser.setGoals(loser.getGoals() - Math.min(match.getRedTeamScore(),match.getBlueTeamScore()));
 

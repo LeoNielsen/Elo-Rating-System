@@ -222,6 +222,7 @@ public class RegenerateService {
             team.setWon(0);
             team.setLost(0);
             team.setGoals(0);
+            team.setShutouts(0);
         }
 
         teamRepository.saveAll(teams);
@@ -233,6 +234,7 @@ public class RegenerateService {
 
             winner.setWon(winner.getWon() + 1);
             winner.setGoals(winner.getGoals() + Math.max(match.getRedTeamScore(),match.getBlueTeamScore()));
+            winner.setShutouts(winner.getShutouts() + (ratingUtils.tenZeroMatch(match.getRedTeamScore(), match.getBlueTeamScore())? 1 : 0));
             loser.setLost(loser.getLost() + 1);
             loser.setGoals(loser.getGoals() + Math.min(match.getRedTeamScore(),match.getBlueTeamScore()));
 

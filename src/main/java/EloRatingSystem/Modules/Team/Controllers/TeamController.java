@@ -1,5 +1,6 @@
 package EloRatingSystem.Modules.Team.Controllers;
 
+import EloRatingSystem.Exception.ApiException;
 import EloRatingSystem.Modules.Team.Dtos.TeamPairResponseDto;
 import EloRatingSystem.Modules.Team.Dtos.TeamResponseDto;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
@@ -38,6 +39,9 @@ public class TeamController {
     @GetMapping("/pair/all")
     public  Mono<List<TeamPairResponseDto>> getAllPairTeams(){
        return teamService.getAllTeamPair();
+    }    @GetMapping("/pair/{id}")
+    public  Mono<TeamPairResponseDto> getPairTeamById(@PathVariable Long id) throws ApiException {
+       return teamService.getTeamPairById(id);
     }
 
     @GetMapping("/gen/pair")
