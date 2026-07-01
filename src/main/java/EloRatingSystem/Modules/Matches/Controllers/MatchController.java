@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("match")
@@ -102,6 +103,11 @@ public class MatchController {
     @GetMapping("/solo/statistics")
     public Mono<MatchStatisticsDto> matchSoloStatistics() {
         return soloMatchService.getSoloStatistics();
+    }
+
+    @GetMapping("/days")
+    public Map<String, Integer> getDayOfMatch(){
+        return matchService.getMatchDays();
     }
 
 }
