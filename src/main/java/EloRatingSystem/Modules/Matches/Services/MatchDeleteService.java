@@ -8,6 +8,7 @@ import EloRatingSystem.Modules.Matches.Utils.MatchUtils;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
 import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
+import EloRatingSystem.Modules.Rating.Services.TeamRatingService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ public class MatchDeleteService {
     @Autowired
     RatingService ratingService;
     @Autowired
+    TeamRatingService teamRatingService;
+    @Autowired
     SoloRatingService soloRatingService;
     @Autowired
     MonthlyRatingService monthlyRatingService;
@@ -30,18 +33,6 @@ public class MatchDeleteService {
     SoloMatchRepository soloMatchRepository;
     @Autowired
     MatchUtils matchUtils;
-
-    @Transactional
-    private void deleteMatch(Match match) {
-        matchUtils.removeMatchStats(match);
-        matchRepository.deleteById(match.getId());
-    }
-
-    @Transactional
-    public void deleteMatch(SoloMatch match) {
-        matchUtils.removeMatchStats(match);
-        soloMatchRepository.deleteById(match.getId());
-    }
 
     @Transactional
     public void deleteMatchById(long id) {
@@ -64,6 +55,7 @@ public class MatchDeleteService {
         for (Match m : matches) {
             Match match = matchRepository.save(m);
             ratingService.newRating(match);
+            teamRatingService.newTeamRating(match);
             monthlyRatingService.newRating(match);
         }
     }

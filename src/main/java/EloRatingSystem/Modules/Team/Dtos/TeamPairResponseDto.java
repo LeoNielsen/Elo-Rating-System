@@ -16,6 +16,7 @@ public class TeamPairResponseDto {
     private Long id;
     private String playerA;
     private String playerB;
+    private Integer rating;
     private Integer won;
     private Integer lost;
     private Integer goals;
@@ -26,6 +27,7 @@ public class TeamPairResponseDto {
         this.id = pair.getId();
         this.playerA = formatPlayerName(pair.getPlayerA());
         this.playerB = formatPlayerName(pair.getPlayerB());
+        this.rating = pair.getRating();
         this.won = 0;
         this.lost = 0;
         this.goals = 0;

@@ -7,6 +7,7 @@ import EloRatingSystem.Modules.Matches.Models.Match;
 import EloRatingSystem.Modules.Matches.Repositories.MatchRepository;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
+import EloRatingSystem.Modules.Rating.Services.TeamRatingService;
 import EloRatingSystem.Modules.Stats.Dtos.MatchStatisticsDto;
 import EloRatingSystem.Modules.Team.Models.Team;
 import EloRatingSystem.Modules.Team.Services.TeamService;
@@ -29,6 +30,8 @@ public class MatchService {
 
     @Autowired
     RatingService ratingService;
+    @Autowired
+    TeamRatingService teamRatingService;
     @Autowired
     MonthlyRatingService monthlyRatingService;
 
@@ -69,6 +72,7 @@ public class MatchService {
 
             match = ratingService.newRating(match);
             monthlyRatingService.newRating(match);
+            teamRatingService.newTeamRating(match);
             match = matchRepository.save(match);
 
             return Mono.just(new TeamMatchResponseDto(match));

@@ -6,10 +6,13 @@ import EloRatingSystem.Modules.Matches.Models.SoloMatch;
 import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
 import EloRatingSystem.Modules.Rating.Services.RatingService;
 import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
+import EloRatingSystem.Modules.Rating.Services.TeamRatingService;
 import EloRatingSystem.Modules.Stats.Services.MonthlyStatsService;
 import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
 import EloRatingSystem.Modules.Stats.Services.StatsService;
+import EloRatingSystem.Modules.Stats.Services.TeamStatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
+import EloRatingSystem.Modules.Team.Models.TeamPair;
 import EloRatingSystem.Modules.Team.Repositories.TeamRepository;
 import EloRatingSystem.Modules.player.Models.Player;
 import jakarta.transaction.Transactional;
@@ -26,6 +29,8 @@ public class MatchUtils {
     @Autowired
     StatsService statsService;
     @Autowired
+    TeamStatsService teamStatsService;
+    @Autowired
     SoloStatsService soloStatsService;
     @Autowired
     MonthlyStatsService monthlyStatsService;
@@ -34,13 +39,18 @@ public class MatchUtils {
     @Autowired
     RatingService ratingService;
     @Autowired
+    TeamRatingService teamRatingService;
+    @Autowired
     SoloRatingService soloRatingService;
     @Autowired
     MonthlyRatingService monthlyRatingService;
     @Autowired
     PlayerAchievementRepository playerAchievementRepository;
+
+    @Transactional
     public void removeMatchStats(Match match) {
         ratingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
+        teamRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
         monthlyRatingService.deleteRatingsByMatch(match.getDate().toLocalDate(), match.getId());
 
         Team winner = match.getBlueTeamScore() < match.getRedTeamScore() ? match.getRedTeam() : match.getBlueTeam();
@@ -58,6 +68,7 @@ public class MatchUtils {
         playerAchievementRepository.deleteAllByMatchId(match.getId());
 
         statsService.deleteStreakByMatchId(match.getId());
+        teamStatsService.deleteStreakByMatchId(match.getId());
         monthlyStatsService.deleteStreakByMatchId(match.getId());
 
         List<Player> players = new ArrayList<>(Arrays.asList(
@@ -74,6 +85,10 @@ public class MatchUtils {
             statsService.undoPlayerStats(player, match, ratingService.getHighestELOByPlayerId(player.getId()), ratingService.getLowestELOByPlayerId(player.getId()));
             monthlyStatsService.undoPlayerStats(player, match, monthlyRatingService.getHighestELOByPlayerId(player.getId(), month, year), monthlyRatingService.getLowestELOByPlayerId(player.getId(), month, year), month, year);
         }
+        TeamPair blue = match.getBlueTeam().getPair();
+        teamStatsService.undoTeamStats(blue,match,teamRatingService.getHighestELOByTeamPairId(blue.getId()), teamRatingService.getLowestELOByTeamPairId(blue.getId()));
+        TeamPair red = match.getRedTeam().getPair();
+        teamStatsService.undoTeamStats(red,match,teamRatingService.getHighestELOByTeamPairId(red.getId()), teamRatingService.getLowestELOByTeamPairId(red.getId()));
     }
 
     @Transactional

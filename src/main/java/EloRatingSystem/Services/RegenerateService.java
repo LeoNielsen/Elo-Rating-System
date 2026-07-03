@@ -7,23 +7,27 @@ import EloRatingSystem.Modules.Matches.Repositories.SoloMatchRepository;
 import EloRatingSystem.Modules.Rating.Models.MonthlyRating;
 import EloRatingSystem.Modules.Rating.Models.PlayerRating;
 import EloRatingSystem.Modules.Rating.Models.SoloPlayerRating;
+import EloRatingSystem.Modules.Rating.Models.TeamRating;
 import EloRatingSystem.Modules.Rating.Repositories.MonthlyRatingRepository;
 import EloRatingSystem.Modules.Rating.Repositories.RatingRepository;
 import EloRatingSystem.Modules.Rating.Repositories.SoloRatingRepository;
-import EloRatingSystem.Modules.Rating.Services.MonthlyRatingService;
-import EloRatingSystem.Modules.Rating.Services.RatingService;
-import EloRatingSystem.Modules.Rating.Services.RatingUtils;
-import EloRatingSystem.Modules.Rating.Services.SoloRatingService;
+import EloRatingSystem.Modules.Rating.Repositories.TeamRatingRepository;
+import EloRatingSystem.Modules.Rating.Services.*;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.PlayerDailyStats;
 import EloRatingSystem.Modules.Stats.Models.DailyStats.SoloPlayerDailyStats;
 import EloRatingSystem.Modules.Stats.Models.PlayerStats;
 import EloRatingSystem.Modules.Stats.Models.SoloPlayerStats;
-import EloRatingSystem.Modules.Stats.Repositories.*;
 import EloRatingSystem.Modules.Stats.Repositories.Daily.MonthlyDailyStatsRepository;
 import EloRatingSystem.Modules.Stats.Repositories.Daily.PlayerDailyStatsRepository;
 import EloRatingSystem.Modules.Stats.Repositories.Daily.SoloPlayerDailyStatsRepository;
+import EloRatingSystem.Modules.Stats.Repositories.Daily.TeamDailyStatsRepository;
+import EloRatingSystem.Modules.Stats.Repositories.MonthlyStatsRepository;
+import EloRatingSystem.Modules.Stats.Repositories.PlayerStatsRepository;
+import EloRatingSystem.Modules.Stats.Repositories.SoloPlayerStatsRepository;
 import EloRatingSystem.Modules.Stats.Repositories.Streaks.MonthlyStreakRepository;
 import EloRatingSystem.Modules.Stats.Repositories.Streaks.StreakRepository;
+import EloRatingSystem.Modules.Stats.Repositories.Streaks.TeamStreakRepository;
+import EloRatingSystem.Modules.Stats.Repositories.TeamStatsRepository;
 import EloRatingSystem.Modules.Stats.Services.SoloStatsService;
 import EloRatingSystem.Modules.Stats.Services.StatsService;
 import EloRatingSystem.Modules.Team.Models.Team;
@@ -52,6 +56,19 @@ public class RegenerateService {
     PlayerDailyStatsRepository playerDailyStatsRepository;
     @Autowired
     TeamRepository teamRepository;
+
+    @Autowired
+    TeamRatingRepository teamRatingRepository;
+
+    @Autowired
+    TeamRatingService teamRatingService;
+    @Autowired
+    TeamStreakRepository teamStreakRepository;
+    @Autowired
+    TeamDailyStatsRepository teamDailyStatsRepository;
+    @Autowired
+    TeamStatsRepository teamStatsRepository;
+
     @Autowired
     MatchRepository matchRepository;
     @Autowired
@@ -227,7 +244,18 @@ public class RegenerateService {
 
         teamRepository.saveAll(teams);
 
+        teamStatsRepository.deleteAll();
+
+        teamStreakRepository.deleteAll();
+
+        teamRatingRepository.deleteAll();
+
+        matches.sort(Comparator.comparingLong(Match::getId));
+
         for (Match match : matches) {
+
+            teamRatingService.newTeamRating(match);
+
             boolean redWon = ratingUtils.isWinner(match.getRedTeamScore(), match.getBlueTeamScore());
             Team winner = redWon ? match.getRedTeam() : match.getBlueTeam();
             Team loser = redWon ? match.getBlueTeam() : match.getRedTeam();
@@ -240,6 +268,14 @@ public class RegenerateService {
 
             teamRepository.save(winner);
             teamRepository.save(loser);
+        }
+
+        teamDailyStatsRepository.deleteAll();
+        for (Match match : matches) {
+            List<TeamRating> ratings = teamRatingRepository.findAllByMatchId(match.getId());
+            for (TeamRating rating : ratings) {
+                teamRatingService.updatePlayerDailyStats(match.getDate().toLocalDate(), rating.getNewRating() - rating.getOldRating(), rating.getTeamPair(), rating.getNewRating());
+            }
         }
     }
 }
