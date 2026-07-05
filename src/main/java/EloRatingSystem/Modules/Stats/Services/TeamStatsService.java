@@ -135,7 +135,9 @@ public class TeamStatsService {
         List<TeamStatisticsResponseDto> teamDtos = new ArrayList<>();
 
         for (TeamPair team : teams) {
-            teamDtos.add(getTeamStatisticsByTeamPair(team));
+            if (team.getPlayerA().getActive() && team.getPlayerB().getActive()){
+                teamDtos.add(getTeamStatisticsByTeamPair(team));
+            }
         }
 
         return Mono.just(teamDtos);

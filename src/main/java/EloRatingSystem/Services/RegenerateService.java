@@ -240,6 +240,7 @@ public class RegenerateService {
             team.setLost(0);
             team.setGoals(0);
             team.setShutouts(0);
+            team.getPair().setRating(1200);
         }
 
         teamRepository.saveAll(teams);
