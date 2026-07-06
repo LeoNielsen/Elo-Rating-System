@@ -77,7 +77,7 @@ public class TeamRatingService {
         TeamRating teamRating = new TeamRating(match, team, team.getRating(), newTeamRating);
         teamRatingRepository.save(teamRating);
         teamStatsService.updatePlayerStats(team, teamRating);
-        updatePlayerDailyStats(LocalDate.now(), newTeamRating - team.getRating(), team, newTeamRating);
+        updatePlayerDailyStats(match.getDate().toLocalDate(), newTeamRating - team.getRating(), team, newTeamRating);
         team.setRating(newTeamRating);
         teamPairRepository.save(team);
     }

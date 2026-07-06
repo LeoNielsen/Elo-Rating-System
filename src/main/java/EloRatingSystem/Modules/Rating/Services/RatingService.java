@@ -91,7 +91,7 @@ public class RatingService {
         PlayerRating playerRating = new PlayerRating(match, player, player.getRating(), newPlayerRating);
         ratingRepository.save(playerRating);
         statsService.updatePlayerStats(player, playerRating);
-        updatePlayerDailyStats(LocalDate.now(), newPlayerRating - player.getRating(), player, newPlayerRating);
+        updatePlayerDailyStats(match.getDate().toLocalDate(), newPlayerRating - player.getRating(), player, newPlayerRating);
         player.setRating(newPlayerRating);
         return player;
     }

@@ -114,7 +114,7 @@ public class MonthlyRatingService {
         MonthlyRating monthlyRating = new MonthlyRating(match, player, oldMonthlyRating, newMonthlyRating, year, month);
         monthlyRatingRepository.save(monthlyRating);
         monthlyStatsService.updateMonthlyStats(player, monthlyRating, month, year);
-        updateMonthlyDailyStats(LocalDate.now(),newMonthlyRating - oldMonthlyRating, player,newMonthlyRating);
+        updateMonthlyDailyStats(match.getDate().toLocalDate(),newMonthlyRating - oldMonthlyRating, player,newMonthlyRating);
     }
 
     public void updateMonthlyDailyStats(LocalDate date,int ratingChange, Player player, int monthlyRating) {
