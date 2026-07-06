@@ -15,9 +15,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.DayOfWeek;
+import java.util.*;
 
 @Service
 public class SoloMatchService {
@@ -90,5 +89,18 @@ public class SoloMatchService {
 
         return Mono.just(new MatchStatisticsDto(redWins, blueWins, redGoals, blueGoals));
 
+    }
+
+    public Map<String, Integer> getMatchDays() {
+        List<SoloMatch> matches = soloMatchRepository.findAll();
+
+        Map<String, Integer> winsByDay = new HashMap<>();
+
+        for (SoloMatch match : matches) {
+            DayOfWeek day = match.getDate().toLocalDate().getDayOfWeek();
+            String dayName = day.toString();
+            winsByDay.put(dayName, winsByDay.getOrDefault(dayName, 0) + 1);
+        }
+        return winsByDay;
     }
 }

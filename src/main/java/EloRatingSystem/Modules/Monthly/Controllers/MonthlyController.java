@@ -18,7 +18,7 @@ public class MonthlyController {
     @Autowired
     MonthlyService monthlyService;
     @GetMapping("/winner/last")
-    public Mono<MonthlyWinnerDto> getLastMonthWinner() {
+    public Mono<List<MonthlyWinnerDto>> getLastMonthWinner() {
         return monthlyService.getLastMonthWinner();
     }
 

@@ -56,10 +56,14 @@ public class MonthlyService {
         }
     }
 
-    public Mono<MonthlyWinnerDto> getLastMonthWinner() {
+    public Mono<List<MonthlyWinnerDto>> getLastMonthWinner() {
         LocalDate previousMonthDate = LocalDate.now().minusMonths(1);
-        return Mono.just(new MonthlyWinnerDto(monthlyWinnerRepository.findByMonthAndYear(previousMonthDate.getMonthValue(), previousMonthDate.getYear())
-                .orElseGet(MonthlyWinner::new)));
+        List<MonthlyWinner> winners = monthlyWinnerRepository.findByMonthAndYear(previousMonthDate.getMonthValue(), previousMonthDate.getYear());
+        List<MonthlyWinnerDto> monthlyWinnerDtos = new ArrayList<>();
+        for (MonthlyWinner winner : winners) {
+            monthlyWinnerDtos.add(new MonthlyWinnerDto(winner));
+        }
+        return Mono.just(monthlyWinnerDtos);
     }
 
     public Mono<List<MonthlyWinnerDto>> getAllMonthWinners() {

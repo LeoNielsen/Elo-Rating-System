@@ -109,5 +109,9 @@ public class MatchController {
     public Map<String, Integer> getDayOfMatch(){
         return matchService.getMatchDays();
     }
+    @GetMapping("/solo/days")
+    public Map<String, Integer> getDayOfSoloMatch(){
+        return soloMatchService.getMatchDays();
+    }
 
 }
