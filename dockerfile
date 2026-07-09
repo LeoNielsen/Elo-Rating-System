@@ -1,22 +1,21 @@
-FROM eclipse-temurin:21-jdk AS build
-
+# Build stage
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-COPY mvnw .
-COPY .mvn .mvn
+# Kopiér pom og src
 COPY pom.xml .
-RUN ./mvnw dependency:go-offline
+COPY src ./src
 
-COPY src src
-RUN ./mvnw clean package -DskipTests
-
-FROM eclipse-temurin:21-jre
-
-WORKDIR /app
-
-# Modtag profil fra GitHub Actions
+# Modtag profil fra workflow (prod/test)
 ARG SPRING_PROFILES_ACTIVE=production
 ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE
+
+# Byg JAR med korrekt profil
+RUN mvn -q -DskipTests package -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+
+# Runtime stage (multi-arch friendly)
+FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
 

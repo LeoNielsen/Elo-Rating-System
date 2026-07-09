@@ -1,0 +1,53 @@
+package EloRatingSystem.Modules.Team.Models;
+
+import EloRatingSystem.Modules.player.Models.Player;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "team")
+public class Team {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @ManyToOne
+    private Player attacker;
+
+    @ManyToOne
+    private Player defender;
+
+    @Column(name = "won", nullable = false)
+    private Integer won;
+
+    @Column(name = "lost", nullable = false)
+    private Integer lost;
+
+    @Column(name = "goals", nullable = false)
+    private Integer goals = 0;
+
+    @Column(name = "shutouts", nullable = false)
+    private Integer shutouts = 0;
+
+    @ManyToOne
+    @JoinColumn(name = "pair_id")
+    private TeamPair pair;
+
+    public Team(Player attacker, Player defender, TeamPair pair){
+        this.attacker = attacker;
+        this.defender = defender;
+        this.goals = 0;
+        this.won = 0;
+        this.lost = 0;
+        this.shutouts = 0;
+        this.pair = pair;
+    }
+
+}

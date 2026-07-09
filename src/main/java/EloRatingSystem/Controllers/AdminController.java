@@ -1,10 +1,13 @@
 package EloRatingSystem.Controllers;
 
-import EloRatingSystem.Dtos.MatchDtos.MatchRequestDto;
-import EloRatingSystem.Dtos.MatchDtos.SoloMatchRequestDto;
-import EloRatingSystem.Models.Player;
-import EloRatingSystem.Reporitories.PlayerRepository;
-import EloRatingSystem.Services.*;
+import EloRatingSystem.Modules.Matches.Dtos.SoloMatchRequestDto;
+import EloRatingSystem.Modules.Matches.Dtos.TeamMatchRequestDto;
+import EloRatingSystem.Modules.Matches.Services.MatchService;
+import EloRatingSystem.Modules.Matches.Services.SoloMatchService;
+import EloRatingSystem.Modules.player.Models.Player;
+import EloRatingSystem.Modules.player.Repositories.PlayerRepository;
+import EloRatingSystem.Modules.player.Services.PlayerService;
+import EloRatingSystem.Services.RegenerateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,28 +27,11 @@ public class AdminController {
     @Autowired
     PlayerService playerService;
     @Autowired
-    MonthlyService monthlyService;
-    @Autowired
     SoloMatchService soloMatchService;
     @Autowired
     PlayerRepository playerRepository;
     @Autowired
     RegenerateService regenerateService;
-
-    @DeleteMapping("/match/latest")
-    public void deleteLatestMatch() {
-        matchService.deleteLatestMatch();
-    }
-
-    @DeleteMapping("/match/solo/latest")
-    public void deleteLatestSoloMatch() {
-        soloMatchService.deleteLatestSoloMatch();
-    }
-
-    @GetMapping("/test")
-    public String secured() {
-        return "Hello! From Admin";
-    }
 
     @PutMapping("/player/activation/{nameTag}")
     public void deactivatePlayerById(@PathVariable String nameTag) {
@@ -58,15 +44,15 @@ public class AdminController {
         playerRepository.deleteById(id);
     }
 
-    @DeleteMapping("/player/all")
-    public void deletePlayers() {
-        playerRepository.deleteAll();
-    }
-
     @PostMapping("/player/statgen")
     public void playerStatGen() {
         regenerateService.playerStatisticsGenAll();
         regenerateService.monthlyStatisticsGenAll();
+    }
+
+    @PostMapping("/team/statgen")
+    public void teamStatGen() {
+        regenerateService.teamStatGenAll();
     }
 
     @PostMapping("/solo/player/statgen")
@@ -87,7 +73,7 @@ public class AdminController {
         int x = 1000;
         for (int i = 0; i < x; i++) {
             Collections.shuffle(players);
-            matchService.newMatch(new MatchRequestDto(players.get(1).getId(), players.get(2).getId(), players.get(3).getId(), players.get(4).getId(), 10, rand.nextInt(0, 10)));
+            matchService.newMatch(new TeamMatchRequestDto(players.get(1).getId(), players.get(2).getId(), players.get(3).getId(), players.get(4).getId(), 10, rand.nextInt(0, 10)),"admin");
         }
     }
 
@@ -99,12 +85,8 @@ public class AdminController {
         int x = 10;
         for (int i = 0; i < x; i++) {
             Collections.shuffle(players);
-            soloMatchService.newSoloMatch(new SoloMatchRequestDto(players.get(0).getId(), players.get(1).getId(), 10, rand.nextInt(0, 10)));
+            soloMatchService.newSoloMatch(new SoloMatchRequestDto(players.get(0).getId(), players.get(1).getId(), 10, rand.nextInt(0, 10)),"admin");
         }
     }
 
-    @GetMapping("/winner")
-    public void getMonthlyWinner() {
-        monthlyService.setMonthlyWinner();
-    }
 }
