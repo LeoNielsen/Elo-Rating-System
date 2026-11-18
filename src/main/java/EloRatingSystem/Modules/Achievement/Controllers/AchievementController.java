@@ -1,7 +1,7 @@
 package EloRatingSystem.Modules.Achievement.Controllers;
 
+import EloRatingSystem.Modules.Achievement.Dtos.PlayerAchievementDto;
 import EloRatingSystem.Modules.Achievement.Models.Achievement;
-import EloRatingSystem.Modules.Achievement.Models.PlayerAchievement;
 import EloRatingSystem.Modules.Achievement.Repositories.AchievementRepository;
 import EloRatingSystem.Modules.Achievement.Repositories.PlayerAchievementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class AchievementController {
     }
 
     @GetMapping("/{playerId}")
-    public Mono<List<PlayerAchievement>> getPlayerAchievements(@PathVariable Long playerId){
+    public Mono<List<PlayerAchievementDto>> getPlayerAchievements(@PathVariable Long playerId){
         return Mono.just(playerAchievementRepository.findAllByPlayerId(playerId));
     }
 
